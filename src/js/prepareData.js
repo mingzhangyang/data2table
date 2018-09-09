@@ -5,11 +5,11 @@
 
 function splitLineB(s, sep) {
   sep = sep || ',';
-  var elem = '';
-  var quo = 0;
-  var array = [];
+  let elem = '';
+  let quo = 0;
+  let array = [];
 
-  for (var i = 0; i < s.length; i++) {
+  for (let i = 0; i < s.length; i++) {
     if (s[i] === '"') {
       if (quo === 0) {
         quo++;
@@ -83,6 +83,89 @@ function getData(url, targetId, prop) {
   });
 }
 
+/**
+ * Flatten a nested object to get a flatten object
+ * @param obj: object
+ */
+function flatten(obj) {
+  if (typeof obj !== 'object' || obj === null) {
+    throw new TypeError('an object expected');
+  }
+  let res = {};
+  function worker(obj, path) {
+    let keys = Object.keys(obj);
+    for (let key of keys) {
+      let value = obj[key];
+      if (typeof value === 'object' && value !== null) {
+        worker(value, path + '/' + key);
+      } else {
+        res[path + '/' + key] = value;
+      }
+    }
+  }
+  worker(obj, '');
+  return res;
+}
+
+/**
+ * statistics of the properties of an nested object.
+ * This is required to create table headers with multiple rows
+ * @param obj: object
+ */
+function propStat(obj) {
+  if (typeof obj !== 'object' || obj === null) {
+    throw new TypeError('an object expected');
+  }
+  // root stat object
+  let root = {
+    prop: '',
+    depth: 0,
+    children: [],
+    maxDepth: 0
+  };
+  // below is the worker for recursion
+  function worker(obj, parentStatObj) {
+    let keys = Object.keys(obj);
+    for (let key of keys) {
+      let value = obj[key];
+      if (typeof value === 'object' && value !== null) {
+        let o = {
+          prop: key,
+          depth: parentStatObj.depth + 1,
+          children: []
+        };
+        parentStatObj.children.push(o);
+        worker(value, o);
+      } else {
+        parentStatObj.children.push({
+          prop: key,
+          depth: parentStatObj.depth + 1
+        });
+        if (parentStatObj.depth + 1 > root.maxDepth) {
+          root.maxDepth = parentStatObj.depth + 1;
+        }
+      }
+    }
+  }
+  worker(obj, root);
+
+  // recursive function to count colSpan
+  function count(obj) {
+    if (!obj.children) {
+      obj.colSpan = 1;
+      obj.rowSpan = root.maxDepth - obj.depth + 1;
+    } else {
+      obj.colSpan = 0;
+      for (let child of obj.children) {
+        obj.colSpan += count(child);
+      }
+    }
+    return obj.colSpan;
+  }
+  count(root);
+  return root;
+}
+
 if (typeof module !== 'undefined' && module.parent) {
   // Node environment, required as module
 } else if (typeof window === 'object') {
@@ -90,4 +173,26 @@ if (typeof module !== 'undefined' && module.parent) {
 } else {
   // Node environment, run directly
   // test code go here
+
+  let obj = {
+    x: {
+      a: {
+        m: 3,
+        n: 4
+      },
+      b: {
+        p: 5,
+        q: 6
+      },
+      c: [7, 8, 9]
+    },
+    y: {
+      s: 'hello',
+      w: 'world'
+    },
+    z: 'test'
+  };
+
+  console.log(flatten(obj));
+  console.dir(propStat(obj), {colors: true, depth: null});
 }

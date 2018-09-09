@@ -108,6 +108,47 @@ function flatten(obj) {
 }
 
 /**
+ * analyze the paths of a flatten object
+ * @param arr
+ */
+function analyzePaths(arr) {
+  let a = arr.map(d => d.split('/').filter(d => d));
+  let maxDepth = a.reduce((acc, d) => {
+    return acc > d.length ? acc : d.length;
+  }, 0);
+
+  let tmp = new Array(maxDepth);
+  for (let i = 0; i < maxDepth; i++) {
+    tmp[i] = a.map(d => {
+      let obj = {
+        path: d.slice(0, i+1).join('/'),
+        depth: i+1
+      };
+      if (d.length > i) {
+        obj.prop = d[i];
+      }
+      return obj;
+    });
+  }
+
+  let res = new Array(maxDepth);
+  for (let i = 0; i < tmp.length; i++) {
+    let t = [tmp[i][0]];
+    t[0].colSpan = 1;
+    for (let j = 1; j < arr.length; j++) {
+      if (t[t.length-1].path === tmp[i][j].path) {
+        t[t.length-1].colSpan += 1;
+      } else {
+        t.push(tmp[i][j]);
+        t[t.length-1].colSpan = 1;
+      }
+    }
+    res[i] = t;
+  }
+  return res;
+}
+
+/**
  * statistics of the properties of an nested object.
  * This is required to create table headers with multiple rows
  * @param obj: object
@@ -193,6 +234,11 @@ if (typeof module !== 'undefined' && module.parent) {
     z: 'test'
   };
 
-  console.log(flatten(obj));
-  console.dir(propStat(obj), {colors: true, depth: null});
+  // console.log(flatten(obj));
+  // console.dir(propStat(obj), {colors: true, depth: null});
+
+  console.dir(analyzePaths(Object.keys(flatten(obj))), {
+    colors: true,
+    depth: null
+  });
 }

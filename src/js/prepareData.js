@@ -109,7 +109,9 @@ function flatten(obj) {
 
 /**
  * analyze the paths of a flatten object
- * @param arr
+ * @param arr: array, the sorted keys of a flatten object
+ * return an array of arrays instructing a table head with
+ * colspan and rowspan
  */
 function analyzePaths(arr) {
   let a = arr.map(d => d.split('/').filter(d => d));
@@ -131,7 +133,19 @@ function analyzePaths(arr) {
     });
   }
 
+  // calculate rowSpan and mark the field to be removed
+  for (let k = tmp.length - 2; k > -1; k--) {
+    for (let h = 0; h < arr.length; h++) {
+      if (tmp[k][h].path === tmp[k+1][h].path) {
+        tmp[k][h].rowSpan = tmp[k+1][h].rowSpan ? tmp[k+1][h].rowSpan + 1 : 1 + 1;
+        tmp[k+1][h].toBeDeleted = true;
+      }
+    }
+  }
+
   let res = new Array(maxDepth);
+
+  // calculate the colSpan and delete the fields to be removed
   for (let i = 0; i < tmp.length; i++) {
     let t = [tmp[i][0]];
     t[0].colSpan = 1;
@@ -143,8 +157,9 @@ function analyzePaths(arr) {
         t[t.length-1].colSpan = 1;
       }
     }
-    res[i] = t;
+    res[i] = t.filter(d => !d.toBeDeleted);
   }
+
   return res;
 }
 
@@ -215,24 +230,26 @@ if (typeof module !== 'undefined' && module.parent) {
   // Node environment, run directly
   // test code go here
 
-  let obj = {
-    x: {
-      a: {
-        m: 3,
-        n: 4
-      },
-      b: {
-        p: 5,
-        q: 6
-      },
-      c: [7, 8, 9]
-    },
-    y: {
-      s: 'hello',
-      w: 'world'
-    },
-    z: 'test'
-  };
+  // let obj = {
+  //   x: {
+  //     a: {
+  //       m: 3,
+  //       n: 4
+  //     },
+  //     b: {
+  //       p: 5,
+  //       q: 6
+  //     },
+  //     c: [7, 8, 9]
+  //   },
+  //   y: {
+  //     s: 'hello',
+  //     w: 'world'
+  //   },
+  //   z: 'test'
+  // };
+
+  let obj = {x: 3, y: 4, z: 5};
 
   // console.log(flatten(obj));
   // console.dir(propStat(obj), {colors: true, depth: null});

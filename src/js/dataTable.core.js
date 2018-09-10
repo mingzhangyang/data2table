@@ -9,6 +9,7 @@
  *    2. Add charts (d3 or G2)
  *    3. Layout adjustment
  *    4. More color schemes
+ *    5. Probably rewrite in TypeScript
 *******************************************************************************/
 
 class DataTable {

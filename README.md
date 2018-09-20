@@ -2,13 +2,16 @@
 An easy way to display data on web
 
 ###Get
->```npm install my-data2table       (not working yet)```
 
->```Download the files directly into your project directory```
+>npm install my-data2table       (not working yet)
 
->```CDN?```
+>Download the files directly into your project directory
+
+>CDN?
+
 ###Usage
->import data2table.core.js and data2table.core.css into your HTML file
+
+>import `data2table.core.js` and `data2table.core.css` into your HTML file
 
 ```
 <link rel="stylesheet" href="path/to/dataTable.core.css">
@@ -77,3 +80,11 @@ let dt = new DataTable(exampleData, 'my-table');
 ```
 
 Please find the demo page [here](https://mingzhangyang.github.io/myBench/html/dataTable.html).
+
+### Advanced
+
+>create customized formatter
+
+>change the layout
+
+>customize the style

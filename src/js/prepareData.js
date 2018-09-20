@@ -79,7 +79,7 @@ function getData(url, targetId, prop) {
     }
     alert(`Failed with status code: ${res.status}`);
   }).catch(err => {
-    alert('Fetching data failed:', err.message);
+    alert(`Fetching data failed:, ${err.message}`);
   });
 }
 

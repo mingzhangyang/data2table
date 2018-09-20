@@ -5,15 +5,15 @@ An easy way to display data on web
 
 1. using npm ? Try the command below.
 
-`npm install my-data2table`       (not working yet)
+   `npm install my-data2table`       (not working yet)
 
 2. Or your can download the source files manually
 
-`Download the files directly into your project directory`
+   `Download the files directly into your project directory`
 
 3. or try CDN
 
-`not working yet`
+   `not working yet`
 
 ### Usage
 
@@ -29,7 +29,7 @@ the table
 
 > Prepare your data as JSON array, i.e.
 
-```
+```javascript
 let exampleData = [
    { "Aff_id": "10377550",
      "Gene_accession": "NM_001127233",
@@ -60,7 +60,7 @@ let exampleData = [
    
 > Configure the table.
 
-```
+```javascript
 let dt = new DataTable(exampleData, 'my-table');
   dt.addFilter('Gene_symbol', 'value');
   dt.configureColumn('Aff_id', {

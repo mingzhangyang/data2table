@@ -1,27 +1,27 @@
 # data2table
 An easy way to display data on web
 
-###Get
+### Get
 
->npm install my-data2table       (not working yet)
+> npm install my-data2table       (not working yet)
 
->Download the files directly into your project directory
+> Download the files directly into your project directory
 
->CDN?
+> CDN?
 
-###Usage
+### Usage
 
->import `data2table.core.js` and `data2table.core.css` into your HTML file
+> import `data2table.core.js` and `data2table.core.css` into your HTML file
 
 ```
 <link rel="stylesheet" href="path/to/dataTable.core.css">
 <script src="path/to/dataTable.core.js"></script>
 ```
 
->Put \<table id="you-name-it">\</table> into the place where you want to show 
+> Put \<table id="you-name-it">\</table> into the place where you want to show 
 the table
 
->Prepare your data as JSON array, i.e.
+> Prepare your data as JSON array, i.e.
 
 ```
 let exampleData = [

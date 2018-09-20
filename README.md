@@ -56,7 +56,7 @@ the table
 3) Configure the table.
 
     ```javascript
-    let dt = new DataTable(exampleData, 'my-table');
+    let dt = new DataTable(exampleData, 'you-name-it');
     dt.addFilter('Gene_symbol', 'value');
     dt.configureColumn('Aff_id', {
        label: 'uid',

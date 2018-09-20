@@ -30,34 +30,28 @@ the table
 3) Prepare your data as JSON array, i.e.
 
    ```javascript
-   let exampleData = [
-      { 
-        "Aff_id": "10377550",
-        "Gene_accession": "NM_001127233",
-        "Gene_symbol": "Trp53",
-        "Gene_title": "transformation related protein 53"
-      },
-      {
-       "Aff_id": "10374366",
-       "Gene_accession": "NM_007912",
-       "Gene_symbol": "Egfr",
-       "Gene_title": "epidermal growth factor receptor"
-      },
-      {
-       "Aff_id": "10375038",
-       "Gene_accession": "NM_010822",
-       "Gene_symbol": "Mpg",
-       "Gene_title": "N-methylpurine-DNA glycosylase"
-      },
-      {
-       "Aff_id": "10391461",
-       "Gene_accession": "NM_009764",
-       "Gene_symbol": "Brca1",
-       "Gene_title": "breast cancer 1, early onset"
-      },
-      ...
-   ];
- ```
+      let exampleData = [
+        {
+          "Aff_id": "10377550",
+          "Gene_accession": "NM_001127233",
+          "Gene_symbol": "Trp53",
+          "Gene_title": "transformation related protein 53"
+        },
+        {
+          "Aff_id": "10374366",
+          "Gene_accession": "NM_007912",
+          "Gene_symbol": "Egfr",
+          "Gene_title": "epidermal growth factor receptor"
+        },
+        {
+          "Aff_id": "10375038",
+          "Gene_accession": "NM_010822",
+          "Gene_symbol": "Mpg",
+          "Gene_title": "N-methylpurine-DNA glycosylase"
+        },
+        ...
+     ];
+   ```
    
 3) Configure the table.
 
@@ -83,7 +77,7 @@ the table
        align: 'center',
     });
     dt.generate();
-```
+   ```
 
 Please find the demo page [here](https://mingzhangyang.github.io/myBench/html/dataTable.html).
 

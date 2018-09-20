@@ -50,7 +50,7 @@ the table
           "Gene_title": "N-methylpurine-DNA glycosylase"
         },
         ...
-     ];
+      ];
    ```
    
 3) Configure the table.

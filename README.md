@@ -3,11 +3,17 @@ An easy way to display data on web
 
 ### Get
 
-> npm install my-data2table       (not working yet)
+1. using npm ? Try the command below.
 
-> Download the files directly into your project directory
+`npm install my-data2table`       (not working yet)
 
-> CDN?
+2. Or your can download the source files manually
+
+`Download the files directly into your project directory`
+
+3. or try CDN
+
+`not working yet`
 
 ### Usage
 

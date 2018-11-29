@@ -523,11 +523,11 @@ class DataTable {
     let that = this;
 
     // create control buttons, i.e. search box, filter button, download button
-    let btnPanle = container.appendChild(document.createElement('div'));
-    btnPanle.classList.add('control-button-panel');
+    let btnPanel = container.appendChild(document.createElement('div'));
+    btnPanel.classList.add('control-button-panel');
 
     if (this.configuration.searchBar) {
-      let searchBar = btnPanle.appendChild(document.createElement('div'));
+      let searchBar = btnPanel.appendChild(document.createElement('div'));
       searchBar.id = this._targetId + '-search-bar';
       searchBar.classList.add('search-bar-wrapper');
 

@@ -35,7 +35,7 @@ class DataTable {
     this._changePageByUser = true;
     this._firstColumnAsRowNumber = true;
 
-    // Create column model
+    // Create column model object
     this._colModel = {};
     this.shownColumns = [];
     let s = new Set();
@@ -419,7 +419,7 @@ class DataTable {
    * @param scheme
    */
   changeColorScheme(scheme) {
-    if (this._colorSchemes.indexOf(scheme) === -1) {
+    if (!this._colorSchemes[scheme]) {
       throw new Error(scheme + ' not set.');
     }
     this.configuration.colorScheme = scheme;

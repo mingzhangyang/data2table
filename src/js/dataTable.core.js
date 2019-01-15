@@ -416,7 +416,7 @@ class DataTable {
 
   /**
    * ChangeColorScheme change the color scheme of the whole object
-   * @param scheme
+   * @param scheme: string
    */
   changeColorScheme(scheme) {
     if (!this._colorSchemes[scheme]) {

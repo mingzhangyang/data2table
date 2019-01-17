@@ -188,6 +188,11 @@ class DataTable {
     throw new Error('A predefined formatter name or custom function expected.');
   }
 
+  // set the totalPages
+  setTotalPages(num) {
+    this._totalPages = num;
+  }
+
   // internal method to set page number (starts from 1)
   setPageNumber(n) {
     if (typeof n !== 'number' || n < 0) {
@@ -833,7 +838,7 @@ class DataTable {
     });
   }
 
-  // create or update the  Filter section
+  // create or update the Filter section
   createFilterSection() {
     // let that = this;
     let filterSection = document.getElementById(this._targetId + '-filter-section');

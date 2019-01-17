@@ -390,8 +390,10 @@ class DataTable {
         });
       }
     }
-    else if (typeof  dataObj === 'object' && dataObj[colName]) {
-      // receive the dataObj returned by ngram/solr
+    else if (Array.isArray(dataObj)) {
+      // provide a specified array similar with the array above
+      // dataObj: interface{facetType: string, facetValue: string, count:
+      // number}[]
       this._filters[colName] = dataObj;
     } else {
       throw 'Adding filter failed';

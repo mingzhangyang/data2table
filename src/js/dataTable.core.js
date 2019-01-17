@@ -833,12 +833,16 @@ class DataTable {
     });
   }
 
-  // create Filter section
+  // create or update the  Filter section
   createFilterSection() {
-    let that = this;
+    // let that = this;
     let filterSection = document.getElementById(this._targetId + '-filter-section');
     if (!filterSection) {
       throw new Error('Creating filter section failed.')
+    }
+
+    while (filterSection.lastChild) {
+      filterSection.removeChild(filterSection.lastChild);
     }
 
     let filterNames = Object.keys(this._filters);

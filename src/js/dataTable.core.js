@@ -29,7 +29,14 @@ class DataTable {
     this._data = arr.slice();
     this._targetId = targetId;
     this._rowsPerPage = 10;
-    this._pageNumber = 1;
+
+    // for a huge amount of data, partition is necessary for performance
+    this._partition = false;
+    this._partIndex = 0;
+    this._binSize = 1000;
+    this._totalRows = null;
+    this._pageNumberInAll = this._partIndex * this._binSize + 1;
+    this._pageNumber = this._pageNumberInAll - this._partIndex * this._binSize;
     this._totalPages = Math.ceil(this._data.length / this._rowsPerPage);
 
     this._changePageByUser = true;
@@ -79,10 +86,22 @@ class DataTable {
     this._uid = 'my-1535567872393-product';
   }
 
+  /**
+   * setTotalPages calculate the number of total pages
+   * @param n: total records/rows
+   */
+  setTotalPages(n) {
+    if (n) {
+      this._totalPages = n;
+    } else {
+      this._totalPages = Math.ceil(this._data.length / this._rowsPerPage);
+    }
+  }
+
   // reset source data after sorting or filtering
   resetData() {
     this._data = this._originalData.slice();
-    this.updateTableView();
+    // this.updateTableView();
   }
 
   // set table caption
@@ -186,11 +205,6 @@ class DataTable {
       return;
     }
     throw new Error('A predefined formatter name or custom function expected.');
-  }
-
-  // set the totalPages
-  setTotalPages(num) {
-    this._totalPages = num;
   }
 
   // internal method to set page number (starts from 1)
@@ -444,7 +458,52 @@ class DataTable {
 
   // filterData get filtered data
   filterData() {
+    this.resetData();
+    // iterate the _filters object
+    let cond = {};
+    let colNames = Object.keys(this._filters);
+    for (let colName of colNames) {
+      let arr = this._filters[colName].filter(d => d.selected);
+      if (arr.length > 0) {
+        cond[colName] = arr;
+      }
+    }
 
+    if (!this._partition) {
+      // filter the data
+      let cols = Object.keys(cond);
+      let newData = this._data;
+      for (let col of cols) {
+        console.log(col[0]);
+        switch (cond[col][0].facetType) {
+          case 'value':
+            let values = cond[col].map(d => d.facetValue);
+            newData = newData.filter(d => values.includes(d[col]));
+            break;
+          case 'range':
+            let ranges = cond[col].map(d => {
+              let t = d.slice(1, -1).split(',');
+              return [+t[0], +t[1]];
+            });
+            newData = newData.filter(d => {
+              for (let range of ranges) {
+                if (d[col] >= range[0] && d[col] < range[1]) {
+                  return true;
+                }
+              }
+              return false;
+            });
+            break;
+          default:
+            console.log(cond[col][0].facetType);
+            throw new TypeError('invalid facet type')
+        }
+      }
+      this._data = newData;
+      this.setTotalPages();
+      this.setPageNumber(1);
+      this.updateTableView();
+    }
   }
 
   // update the table content
@@ -514,6 +573,10 @@ class DataTable {
       }
     }
     tBody.appendChild(df);
+
+    // update current page number and total page number
+    document.getElementById('table-page-number-current').value = this._pageNumber;
+    document.getElementById('table-page-number-total').value = this._totalPages;
   }
 
   // generate all table related panels,
@@ -845,7 +908,7 @@ class DataTable {
 
   // create or update the Filter section
   createFilterSection() {
-    // let that = this;
+    let that = this;
     let filterSection = document.getElementById(this._targetId + '-filter-section');
     if (!filterSection) {
       throw new Error('Creating filter section failed.')
@@ -884,6 +947,7 @@ class DataTable {
         inp.counterpart = obj;
         inp.addEventListener('change', function() {
           this.counterpart.selected = this.checked;
+          that.filterData();
         });
         let label = span.appendChild(document.createElement('label'));
         label.appendChild(document.createTextNode(`${obj.facetValue} (${obj.count})`));

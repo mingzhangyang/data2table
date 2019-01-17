@@ -442,6 +442,11 @@ class DataTable {
     this._dataToShow = res;
   }
 
+  // filterData get filtered data
+  filterData() {
+
+  }
+
   // update the table content
   updateTableView() {
     this._updateDataToShow();
@@ -873,9 +878,13 @@ class DataTable {
         span.classList.add('filter-value');
         let inp = span.appendChild(document.createElement('input'));
         inp.type = 'checkbox';
-        inp.facetType = obj.facetType;
-        inp.facetValue = obj.facetValue;
-        inp.count = obj.count;
+        // inp.facetType = obj.facetType;
+        // inp.facetValue = obj.facetValue;
+        // inp.count = obj.count;
+        inp.counterpart = obj;
+        inp.addEventListener('change', function() {
+          this.counterpart.selected = this.checked;
+        });
         let label = span.appendChild(document.createElement('label'));
         label.appendChild(document.createTextNode(`${obj.facetValue} (${obj.count})`));
       }

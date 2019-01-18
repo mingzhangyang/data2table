@@ -29,8 +29,35 @@ class DataTable {
     this._data = arr.slice();
     this._targetId = targetId;
     this._rowsPerPage = 10;
-    this._pageNumber = 1;
-    this._totalPages = Math.ceil(this._data.length / this._rowsPerPage);
+
+    // for a huge amount of data, partition is necessary for performance
+    this._partition = false;
+    this._partIndex = 0;
+    this._binSize = 1000;
+
+    // if _partition is true, the user should also set the _totalRows and _totalPages
+    this._totalRows = this._partition ? null : this._data.length;
+    this._totalPages = this._partition ? null : Math.ceil(this._data.length / this._rowsPerPage);
+
+    this.__pageNumberInAll = 1;
+    // _offset is the current page number in the current bin/part, starts from 1
+    this._offset = 1;
+    let that = this;
+    Object.defineProperty(this, '_pageNumberInAll', {
+      enumerable: true,
+      get() {
+        return that.__pageNumberInAll;
+      },
+      set(v) {
+        if (!that._partition) {
+          that.__pageNumberInAll = v;
+          that._offset = v;
+        } else {
+          that.__pageNumberInAll = v;
+          that._offset = v % that._binSize + 1;
+        }
+      }
+    });
 
     this._changePageByUser = true;
     this._firstColumnAsRowNumber = true;
@@ -79,10 +106,40 @@ class DataTable {
     this._uid = 'my-1535567872393-product';
   }
 
+  /**
+   * setTotalPages calculate the number of total pages
+   * @param n: total records/rows
+   */
+  setTotalPages(n) {
+    if (n) {
+      this._totalPages = n;
+    } else {
+      this._totalPages = Math.ceil(this._data.length / this._rowsPerPage);
+    }
+  }
+
   // reset source data after sorting or filtering
   resetData() {
     this._data = this._originalData.slice();
-    this.updateTableView();
+    // this.updateTableView();
+  }
+
+  /**
+   * fetchData can be over written by the user to customize specific
+   * requirements. It receives a descriptor object to indicate what data are
+   * required, e.g. {
+   *  requirement: 'partition',
+   *  partIndex: 2
+   * } or {
+   *  requirement: 'sort',
+   *  colName: 'score',
+   *  order: 'ascending'
+   * }
+   *
+   * This function should return a promise.
+   */
+  fetchData() {
+
   }
 
   // set table caption
@@ -188,12 +245,15 @@ class DataTable {
     throw new Error('A predefined formatter name or custom function expected.');
   }
 
+  // getPageNumber get the _pageNumberInAll
+  getPageNumber() {
+    return this._pageNumberInAll;
+  }
+
   // internal method to set page number (starts from 1)
   setPageNumber(n) {
-    if (typeof n !== 'number' || n < 0) {
-      throw new Error('a natural number expected');
-    }
-    this._pageNumber = n;
+    this._pageNumberInAll = n;
+    // console.log(this._pageNumberInAll, this._pageNumber);
   }
 
   // actually, this is a internal method, update the internal properties
@@ -336,6 +396,7 @@ class DataTable {
             count: v
           });
         }
+        arr.sort((d1, d2) => d2.count - d1.count);
         this._filters[colName] = arr;
       }
 
@@ -390,8 +451,10 @@ class DataTable {
         });
       }
     }
-    else if (typeof  dataObj === 'object' && dataObj[colName]) {
-      // receive the dataObj returned by ngram/solr
+    else if (Array.isArray(dataObj)) {
+      // provide a specified array similar with the array above
+      // dataObj: interface{facetType: string, facetValue: string, count:
+      // number}[]
       this._filters[colName] = dataObj;
     } else {
       throw 'Adding filter failed';
@@ -416,7 +479,7 @@ class DataTable {
 
   /**
    * ChangeColorScheme change the color scheme of the whole object
-   * @param scheme
+   * @param scheme: string
    */
   changeColorScheme(scheme) {
     if (!this._colorSchemes[scheme]) {
@@ -428,11 +491,61 @@ class DataTable {
   // internal method, determine the range of data to show
   _updateDataToShow() {
     let res = [];
-    let start = (this._pageNumber - 1) * this._rowsPerPage;
+    // _offset should be used below
+    let start = (this._offset - 1) * this._rowsPerPage;
     for (let i = 0; i < this._rowsPerPage && start + i < this._data.length; i++) {
       res.push(this._data[start+i]);
     }
     this._dataToShow = res;
+  }
+
+  // filterData get filtered data
+  filterData() {
+    this.resetData();
+    // iterate the _filters object
+    let cond = {};
+    let colNames = Object.keys(this._filters);
+    for (let colName of colNames) {
+      let arr = this._filters[colName].filter(d => d.selected);
+      if (arr.length > 0) {
+        cond[colName] = arr;
+      }
+    }
+
+    if (!this._partition) {
+      // filter the data
+      let cols = Object.keys(cond);
+      let newData = this._data;
+      for (let col of cols) {
+        switch (cond[col][0].facetType) {
+          case 'value':
+            let values = cond[col].map(d => d.facetValue);
+            newData = newData.filter(d => values.includes(d[col]));
+            break;
+          case 'range':
+            let ranges = cond[col].map(d => {
+              let t = d.slice(1, -1).split(',');
+              return [+t[0], +t[1]];
+            });
+            newData = newData.filter(d => {
+              for (let range of ranges) {
+                if (d[col] >= range[0] && d[col] < range[1]) {
+                  return true;
+                }
+              }
+              return false;
+            });
+            break;
+          default:
+            console.log(cond[col][0].facetType);
+            throw new TypeError('invalid facet type')
+        }
+      }
+      this._data = newData;
+      this.setTotalPages();
+      this.setPageNumber(1);
+      this.updateTableView();
+    }
   }
 
   // update the table content
@@ -469,7 +582,8 @@ class DataTable {
       tBody.removeChild(tBody.lastChild);
     }
 
-    let startIndex = (this._pageNumber - 1) * this._rowsPerPage + 1;
+    // _pageNumberInAll should be use below
+    let startIndex = (this._pageNumberInAll - 1) * this._rowsPerPage + 1;
     let df = document.createDocumentFragment();
     for (let i = 0; i < this._dataToShow.length; i++) {
       let row = this._dataToShow[i];
@@ -502,6 +616,10 @@ class DataTable {
       }
     }
     tBody.appendChild(df);
+
+    // update current page number and total page number
+    document.getElementById('table-page-number-current').value = this._pageNumberInAll;
+    document.getElementById('table-page-number-total').value = this._totalPages;
   }
 
   // generate all table related panels,
@@ -636,6 +754,7 @@ class DataTable {
       let firstCol = head.appendChild(document.createElement('th'));
       firstCol.innerHTML = '#';
       firstCol.classList.add('table-row-index-column');
+      firstCol.style.width = ((this._totalRows + '').length) * 15 + 'px';
     }
     for (let name of this.shownColumns) {
       let th = head.appendChild(document.createElement('th'));
@@ -686,9 +805,9 @@ class DataTable {
     num.classList.add('table-row-number-selector');
     for (let i of [5, 10, 20, 50, 100, 200]) {
       num.appendChild(document.createElement('option'))
-      .appendChild(document.createTextNode(i));
+      .appendChild(document.createTextNode(i+''));
     }
-    num.value = 10;
+    num.value = this._rowsPerPage;
 
     // page selector candidate
     let c = pager.appendChild(document.createElement('div'));
@@ -706,13 +825,12 @@ class DataTable {
     .appendChild(document.createTextNode('Page'));
     let inp1 = m.appendChild(document.createElement('input'));
     inp1.id = 'table-page-number-current';
-    inp1.value = this._pageNumber;
     m.appendChild(document.createElement('span'))
     .appendChild(document.createTextNode('of'));
     let inp2 = m.appendChild(document.createElement('input'));
     inp2.id = 'table-page-number-total';
-    inp2.setAttribute('readonly', true);
-    inp2.value = this._totalPages;
+    inp2.readonly = true;
+
 
     // next page button
     let plusOne = c.appendChild(document.createElement('div'));
@@ -751,8 +869,7 @@ class DataTable {
 
     let pager = document.getElementById(this._targetId + '-pager-section');
     let rowPerPageSelector = pager.getElementsByTagName('select')[0];
-    let currentPageArea = document.getElementById('table-page-number-current');
-    let totalPageNumberArea = document.getElementById('table-page-number-total');
+    let currentPageNumber = document.getElementById('table-page-number-current');
 
     // add event listener to up/down sort controls
     let sortingControls = document.getElementsByClassName('table-sorting-control');
@@ -771,27 +888,23 @@ class DataTable {
         that.sort(col, true);
         evt.target.classList.add('table-sorting-control-active');
       }
-      that._pageNumber = 1;
-      currentPageArea.value = 1;
+      that.setPageNumber(1);
       that.updateTableView();
     });
 
     // add event listener to page-number-control minus/plus icon using event
     // delegation
     pager.addEventListener('click', function (evt) {
+      // console.log('pager clicked');
       if (evt.target.classList.contains('table-page-number-minus-one')) {
-        if (+currentPageArea.value > 1) {
-          let v = +currentPageArea.value - 1;
-          that._pageNumber = v;
-          currentPageArea.value = v;
+        if (+currentPageNumber.value > 1) {
+          that.setPageNumber(+currentPageNumber.value - 1);
           that.updateTableView();
         }
       }
       if (evt.target.classList.contains('table-page-number-plus-one')) {
-        if (+currentPageArea.value < that._totalPages) {
-          let v = +currentPageArea.value + 1;
-          that._pageNumber = v;
-          currentPageArea.value = v;
+        if (+currentPageNumber.value < that._totalPages) {
+          that.setPageNumber(+currentPageNumber.value + 1);
           that.updateTableView();
         }
       }
@@ -804,9 +917,7 @@ class DataTable {
       that.setPageNumber(1);
       that.updateTableView();
 
-      // update pager
-      currentPageArea.value = 1;
-      totalPageNumberArea.value = that._totalPages;
+      // Below is redundant?
       that._changePageByUser = false;
       setTimeout(function () {
         that._changePageByUser = true;
@@ -814,16 +925,18 @@ class DataTable {
     });
 
     // add event listener to page selector
-    currentPageArea.addEventListener('change', function () {
+    currentPageNumber.addEventListener('change', function () {
       let n = +this.value;
       if (isNaN(n)) {
         alert('invalid page number!');
         return;
       }
-      if (n < 0 || n > that._totalPages) {
+      if (n < 1 || n > that._totalPages) {
         alert('page number out of range');
         return;
       }
+
+      // whether the _changePageByUser is necessary here?
       if (that._changePageByUser) {
         that.setPageNumber(+this.value);
         that.updateTableView();
@@ -831,12 +944,16 @@ class DataTable {
     });
   }
 
-  // create Filter section
+  // create or update the Filter section
   createFilterSection() {
     let that = this;
     let filterSection = document.getElementById(this._targetId + '-filter-section');
     if (!filterSection) {
       throw new Error('Creating filter section failed.')
+    }
+
+    while (filterSection.lastChild) {
+      filterSection.removeChild(filterSection.lastChild);
     }
 
     let filterNames = Object.keys(this._filters);
@@ -862,10 +979,18 @@ class DataTable {
         span.classList.add('filter-value');
         let inp = span.appendChild(document.createElement('input'));
         inp.type = 'checkbox';
-        inp.facetType = obj.facetType;
-        inp.facetValue = obj.facetValue;
-        inp.count = obj.count;
+        let uid = `${that._targetId}-filter-value-${filterName}-${obj.facetValue}`;
+        inp.id = uid;
+
+        inp.counterpart = obj;
+        inp.addEventListener('change', function() {
+          this.counterpart.selected = this.checked;
+          if (!that._partition) {
+            that.filterData();
+          }
+        });
         let label = span.appendChild(document.createElement('label'));
+        label.setAttribute('for', uid);
         label.appendChild(document.createTextNode(`${obj.facetValue} (${obj.count})`));
       }
     }

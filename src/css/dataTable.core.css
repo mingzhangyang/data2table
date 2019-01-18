@@ -21,7 +21,7 @@
     width: 100%;
 }
 .my-1535567872393-product .table-row-index-column {
-    width: 30px;
+    /*width: 30px;*/
     text-align: center;
     vertical-align: center;
 }
@@ -39,11 +39,17 @@
     color: var(--font-color);
     background-color: var(--hover-color);
 }
+
+.my-1535567872393-product th {
+    text-align: center;
+}
 .my-1535567872393-product th,
 .my-1535567872393-product td {
     overflow-wrap: break-word;
     padding: 6px 4px;
-    font-size: 12px;
+    /*font-size: 12px;*/
+    font-size: 14px;
+    font-family: "Source Sans Pro", "Helvetica Neue", "Helvetica", "Roboto", "Arial", sans-serif;
 }
 .my-1535567872393-product .table-section tr:nth-child(even){
     background-color: var(--hover-color);
@@ -94,6 +100,8 @@
 
 .my-1535567872393-product .table-page-control-container select {
     margin-left: 10px;
+    width: 48px;
+    padding: 0 0 0 4px;
     height: 24px;
     border: 1px solid var(--border-color);
 }
@@ -125,7 +133,7 @@
 }
 .my-1535567872393-product .table-page-number-current-container input {
     width: 30px;
-    height: 20px;
+    height: 24px;
     text-align: center;
     margin: 0 8px;
     border: 1px solid var(--border-color);
@@ -333,14 +341,27 @@
     color: #fff;
     text-align: center;
     border-radius: 6px;
-    padding: 5px 0;
+    padding: 5px;
 
     /* Position the tooltip */
     position: absolute;
-    top: -20px;
+    top: -30px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 1;
+}
+.my-1535567872393-product .table-header-row th .tooltiptext::before {
+    content: '';
+    display: block;
+    position: absolute;
+    background-color: black;
+    width: 10px;
+    height: 10px;
+    left: 50%;
+    margin-left: -5px;
+    bottom: 0;
+    margin-bottom: -5px;
+    transform: rotate(45deg);
 }
 .my-1535567872393-product .table-header-row th:hover .tooltiptext {
     visibility: visible;

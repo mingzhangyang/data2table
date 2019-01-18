@@ -34,12 +34,14 @@ class DataTable {
     this._partition = false;
     this._partIndex = 0;
     this._binSize = 1000;
-    this._totalRows = null;
-    this.__pageNumberInAll = 1;
 
+    // if _partition is true, the user should also set the _totalRows and _totalPages
+    this._totalRows = this._partition ? null : this._data.length;
+    this._totalPages = this._partition ? null : Math.ceil(this._data.length / this._rowsPerPage);
+
+    this.__pageNumberInAll = 1;
     // _offset is the current page number in the current bin/part, starts from 1
     this._offset = 1;
-    this._totalPages = this._partition ? null : Math.ceil(this._data.length / this._rowsPerPage);
     let that = this;
     Object.defineProperty(this, '_pageNumberInAll', {
       enumerable: true,
@@ -752,6 +754,7 @@ class DataTable {
       let firstCol = head.appendChild(document.createElement('th'));
       firstCol.innerHTML = '#';
       firstCol.classList.add('table-row-index-column');
+      firstCol.style.width = ((this._totalRows + '').length) * 15 + 'px';
     }
     for (let name of this.shownColumns) {
       let th = head.appendChild(document.createElement('th'));

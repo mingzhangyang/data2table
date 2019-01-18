@@ -122,7 +122,20 @@ class DataTable {
     // this.updateTableView();
   }
 
-  // fetchData get the new data part
+  /**
+   * fetchData can be over written by the user to customize specific
+   * requirements. It receives a descriptor object to indicate what data are
+   * required, e.g. {
+   *  requirement: 'partition',
+   *  partIndex: 2
+   * } or {
+   *  requirement: 'sort',
+   *  colName: 'score',
+   *  order: 'ascending'
+   * }
+   *
+   * This function should return a promise.
+   */
   fetchData() {
 
   }

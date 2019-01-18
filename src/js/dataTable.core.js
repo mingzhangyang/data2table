@@ -109,6 +109,7 @@ class DataTable {
   /**
    * setTotalPages calculate the number of total pages
    * @param n: total records/rows
+   * if _partition is true, the parameter n should be provided
    */
   setTotalPages(n) {
     if (n) {

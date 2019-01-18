@@ -394,6 +394,7 @@ class DataTable {
             count: v
           });
         }
+        arr.sort((d1, d2) => d2.count - d1.count);
         this._filters[colName] = arr;
       }
 

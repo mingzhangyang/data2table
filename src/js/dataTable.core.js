@@ -514,7 +514,6 @@ class DataTable {
       let cols = Object.keys(cond);
       let newData = this._data;
       for (let col of cols) {
-        console.log(col[0]);
         switch (cond[col][0].facetType) {
           case 'value':
             let values = cond[col].map(d => d.facetValue);

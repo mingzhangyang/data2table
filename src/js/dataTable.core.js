@@ -975,15 +975,18 @@ class DataTable {
         span.classList.add('filter-value');
         let inp = span.appendChild(document.createElement('input'));
         inp.type = 'checkbox';
-        // inp.facetType = obj.facetType;
-        // inp.facetValue = obj.facetValue;
-        // inp.count = obj.count;
+        let uid = `${that._targetId}-filter-value-${filterName}-${obj.facetValue}`;
+        inp.id = uid;
+
         inp.counterpart = obj;
         inp.addEventListener('change', function() {
           this.counterpart.selected = this.checked;
-          that.filterData();
+          if (!that._partition) {
+            that.filterData();
+          }
         });
         let label = span.appendChild(document.createElement('label'));
+        label.setAttribute('for', uid);
         label.appendChild(document.createTextNode(`${obj.facetValue} (${obj.count})`));
       }
     }

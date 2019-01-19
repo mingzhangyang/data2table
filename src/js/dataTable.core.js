@@ -108,12 +108,13 @@ class DataTable {
 
   /**
    * setTotalPages calculate the number of total pages
-   * @param n: total records/rows
+   * @param n: total records/rows (PAY ATTENTION!!!)
    * if _partition is true, the parameter n should be provided
    */
   setTotalPages(n) {
     if (n) {
-      this._totalPages = n;
+      this._totalRows = n;
+      this._totalPages = Math.ceil(n / this._rowsPerPage);
     } else {
       this._totalPages = Math.ceil(this._data.length / this._rowsPerPage);
     }

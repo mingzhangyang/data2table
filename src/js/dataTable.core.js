@@ -109,14 +109,16 @@ class DataTable {
   /**
    * setTotalPages calculate the number of total pages
    * @param n: total records/rows (PAY ATTENTION!!!)
-   * if _partition is true, the parameter n should be provided
+   * if _partition is true or filtering is on, the parameter n should be provided
+   * This function should be invoked when set _partition as true or filtering the _data
    */
   setTotalPages(n) {
     if (n) {
       this._totalRows = n;
       this._totalPages = Math.ceil(n / this._rowsPerPage);
     } else {
-      this._totalPages = Math.ceil(this._data.length / this._rowsPerPage);
+      // this._totalPages = Math.ceil(this._data.length / this._rowsPerPage);
+      this._totalPages = Math.ceil(this._totalRows / this._rowsPerPage);
     }
   }
 
@@ -544,7 +546,7 @@ class DataTable {
         }
       }
       this._data = newData;
-      this.setTotalPages();
+      this.setTotalPages(this._data.length);
       this.setPageNumber(1);
       this.updateTableView();
     }

@@ -368,8 +368,7 @@ class DataTable {
    */
   addFilter(colName, type, dataObj, int) {
     if (!this._colModel[colName]) {
-      throw 'Column name not recognized. Please use the original column name' +
-      ' but not the customized name.';
+      throw `Column name ${colName} not recognized. Please use the original column name, but not the customized name.`;
     }
     if (type !== 'value' && type !== 'range') {
       throw 'Type not recognized. Only value or range allowed.';

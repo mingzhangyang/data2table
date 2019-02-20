@@ -961,8 +961,10 @@ class DataTable {
 
     let filterNames = Object.keys(this._filters);
     if (filterNames.length === 0) {
-      throw new Error('No filters found.');
+      console.error('No filters found.');
+      return;
     }
+
     let df = document.createDocumentFragment();
 
     let table = df.appendChild(document.createElement('table'));
@@ -977,9 +979,15 @@ class DataTable {
       // reuse td variable below
       td = row.appendChild(document.createElement('td'));
       td.classList.add('filter-values');
-      for (let obj of this._filters[filterName]) {
+      td.classList.add('unfold-fold-fold');
+      for (let i = 0; i < this._filters[filterName].length; i++) {
+        let obj = this._filters[filterName][i];
         let span = td.appendChild(document.createElement('span'));
         span.classList.add('filter-value');
+        if (i > 9) {
+          span.classList.add('filter-value-hidden');
+        }
+
         let inp = span.appendChild(document.createElement('input'));
         inp.type = 'checkbox';
         let uid = `${that._targetId}-filter-value-${filterName}-${obj.facetValue}`;
@@ -996,6 +1004,11 @@ class DataTable {
         label.setAttribute('for', uid);
         label.appendChild(document.createTextNode(`${obj.facetValue} (${obj.count})`));
       }
+      let ctrl = td.appendChild(document.createElement('span'));
+      ctrl.classList.add('unfold-fold-ctrl');
+      ctrl.addEventListener('click', function(evt) {
+        evt.target.parentNode.classList.toggle('unfold-fold-fold');
+      });
     }
     filterSection.appendChild(df);
 

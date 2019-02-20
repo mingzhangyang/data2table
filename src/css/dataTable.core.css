@@ -307,8 +307,26 @@
     align-items: center;
 }
 .my-1535567872393-product .filter-value input[type='checkbox'] + label {
-    margin-right: 8px;
+    margin-right:12px;
+    margin-left: 6px;
+}
+.my-1535567872393-product .unfold-fold-fold .filter-value-hidden {
+    display: none;
+}
+.my-1535567872393-product .unfold-fold-ctrl {
+    border-bottom: 1px solid #0b7dda;
+    cursor: pointer;
+    position: relative;
+    font-weight: bold;
     margin-left: 12px;
+}
+.my-1535567872393-product .unfold-fold-fold .unfold-fold-ctrl::before {
+    content: 'more';
+    color: green;
+}
+.my-1535567872393-product .unfold-fold-ctrl::before {
+    content: 'less';
+    color: purple;
 }
 
 

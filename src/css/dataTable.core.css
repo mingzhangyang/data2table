@@ -314,19 +314,22 @@
     display: none;
 }
 .my-1535567872393-product .unfold-fold-ctrl {
-    border-bottom: 1px solid #0b7dda;
+    /*border-bottom: 1px solid #0b7dda;*/
     cursor: pointer;
     position: relative;
-    font-weight: bold;
     margin-left: 12px;
+    font-style: italic;
+    color: #2f5777;
+}
+.my-1535567872393-product .unfold-fold-ctrl:hover {
+
 }
 .my-1535567872393-product .unfold-fold-fold .unfold-fold-ctrl::before {
-    content: 'more';
-    color: green;
+    content: 'show all';
+
 }
 .my-1535567872393-product .unfold-fold-ctrl::before {
-    content: 'less';
-    color: purple;
+    content: 'show fewer';
 }
 
 

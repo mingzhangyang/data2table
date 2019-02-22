@@ -886,13 +886,15 @@ class DataTable {
         let col = evt.target._colName;
         that.sort(col, false);
         evt.target.classList.add('table-sorting-control-active');
+        that.setPageNumber(1);
+        that.updateTableView();
       } else if (evt.target.classList.contains('table-sorting-down-control')) {
         let col = evt.target._colName;
         that.sort(col, true);
         evt.target.classList.add('table-sorting-control-active');
+        that.setPageNumber(1);
+        that.updateTableView();
       }
-      that.setPageNumber(1);
-      that.updateTableView();
     });
 
     // add event listener to page-number-control minus/plus icon using event

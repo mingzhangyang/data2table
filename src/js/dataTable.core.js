@@ -10,7 +10,7 @@
  *    3. Layout adjustment
  *    4. More color schemes
  *    5. Probably rewrite in TypeScript
-*******************************************************************************/
+ *******************************************************************************/
 
 class DataTable {
   constructor(arr, targetId, caption) {
@@ -351,7 +351,7 @@ class DataTable {
       default:
         console.log('Property not recognized!');
         console.log('Expect: download | search | filter | visualization |' +
-            ' scheme | caption');
+          ' scheme | caption');
         return;
     }
     console.log('Configuration updated.');
@@ -685,9 +685,9 @@ class DataTable {
       let example = hintWrapper.appendChild(document.createElement('p'));
       example.appendChild(document.createTextNode('e.g. '));
       example.appendChild(document.createElement('span'))
-          .appendChild(document.createTextNode('"length": > 120'));
+      .appendChild(document.createTextNode('"length": > 120'));
       example.appendChild(document.createElement('span'))
-          .appendChild(document.createTextNode(';'));
+      .appendChild(document.createTextNode(';'));
       example.appendChild(document.createElement('span'))
       .appendChild(document.createTextNode('"height": 80 AND "width": 100'));
       example.setAttribute('role', 'row');
@@ -745,12 +745,12 @@ class DataTable {
 
     // add caption to the table
     table.appendChild(document.createElement('caption'))
-        .appendChild(document.createTextNode(this.configuration.caption));
+    .appendChild(document.createTextNode(this.configuration.caption));
 
     // create table header
     // Since the header is supposed not to update, create it once
     let head = table.appendChild(document.createElement('thead'))
-      .appendChild(document.createElement('tr'));
+    .appendChild(document.createElement('tr'));
     head.classList.add('table-header-row');
 
     if (this._firstColumnAsRowNumber) {
@@ -761,7 +761,10 @@ class DataTable {
     }
     for (let name of this.shownColumns) {
       let th = head.appendChild(document.createElement('th'));
-      th.appendChild(document.createTextNode(this._colModel[name].label));
+      let sp = th.appendChild(document.createElement('span'));
+      sp.classList.add('table-row-regular-column-name');
+      sp.appendChild(document.createTextNode(this._colModel[name].label));
+      sp.setAttribute('aria-label', this._colModel[name].label);
       let model = this._colModel[name];
       // set width
       if (model.width) {
@@ -776,6 +779,7 @@ class DataTable {
       }
       // create sorting icon if sortable
       if (model.sortable) {
+        sp.classList.add('table-row-filter-column-name');
         let control = th.appendChild(document.createElement('div'));
         control.classList.add('table-sorting-control-container');
         control._colName = name;
@@ -857,13 +861,14 @@ class DataTable {
   // created. Because there are only a few of elements to take care of.
   attachListeners() {
     let that = this;
-    document.getElementById(this._targetId)
-        .addEventListener('click', function (evt) {
-            that.messageQueue.push({
-              target: evt.target,
-              //....
-            });
-    });
+    // document.getElementById(this._targetId)
+    //     .addEventListener('click', function (evt) {
+    //         that.messageQueue.push({
+    //           target: evt.target,
+    //           //....
+    //         });
+    //         console.log(`${evt.target.tagName} clicked.`);
+    // });
 
     let table = document.getElementById(this._targetId + '-table-section');
     if (!table) {
@@ -977,7 +982,7 @@ class DataTable {
       row.filterName = filterName;
       let td = row.appendChild(document.createElement('td'));
       td.classList.add('filter-name');
-      td.appendChild(document.createTextNode(filterName));
+      td.appendChild(document.createTextNode(this._colModel[filterName].label ? this._colModel[filterName].label : filterName));
       // reuse td variable below
       td = row.appendChild(document.createElement('td'));
       td.classList.add('filter-values');
@@ -1006,16 +1011,18 @@ class DataTable {
         label.setAttribute('for', uid);
         label.appendChild(document.createTextNode(`${obj.facetValue} (${obj.count})`));
       }
-      let ctrl = td.appendChild(document.createElement('span'));
-      ctrl.classList.add('unfold-fold-ctrl');
-      ctrl.addEventListener('click', function(evt) {
-        evt.target.parentNode.classList.toggle('unfold-fold-fold');
-      });
+      if (this._filters[filterName].length > 10) {
+        let ctrl = td.appendChild(document.createElement('span'));
+        ctrl.classList.add('unfold-fold-ctrl');
+        ctrl.addEventListener('click', function(evt) {
+          evt.target.parentNode.classList.toggle('unfold-fold-fold');
+        });
+      }
     }
     filterSection.appendChild(df);
 
     // add event listener to input[type='checkbox'] elements
-    
+
   }
 
   // create Visualization section
@@ -1070,3 +1077,4 @@ if (typeof module !== 'undefined' && !module.parent) {
   console.log(Date.now() - start);
 }
 
+export default DataTable;

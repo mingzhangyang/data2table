@@ -45,6 +45,7 @@
 }
 .my-1535567872393-product th,
 .my-1535567872393-product td {
+    /*overflow-wrap: break-word;*/
     word-wrap: break-word;
     padding: 6px 4px;
     /*font-size: 12px;*/
@@ -62,6 +63,11 @@
     display: flex;
     justify-content: space-around;
     align-items: center;
+}
+
+.my-1535567872393-product .table-row-filter-column-name {
+    width: 75%;
+    display: block;
 }
 
 .my-1535567872393-product .table-sorting-control-container {

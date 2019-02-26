@@ -336,6 +336,7 @@
 }
 .my-1535567872393-product .unfold-fold-ctrl::before {
     content: 'show fewer';
+    display: inline-block;
 }
 
 

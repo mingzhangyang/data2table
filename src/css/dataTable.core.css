@@ -327,7 +327,7 @@
     font-style: italic;
     color: #2f5777;
 }
-.my-1535567872393-product .unfold-fold-ctrl:hover {
+.my-1535567872393-product .unfold-fold-ctrl {
     display: inline-block;
 }
 .my-1535567872393-product .unfold-fold-fold .unfold-fold-ctrl::before {

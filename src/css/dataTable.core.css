@@ -389,6 +389,7 @@
 .my-1535567872393-product div.download-control-button .data-table-download-type-option-label {
     color: white;
     cursor: pointer;
+    display: block;
 }
 
 

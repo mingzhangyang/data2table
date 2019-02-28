@@ -21,6 +21,10 @@ class DataTable {
    *    # caption: <String>, the caption of the table
    *    # dataIsComplete: <Bool>, indicates whether new data are needed, if true
    *      then fetchData function (below) is required.
+   *    # downloadFileName: <String>, specify the file name of download.
+   *    # dataToDownload: <Array>, the raw data for user to download in case of
+   *      dataIsComplete. To be noted, the arr provided to DataTable might not
+   *      be the same as this. The data consumed by DataTable might be converted.
    *    # fetchData: <Function>, fetch new data to update the table, an object
    *      that specifies the parameters, i.e. range <Array>, sort <Object>, etc.
    *      will be provided as the sole argument. And this function should return
@@ -61,7 +65,7 @@ class DataTable {
     this._rowsPerPage = 10;
 
     // for a huge amount of data, partition is necessary for performance
-    this._partition = false;
+    this._partition = !this.opts.dataIsComplete;
     this._partIndex = 0;
     this._binSize = 1000;
 
@@ -794,19 +798,19 @@ class DataTable {
           console.log(type);
           // need to be done
           let a = document.createElement('a');
-          a.setAttribute('download', that.opts.downloadFileName ? that.opts.downloadFileName : 'data.' + type.toLowerCase());
+          a.setAttribute('download', (that.opts.downloadFileName ? that.opts.downloadFileName : 'data') + '.' + type.toLowerCase());
 
           if (that.opts.dataIsComplete) {
             let str;
             switch (type) {
               case 'CSV':
-                str = DataTable.convert(that._data, ',');
+                str = DataTable.convert(that.opts.dataToDownload, ',');
                 break;
               case 'TSV':
-                str = DataTable.convert(that._data, '\t');
+                str = DataTable.convert(that.opts.dataToDownload, '\t');
                 break;
               case 'JSON':
-                str = JSON.stringify(that._data);
+                str = JSON.stringify(that.opts.dataToDownload);
                 break;
               default:
             }
@@ -964,6 +968,8 @@ class DataTable {
   // which you save the time searching the DOM tree to get the elements,
   // it is acceptable to add event listener after all the elements have been
   // created. Because there are only a few of elements to take care of.
+  // Below are event listener to update the table view. Other listeners are
+  // registered when they were created.
   attachListeners() {
     let that = this;
     // document.getElementById(this._targetId)

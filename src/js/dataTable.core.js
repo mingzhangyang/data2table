@@ -13,16 +13,46 @@
  *******************************************************************************/
 
 class DataTable {
-  constructor(arr, targetId, caption) {
+  /******************************************************************************
+   * To create an instance of DataTable class
+   * @param arr: <Array>, array of data objects
+   * @param targetId: <String>, the id of the table of placeholder
+   * @param opts: <Object>, potential properties include:
+   *    # caption: <String>, the caption of the table
+   *    # dataIsComplete: <Bool>, indicates whether new data are needed, if true
+   *      then fetchData function (below) is required.
+   *    # fetchData: <Function>, fetch new data to update the table, an object
+   *      that specifies the parameters, i.e. range <Array>, sort <Object>, etc.
+   *      will be provided as the sole argument. And this function should return
+   *      a promise.
+   *    # urlForDownloading: <String>, a link to download the whole data
+   * @returns {number|any}
+   *******************************************************************************/
+  constructor(arr, targetId, opts) {
     if (!Array.isArray(arr)) {
-      throw new Error('an array of objects expected');
+      throw new TypeError('an array of objects expected');
     }
     if (Object.prototype.toString.call(arr[0]) !== '[object Object]') {
-      throw new Error('an array of objects expected');
+      throw new TypeError('an array of objects expected');
     }
     // if (typeof window === 'undefined') {
     //   throw new Error('Data Table only works in browser');
     // }
+    if (typeof targetId !== 'string' || !targetId) {
+      throw new TypeError('target id should be a non-empty string');
+    }
+    if (typeof opts !== 'undefined') {
+      if (Object.prototype.toString.call(opts) !== '[object Object]') {
+        throw new TypeError('if provided, opts should be an object');
+      } else {
+        this.opts = opts;
+      }
+    } else {
+      this.opts = {
+        caption: '',
+        dataIsComplete: true
+      }
+    }
 
     // below are properties required to create and update table
     this._originalData = arr;
@@ -93,7 +123,7 @@ class DataTable {
       default: 'default-color-scheme'
     };
     this.configuration = {
-      caption: typeof caption === 'string' ? caption : '',
+      caption: typeof this.opts.caption === 'string' ? this.opts.caption : '',
       searchBar: true,
       filterButton: false,
       vizButton: false,
@@ -309,6 +339,22 @@ class DataTable {
       }
     };
     return pool[name];
+  }
+
+  // Convert JSON to CSV or TSV
+  static convert(arr, delimiter) {
+    if (!Array.isArray(arr)) {
+      throw new TypeError('an array of objects expected');
+    }
+    if (arr.length === 0) {
+      return '';
+    }
+    let cols = Object.keys(arr[0]);
+    let res = cols.join(delimiter) + '\n';
+    for (let obj of arr) {
+      res += cols.map(p => obj[p]).join(delimiter) + '\n';
+    }
+    return res;
   }
 
   // if descending is omitted, sort in descending order by default
@@ -717,14 +763,73 @@ class DataTable {
     }
 
     if (this.configuration.downloadButton) {
+      let that = this;
       let dBtn = btns.appendChild(document.createElement('div'));
       dBtn.classList.add('table-top-button', 'download-control-button');
-      dBtn.appendChild(document.createTextNode('Download'));
+      let sp = document.createElement('span');
+      sp.appendChild(document.createTextNode('Download'));
+      dBtn.appendChild(sp);
       dBtn.setAttribute('role', 'button');
       dBtn.setAttribute('aria-label', 'download button');
-      dBtn.addEventListener('click', function () {
-        // control download options
-      });
+
+      let list = document.createElement('form');
+      list.classList.add('data-table-download-type-options');
+      for (let type of ['CSV', 'TSV', 'JSON']) {
+        let span = document.createElement('span');
+        let inp = span.appendChild(document.createElement('input'));
+        inp.type = 'radio';
+        inp.value = type;
+        inp.id = 'data-table-download-type-option ' + type;
+        inp.classList.add('data-table-download-type-option');
+        inp.checked = type === 'CSV';
+        inp.name = 'data-table-download-type';
+        span.appendChild(inp);
+        let label = document.createElement('label');
+        label.classList.add('data-table-download-type-option-label');
+        label.append(document.createTextNode(type));
+        label.htmlFor = 'data-table-download-type-option ' + type;
+
+        label.addEventListener('click', () => {
+          console.log('download type selected');
+          console.log(type);
+          // need to be done
+          let a = document.createElement('a');
+          a.setAttribute('download', that.opts.downloadFileName ? that.opts.downloadFileName : 'data.' + type.toLowerCase());
+
+          if (that.opts.dataIsComplete) {
+            let str;
+            switch (type) {
+              case 'CSV':
+                str = DataTable.convert(that._data, ',');
+                break;
+              case 'TSV':
+                str = DataTable.convert(that._data, '\t');
+                break;
+              case 'JSON':
+                str = JSON.stringify(that._data);
+                break;
+              default:
+            }
+            a.setAttribute('href', `data:text/${type.toLowerCase()};charset=utf-8,${encodeURIComponent(str)}`);
+          } else {
+            a.setAttribute('href', `${that.opts.urlForDownloading}&type=${type.toLowerCase()}`);
+          }
+
+          a.style.display = 'none';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        });
+
+        span.appendChild(label);
+        list.appendChild(span);
+      }
+
+      dBtn.appendChild(list);
+
+      // dBtn.addEventListener('click', function () {
+      //   // control download options
+      // });
     }
 
 
@@ -927,7 +1032,7 @@ class DataTable {
       that.setPageNumber(1);
       that.updateTableView();
 
-      // Below is redundant?
+      // Below is redundant???
       that._changePageByUser = false;
       setTimeout(function () {
         that._changePageByUser = true;

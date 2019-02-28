@@ -356,8 +356,47 @@
 .my-1535567872393-product div.download-control-button {
     margin-right: 0;
     float: right;
+    position: relative;
+}
+.my-1535567872393-product div.download-control-button form {
+    border-left: 1px solid var(--hover-blue-color);
+    border-right: 1px solid var(--hover-blue-color);
+    background-color: var(--hover-blue-color);
+    width: 100%;
+    position: absolute;
+    z-index: 10;
+    height: 0;
+    transition: height .4s;
+    border-radius: 4px;
+    opacity: .8;
+    overflow: hidden;
+}
+.my-1535567872393-product div.download-control-button:hover form {
+    height: 90px;
+}
+.my-1535567872393-product div.download-control-button .data-table-download-type-options span {
+    display: block;
+    cursor: pointer;
+}
+.my-1535567872393-product div.download-control-button .data-table-download-type-options span:hover {
+    background-color: var(--font-color);
+}
+.my-1535567872393-product div.download-control-button input[type=radio].data-table-download-type-option {
+    display: none;
 }
 
+.my-1535567872393-product div.download-control-button .data-table-download-type-option-label {
+    color: white;
+    cursor: pointer;
+}
+
+
+
+
+
+
+
+/*table tooltips setting*/
 .my-1535567872393-product .table-header-row th {
     position: relative;
 }

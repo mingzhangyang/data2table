@@ -409,11 +409,11 @@ class DataTable {
 
   /**
    * AddFilter add a filter to filter section
-   * @param colName: string, column names
-   * @param type: string, value | range
-   * @param dataObj: array | null, return by solr/ngram. If is null,
+   * @param colName: <string>, column names
+   * @param type: <string>, value | range
+   * @param dataObj: <array | null>, return by solr/ngram. If is null,
    * it will be computed locally
-   * @param int: boolean, specify when using range facet, only use integer as
+   * @param int: <boolean>, specify when using range facet, only use integer as
    * range boundaries
    */
   addFilter(colName, type, dataObj, int) {

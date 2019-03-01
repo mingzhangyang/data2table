@@ -373,11 +373,13 @@
     overflow: hidden;
 }
 .my-1535567872393-product div.download-control-button:hover form {
-    height: 90px;
+    height: auto;
 }
 .my-1535567872393-product div.download-control-button .data-table-download-type-options span {
     display: block;
     cursor: pointer;
+    /*text-align: left;*/
+    /*padding-left: 12px;*/
 }
 .my-1535567872393-product div.download-control-button .data-table-download-type-options span:hover {
     background-color: var(--font-color);

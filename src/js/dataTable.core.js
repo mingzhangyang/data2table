@@ -19,26 +19,24 @@ class DataTable {
    * @param targetId: <String>, the id of the table of placeholder
    * @param opts: <Object>, potential properties include:
    *    # caption: <String>, the caption of the table
-   *    # dataIsComplete: <Bool>, indicates whether new data are needed, if true
-   *      then fetchData function (below) is required.
+   *    # dataIsComplete: <Bool>, required. It indicates whether new data are needed,
+   *      if true then fetchData function (below) is required.
+   *    # totalRows: <Number>, if data is not complete, user should provide the
+   *      totalRows parameter
    *    # downloadFileName: <String>, specify the file name of download.
    *    # dataToDownload: <Array>, the raw data for user to download in case of
    *      dataIsComplete. To be noted, the arr provided to DataTable might not
    *      be the same as this. The data consumed by DataTable might be converted.
    *    # fetchData: <Function>, fetch new data to update the table, an object
-   *      that specifies the parameters, i.e. range <Array>, sort <Object>, etc.
+   *      that specifies the parameters, i.e. filter <Object>, sort <Object>, etc.
    *      will be provided as the sole argument. And this function should return
    *      a promise.
    *    # urlForDownloading: <String>, a link to download the whole data
+   *    # fetchFacetingData: <Function>, fetch faceting data function is required
+   *      if the data is not complete
    * @returns {number|any}
    *******************************************************************************/
   constructor(arr, targetId, opts) {
-    if (!Array.isArray(arr)) {
-      throw new TypeError('an array of objects expected');
-    }
-    if (Object.prototype.toString.call(arr[0]) !== '[object Object]') {
-      throw new TypeError('an array of objects expected');
-    }
     // if (typeof window === 'undefined') {
     //   throw new Error('Data Table only works in browser');
     // }
@@ -58,43 +56,66 @@ class DataTable {
       }
     }
 
+    if (!this.opts.downloadFileName) {
+      this.opts.downloadFileName = 'data';
+    }
+
+    if (!this.opts.dataIsComplete) {
+      if (!this.opts.urlForDownloading) {
+        throw "Data is not complete. An url for downloading the data is required.";
+      }
+      if (!this.opts.fetchData) {
+        throw "Data is not complete. A fetchData function is required.";
+      }
+      if (!this.opts.fetchFacetingData) {
+        throw "Data is not complete. A fetchFacetingData function is required.";
+      }
+
+      if (typeof this.opts.fetchData !== "function") {
+        throw new TypeError("fetchData should be a function")
+      }
+      this.fetchData = this.opts.fetchData;
+
+      if (typeof this.opts.fetchFacetingData !== "function") {
+        throw new TypeError("fetchFacetingData should be a function")
+      }
+      this.fetchFacetingData = this.opts.fetchFacetingData;
+    }
+
     // below are properties required to create and update table
     this._originalData = arr;
-    this._data = arr.slice();
+
+    if (!Array.isArray(this._originalData)) {
+      throw new TypeError('an array of objects expected');
+    }
+    if (Object.prototype.toString.call(this._originalData[0]) !== '[object Object]') {
+      throw new TypeError('an array of objects expected');
+    }
+
+    this._data = this._originalData.slice();
     this._targetId = targetId;
     this._rowsPerPage = 10;
 
     // for a huge amount of data, partition is necessary for performance
     this._partition = !this.opts.dataIsComplete;
+    // _partIndex starts from 0, not 1. PAY ATTENTION.
     this._partIndex = 0;
     this._binSize = 1000;
 
     // if _partition is true, the user should also set the _totalRows and _totalPages
-    this._totalRows = this._partition ? null : this._data.length;
-    this._totalPages = this._partition ? null : Math.ceil(this._data.length / this._rowsPerPage);
+    // _totalRows will initialized at beginning, and can be updated by _setTotalPages
+    this._totalRows = this._partition ? opts.totalRows : this._data.length;
+    // _totalPages can be updated by _setTotalPages or setRowsPerPage
+    this._totalPages = Math.ceil(this._totalRows / this._rowsPerPage);
 
-    this.__pageNumberInAll = 1;
-    // _offset is the current page number in the current bin/part, starts from 1
+    // _pageNumberInAll is the page number in all, starts from 1
+    this._pageNumberInAll = 1;
+    // _offset is the current page offset in the current bin/part, starts from 1
     this._offset = 1;
-    let that = this;
-    Object.defineProperty(this, '_pageNumberInAll', {
-      enumerable: true,
-      get() {
-        return that.__pageNumberInAll;
-      },
-      set(v) {
-        if (!that._partition) {
-          that.__pageNumberInAll = v;
-          that._offset = v;
-        } else {
-          that.__pageNumberInAll = v;
-          that._offset = v % that._binSize + 1;
-        }
-      }
-    });
 
     this._changePageByUser = true;
     this._firstColumnAsRowNumber = true;
+    this.maxNumOfFacets = this.opts.maxNumOfFacets ? this.opts.maxNumOfFacets : 50;
 
     // Create column model object
     this._colModel = {};
@@ -120,8 +141,12 @@ class DataTable {
       this.shownColumns.push(name);
     }
 
-    // below are properties required to configure the whole
+    // below are sort setting and filter setting
     this._filters = {};
+    this.sortSetting = null;
+    this.filterSetting = null;
+
+    // properties required to configure the whole
     this._charts = [];
     this._colorSchemes = {
       default: 'default-color-scheme'
@@ -141,43 +166,157 @@ class DataTable {
   }
 
   /**
-   * setTotalPages calculate the number of total pages
+   * _setTotalPages is an internal method to calculate the number of total pages
+   * it will update the _totalPages and _totalRows if provided
    * @param n: total records/rows (PAY ATTENTION!!!)
    * if _partition is true or filtering is on, the parameter n should be provided
-   * This function should be invoked when set _partition as true or filtering the _data
+   * This function should be invoked when filtering the _data, in which case the
+   * _totalRows is likely to change
+   * @private
    */
-  setTotalPages(n) {
-    if (n) {
+  _setTotalPages(n) {
+    if (typeof n !== "undefined") {
+      if (typeof n !== "number") {
+        throw new TypeError("a number argument expected");
+      }
       this._totalRows = n;
       this._totalPages = Math.ceil(n / this._rowsPerPage);
+      // when _totalRows is 0, _totalPages should be 1 not 0. *** Math.ceil(0) is 0 ***
+      if (this._totalPages === 0) {
+        this._totalPages = 1;
+      }
     } else {
-      // this._totalPages = Math.ceil(this._data.length / this._rowsPerPage);
       this._totalPages = Math.ceil(this._totalRows / this._rowsPerPage);
+      if (this._totalPages === 0) {
+        this._totalPages = 1;
+      }
     }
+  }
+
+  /**
+   * setRowsPerPage is used to set and update _rowsPerPage and _totalPages
+   * @param n
+   */
+  setRowsPerPage(n) {
+    if (typeof n !== 'number' || n < 0) {
+      throw new Error('a natural number expected');
+    }
+    this._rowsPerPage = n;
+    this._totalPages = Math.ceil(this._totalRows / this._rowsPerPage);
   }
 
   // reset source data after sorting or filtering
   resetData() {
-    this._data = this._originalData.slice();
-    // this.updateTableView();
+    if (!this._partition) {
+      this._data = this._originalData.slice();
+      // console.log(this._data.length);
+    } else {
+      // fetch data from the server?
+    }
   }
 
   /**
-   * fetchData can be over written by the user to customize specific
-   * requirements. It receives a descriptor object to indicate what data are
-   * required, e.g. {
-   *  requirement: 'partition',
-   *  partIndex: 2
-   * } or {
-   *  requirement: 'sort',
-   *  colName: 'score',
-   *  order: 'ascending'
-   * }
-   *
-   * This function should return a promise.
+   * internal method to set page number (starts from 1)
+   * @param n: <Number>. It is for internal use. The parameter received is supposed
+   * to be valid. No type check.
+   * @private
    */
-  fetchData() {
+  _setPageNumber(n) {
+    this._pageNumberInAll = n;
+    if (!this._partition) {
+      this._offset = n;
+    } else {
+      this._offset = n % (this._binSize / this._rowsPerPage);
+      // Below is critical. It's due to _pageNumberInAll and _offset start from 1.
+      // *CRITICAL*
+      if (this._offset === 0) {
+        this._offset = this._binSize / this._rowsPerPage;
+      }
+    }
+  }
 
+  /**
+   * Check whether a page number is in the current partition
+   * If not in the current partition, then update the data and table view;
+   * If in the current partition, only update the table view
+   * @param v: <Number>, the page number
+   *****************************************************************************
+   * This method should be the only one that invoke _updateTableView function? *
+   * It equals to "_setPageNumber(v)" plus "_updateTableView()".               *
+   * No. It seems not to be a good idea. sort and filterData should invoke     *
+   * _setPageNumber and _updateTableView directly to avoid redundant checks.   *
+   * Besides, sort or filterData will change the underlying data, it is        *
+   * necessary to fetch new data from the server anyway. But the function      *
+   * below will not fetch new data if the _partitionIndex doesn't change.      *
+   *****************************************************************************
+   */
+  _checkPageNumber(v) {
+    if (!this._partition) {
+      this._setPageNumber(v);
+      this._updateTableView();
+    } else {
+      // compute the _partIndex from page number
+      // v * this._rowsPerPage - 1, it is critical to minus one.
+      let t = Math.floor((v * this._rowsPerPage - 1) / this._binSize);
+      // the above <=> Math.floor((v - 1) / (this._binSize / this._rowsPerPage))
+      // console.log(t, this._partIndex);
+      if (t !== this._partIndex) {
+        this._partIndex = t;
+        let opts;
+        if (this.sortSetting) {
+          opts = {sort: this.sortSetting};
+        }
+        if (this.filterSetting) {
+          if (opts) {
+            opts.filter = this.filterSetting;
+          } else {
+            opts = {filter: this.filterSetting};
+          }
+        }
+        this._notifyStatus({ type: 'progress'});
+        let p = this.fetchData(t * this._binSize, opts);
+        p.then(data => {
+          // data is in the form of {totalCount: number, data: array}
+          this._notifyStatus({type: 'success'});
+          // the data should be ready to use without any pre-processing
+          this._data = data.data;
+          console.log("Loading new data.");
+          // console.log(this);
+          this._setPageNumber(v);
+          this._updateTableView();
+        }).catch(err => {
+          this._notifyStatus({
+            type: 'error',
+            message: 'Failed to load new data (pagination)'
+          });
+          console.error(err);
+        });
+      } else {
+        this._setPageNumber(v);
+        this._updateTableView();
+      }
+    }
+  }
+
+  /**
+   * fetchData should be overwritten by the user to load new data
+   * @param n: <Number>, this will be used as "skip" parameter in the query string
+   * n is the number of rows/docs to skip
+   * @param opts: <Object>, options including filtering fields, sorting fields and so on
+   * should be provided as an object
+   * This function should return a promise, which resolved as an object with the pattern
+   * {totalCount: number, data: array}
+   */
+  fetchData(n, opts) {
+    // should return a promise
+  }
+
+  /**
+   * fetchFacetingData should be over-written by the user to get faceting info from server
+   * @param arr: <Array>, a list of field names for faceting
+   */
+  fetchFacetingData(arr) {
+    // fetch faceting data from server
   }
 
   // set table caption
@@ -187,13 +326,6 @@ class DataTable {
     }
   }
 
-  // customized column names
-  renameColumn(oldName, newName) {
-    if (!this._colModel[oldName]) {
-      throw 'Column name not recognized.';
-    }
-    this._colModel[oldName].label = newName;
-  }
 
   /**
    * choose the columns to display in the table
@@ -224,6 +356,7 @@ class DataTable {
     Object.assign(this._colModel[name], obj);
   }
 
+  // Redundant mark
   /**
    * Add a column to the table to show
    * @param colName: string, can put as many as possible
@@ -245,6 +378,7 @@ class DataTable {
     }
   }
 
+  // Redundant mark
   /**
    * remove a present column in the table
    * @param colName
@@ -261,17 +395,29 @@ class DataTable {
     }
   }
 
-  // formatter to create customized elements with the data
-  // the provided func should return an document element object
-  // or innerHTML
+  // Redundant mark
+  // customized column names
+  renameColumn(oldName, newName) {
+    if (!this._colModel[oldName]) {
+      throw 'Column name not recognized.';
+    }
+    this._colModel[oldName].label = newName;
+  }
+
+  /**
+   * formatter to create customized elements with the data,
+   * the provided func should return an document element object or innerHTML
+   * @param colName
+   * @param func
+   */
   setFormatter(colName, func) {
     if (typeof colName !== 'string' || !this._colModel[colName]) {
-      throw new Error('Column name not recognized.');
+      throw new Error(`Column name ${colName} not recognized.`);
     }
     if (typeof func === 'string') {
       let f = DataTable.formatterPool(func);
       if (!f) {
-        throw new Error('The formatter name not recognized.');
+        throw new Error(`The formatter name ${func} not recognized.`);
       }
       this._colModel[colName].formatter = f;
       return;
@@ -283,92 +429,6 @@ class DataTable {
     throw new Error('A predefined formatter name or custom function expected.');
   }
 
-  // getPageNumber get the _pageNumberInAll
-  getPageNumber() {
-    return this._pageNumberInAll;
-  }
-
-  // internal method to set page number (starts from 1)
-  setPageNumber(n) {
-    this._pageNumberInAll = n;
-    // console.log(this._pageNumberInAll, this._pageNumber);
-  }
-
-  // actually, this is a internal method, update the internal properties
-  // _rowsPerPage and _totalPages
-  setRowsPerPage(n) {
-    if (typeof n !== 'number' || n < 0) {
-      throw new Error('a natural number expected');
-    }
-    this._rowsPerPage = n;
-    this._totalPages = Math.ceil(this._data.length / this._rowsPerPage);
-  }
-
-  // static method
-  static convertToString(d) {
-    switch (typeof d) {
-      case 'number':
-        return d + '';
-      case 'string':
-        return d;
-      case 'object':
-        if (Array.isArray(d)) {
-          return d.join(', ');
-        } else if (d === null) {
-          return 'null';
-        } else {
-          return JSON.stringify(d);
-        }
-      case 'bool':
-        return d + '';
-      default:
-        return 'null';
-    }
-  }
-
-  // Predefined formatter
-  static formatterPool(name) {
-    const pool = {
-      highlight: function (s) {
-        return `<mark>${s}</mark>`;
-      },
-      addLink: function (obj) {
-        return `<a href="${obj.link}">${obj.text}</a>`;
-      },
-      bold: function (word) {
-        return `<strong>${word}</strong>`;
-      },
-      colorText: function (obj) {
-        return `<span style="color: ${obj.color}">${obj.text}</span>`;
-      }
-    };
-    return pool[name];
-  }
-
-  // Convert JSON to CSV or TSV
-  static convert(arr, delimiter) {
-    if (!Array.isArray(arr)) {
-      throw new TypeError('an array of objects expected');
-    }
-    if (arr.length === 0) {
-      return '';
-    }
-    let cols = Object.keys(arr[0]);
-    let res = cols.join(delimiter) + '\n';
-    for (let obj of arr) {
-      res += cols.map(p => obj[p]).join(delimiter) + '\n';
-    }
-    return res;
-  }
-
-  // if descending is omitted, sort in descending order by default
-  sort(col, descending) {
-    if (descending) {
-      this._data.sort((x, y) => x[col] < y[col] ? 1 : -1);
-    } else {
-      this._data.sort((x, y) => x[col] < y[col] ? -1 : 1);
-    }
-  }
 
   /**
    * configureLayout method set configuration property
@@ -434,6 +494,9 @@ class DataTable {
           if (typeof v === 'undefined') {
             continue;
           }
+          if (typeof v === 'object') {
+            v = v.valueForFiltering;
+          }
           let c = m.get(v);
           if (c === undefined) {
             m.set(v, 1);
@@ -442,11 +505,11 @@ class DataTable {
           }
         }
         let arr = [];
-        for (let [k, v] of m.entries()) {
+        for (let [k, c] of m.entries()) {
           arr.push({
             facetType: 'value',
             facetValue: k,
-            count: v
+            count: c
           });
         }
         arr.sort((d1, d2) => d2.count - d1.count);
@@ -455,10 +518,10 @@ class DataTable {
 
       if (type === 'range') {
         // if type is range, the values of that column should be number
-        if (typeof this._data[0][colName] !== 'number') {
-          throw 'This column should be of type of number.';
+        if (typeof this._data[0][colName] !== 'number' || typeof this._data[0][colName].valueForFiltering !== 'number') {
+          throw 'This column should be of type of number or object that contains a valueForFiltering of number type.';
         }
-        this.sort(colName, false);
+        this._sort(colName, -1);
         if (this._data.length < 5) {
           throw 'Two few items to range.';
         }
@@ -503,8 +566,7 @@ class DataTable {
           };
         });
       }
-    }
-    else if (Array.isArray(dataObj)) {
+    } else if (Array.isArray(dataObj)) {
       // provide a specified array similar with the array above
       // dataObj: interface{facetType: string, facetValue: string, count:
       // number}[]
@@ -541,28 +603,189 @@ class DataTable {
     this.configuration.colorScheme = scheme;
   }
 
-  // internal method, determine the range of data to show
-  _updateDataToShow() {
-    let res = [];
-    // _offset should be used below
-    let start = (this._offset - 1) * this._rowsPerPage;
-    for (let i = 0; i < this._rowsPerPage && start + i < this._data.length; i++) {
-      res.push(this._data[start+i]);
+  // static method
+  static convertToString(d) {
+    switch (typeof d) {
+      case 'number':
+        return d + '';
+      case 'string':
+        return d;
+      case 'object':
+        if (Array.isArray(d)) {
+          return d.join(', ');
+        } else if (d === null) {
+          return 'null';
+        } else {
+          return JSON.stringify(d);
+        }
+      case 'bool':
+        return d + '';
+      default:
+        return 'null';
     }
-    this._dataToShow = res;
   }
 
-  // filterData get filtered data
-  filterData() {
+  // Predefined formatter
+  static formatterPool(name) {
+    const pool = {
+      highlight: function (s) {
+        return `<mark>${s}</mark>`;
+      },
+      addLink: function (obj) {
+        return `<a href="${obj.link}">${obj.text}</a>`;
+      },
+      bold: function (word) {
+        return `<strong>${word}</strong>`;
+      },
+      colorText: function (obj) {
+        return `<span style="color: ${obj.color}">${obj.text}</span>`;
+      }
+    };
+    return pool[name];
+  }
+
+  // Convert JSON to CSV or TSV
+  static convert(arr, delimiter) {
+    if (!Array.isArray(arr)) {
+      throw new TypeError('an array of objects expected');
+    }
+    if (arr.length === 0) {
+      return '';
+    }
+    let cols = Object.keys(arr[0]);
+    let res = cols.join(delimiter) + '\n';
+    for (let obj of arr) {
+      res += cols.map(p => obj[p]).join(delimiter) + '\n';
+    }
+    return res;
+  }
+
+  /**
+   * This is an internal method to sort the data on a specified column and update the table
+   * @param col: <String>, must be a valid column name
+   * @param order: <Number>, 1 for ascending; -1 for descending. If order is not provided, -1 will be taken.
+   * @private
+   */
+  _sort(col, order) {
+    if (!order) {
+      order = -1;
+    }
+
+    this.sortSetting = {name: col, order: order};
+
+    if (!this._partition) {
+      // Below is very important. Without the checking, if the _data is empty,
+      // the code below to sort will throw error. this_data[0] is undefined.
+      if (this._data.length === 0) {
+        return;
+      }
+      if (order === -1) {
+        try {
+          switch (typeof this._data[0][col]) {
+            case 'object':
+              this._data.sort((x, y) => {
+                return x[col].valueForSorting < y[col].valueForSorting ? 1 : -1;
+              });
+              break;
+            default:
+              this._data.sort((x, y) => x[col] < y[col] ? 1 : -1);
+          }
+        } catch(err) {
+          console.error(err);
+          this._notifyStatus({
+            type: 'error',
+            message: "Error happens when sorting column " + col + " locally"
+          });
+        }
+      } else if (order === 1) {
+        try {
+          switch (typeof this._data[0][col]) {
+            case 'object':
+              this._data.sort((x, y) => {
+                return x[col].valueForSorting < y[col].valueForSorting ? -1 : 1;
+              });
+              break;
+            default:
+              this._data.sort((x, y) => x[col] < y[col] ? -1 : 1);
+          }
+        } catch(err) {
+          console.error(err);
+          this._notifyStatus({
+            type: 'error',
+            message: "Error happens when sorting column " + col + " locally"
+          });
+        }
+      }
+
+      // sort doesn't change the underlying data
+      // Therefore, it is not required to consider the filterSetting here
+      this._setPageNumber(1);
+      this._updateTableView();
+
+    } else {
+      // sort will update the underlying data, therefore it is necessary to re-fetch
+      // data from the server. It is not correct to use _checkPageNumber to replace the
+      // codes below, which will not fetch new data if the _partitionIndex doesn't change
+      // get data from server side
+      this._notifyStatus({type: 'progress'});
+      let opts = {sort: this.sortSetting};
+      if (this.filterSetting) {
+        opts.filter = this.filterSetting;
+      }
+      this.fetchData(0, opts).then(newData => {
+        // newData is in the form of {totalCount: number, data: array}
+        // Using arrow functions, therefore "this" points to real this
+        try {
+          this._notifyStatus({type: 'success'});
+          // the newData should be ready to use without any pre-processing
+          this._data = newData.data;
+          this._setPageNumber(1);
+          this._updateTableView();
+        } catch(err) {
+          // console.error(err.toString());
+          this._notifyStatus({
+            type: 'error',
+            message: `Error happens when process the data from server for sorting on ${col}`
+          });
+        }
+      }).catch(err => {
+        // console.error(err);
+        this._notifyStatus({
+          type: 'error',
+          message: 'Error happens when load data from server for sorting on ' + col
+        });
+      });
+    }
+  }
+
+  /**
+   * _filterData change the underlying data and update the table view accordingly
+   */
+  _filterData() {
     this.resetData();
     // iterate the _filters object
     let cond = {};
+    this.filterSetting = {};
     let colNames = Object.keys(this._filters);
     for (let colName of colNames) {
       let arr = this._filters[colName].filter(d => d.selected);
       if (arr.length > 0) {
-        cond[colName] = arr;
+        let t = arr.map(d => d.facetValue);
+        cond[colName] = {
+          facetType: this._filters[colName][0].facetType,
+          facetValues: t
+        };
+        this.filterSetting[colName] = t;
       }
+    }
+
+    // console.log(this.filterSetting);
+
+    let wrapper = document.getElementsByClassName('filter-viz-download-buttons-wrapper')[0];
+    if (Object.keys(cond).length) {
+      wrapper.classList.add('filter-active');
+    } else {
+      wrapper.classList.remove('filter-active');
     }
 
     if (!this._partition) {
@@ -570,18 +793,34 @@ class DataTable {
       let cols = Object.keys(cond);
       let newData = this._data;
       for (let col of cols) {
-        switch (cond[col][0].facetType) {
+        switch (cond[col].facetType) {
           case 'value':
-            let values = cond[col].map(d => d.facetValue);
-            newData = newData.filter(d => values.includes(d[col]));
+            try {
+              let values = cond[col].facetValues;
+
+              switch (typeof newData[0][col]) {
+                case 'object':
+                  newData = newData.filter(d => values.includes(d[col].valueForFiltering));
+                  break;
+                default:
+                  newData = newData.filter(d => values.includes(d[col]));
+              }
+            } catch (err) {
+              console.error(err);
+              this._notifyStatus({
+                type: 'error',
+                message: "Error happens when filter the data locally"
+              });
+            }
             break;
           case 'range':
-            let ranges = cond[col].map(d => {
+            let ranges = cond[col].facetValues.map(d => {
               let t = d.slice(1, -1).split(',');
               return [+t[0], +t[1]];
             });
             newData = newData.filter(d => {
               for (let range of ranges) {
+                // may be updated to handle the case d[col] is an object
                 if (d[col] >= range[0] && d[col] < range[1]) {
                   return true;
                 }
@@ -590,19 +829,130 @@ class DataTable {
             });
             break;
           default:
-            console.log(cond[col][0].facetType);
-            throw new TypeError('invalid facet type')
+            // console.log(cond[col][0].facetType);
+            this._notifyStatus({
+              type: 'error',
+              message: cond[col][0].facetType + ' is not a valid facet type'
+            });
         }
       }
       this._data = newData;
-      this.setTotalPages(this._data.length);
-      this.setPageNumber(1);
-      this.updateTableView();
+      // console.log(newData);
+      // The underlying data might be changed, thus totalPages needs to be updated
+      this._setTotalPages(this._data.length);
+
+      // filter will change the underlying data, therefore if the sorting is on,
+      // it is required to resort the data. CRITICAL!
+      if (this.sortSetting) {
+        this._sort(this.sortSetting.name, this.sortSetting.order);
+      } else {
+        this._setPageNumber(1);
+        this._updateTableView();
+      }
+
+    } else {
+      // It is most likely that the underlying data will be changed, therefore
+      // it is necessary to re-fetch data from server. We can not use _checkPageNumber
+      // here, which will not fetch new data if the _partitionIndex is not changed.
+      // filter data on the server side
+      // how to deal with the sort settings?
+      this._notifyStatus({
+        type: 'progress',
+        message: 'filtering'
+      });
+      let opts = {filter: this.filterSetting};
+      if (this.sortSetting) {
+        opts.sort = this.sortSetting;
+      }
+      this.fetchData(0, opts).then(newData => {
+        try {
+          // newData is in the form of {totalCount: number, data: array}
+          this._notifyStatus({type: 'success'});
+          // update the _data
+          this._data = newData.data;
+          // update the totalPages!!!!
+          this._setTotalPages(newData.totalCount);
+          // update the page number
+          this._setPageNumber(1);
+          // update table view
+          this._updateTableView();
+        } catch (err) {
+          // console.error(err.toString());
+          this._notifyStatus({
+            type: 'error',
+            message: `Error happens when process the data from server for filtering`
+          });
+        }
+      }).catch(err => {
+        // console.error(err.toString());
+        // deal with errors
+        this._notifyStatus({
+          type: 'error',
+          message: 'Failed to load new data (filtering)'
+        });
+      });
     }
   }
 
-  // update the table content
-  updateTableView() {
+  /**
+   * Show status on the top of the table
+   * @param o: <Object> {type: 'progress|success|error'(required), message: <String> (optional)>}
+   */
+  _notifyStatus(o) {
+    let ns = document.getElementById(this._targetId + '-notification-section');
+    let msgs = ns.getElementsByClassName('message-bar');
+    switch (o.type) {
+      case 'progress':
+        ns.classList.add('progress-active');
+        ns.classList.remove('error-active');
+        ns.classList.remove('alert-active');
+        break;
+      case 'error':
+        ns.classList.add('error-active');
+        ns.classList.remove('alert-active');
+        ns.classList.remove('progress-active');
+        msgs[0].innerText = o.message;
+        break;
+      case 'alert':
+        ns.classList.add('alert-active');
+        ns.classList.remove('error-active');
+        ns.classList.remove('progress-active');
+        msgs[1].innerText = o.message;
+        break;
+      case 'success':
+        ns.classList.remove('progress-active');
+        ns.classList.remove('error-active');
+        ns.classList.remove('alert-active');
+        break;
+      default:
+        ns.classList.remove('progress-active');
+        ns.classList.remove('error-active');
+        ns.classList.remove('alert-active');
+    }
+  }
+
+
+  // internal method, determine the range of data to show
+  _updateDataToShow() {
+    let res = [];
+    // _offset should be used below
+    // console.log(this._offset);
+    console.log(`current partition index: ${this._partIndex}`);
+    console.log(`Current page number: ${this._pageNumberInAll}`);
+    console.log(`Current offset: ${this._offset}`);
+    let start = (this._offset - 1) * this._rowsPerPage;
+    for (let i = 0; i < this._rowsPerPage && start + i < this._data.length; i++) {
+      res.push(this._data[start+i]);
+    }
+    this._dataToShow = res;
+  }
+
+  /**
+   * This is an internal method to update the table view.
+   * It is mainly invoked by _sort | _filterData | _checkPageNumber to update the table
+   * @private
+   */
+  _updateTableView() {
     this._updateDataToShow();
     // check formatter
     for (let colName of this.shownColumns) {
@@ -694,11 +1044,11 @@ class DataTable {
     let that = this;
 
     // create control buttons, i.e. search box, filter button, download button
-    let btnPanel = container.appendChild(document.createElement('div'));
-    btnPanel.classList.add('control-button-panel');
+    let sbPanel = container.appendChild(document.createElement('div'));
+    sbPanel.classList.add('search-bar-panel');
 
     if (this.configuration.searchBar) {
-      let searchBar = btnPanel.appendChild(document.createElement('div'));
+      let searchBar = sbPanel.appendChild(document.createElement('div'));
       searchBar.id = this._targetId + '-search-bar';
       searchBar.classList.add('search-bar-wrapper');
 
@@ -795,12 +1145,15 @@ class DataTable {
 
         label.addEventListener('click', () => {
           console.log('download type selected');
-          console.log(type);
+          // console.log(type);
           // need to be done
           let a = document.createElement('a');
-          a.setAttribute('download', (that.opts.downloadFileName ? that.opts.downloadFileName : 'data') + '.' + type.toLowerCase());
+          a.setAttribute('download', that.opts.downloadFileName + '.' + type.toLowerCase());
 
-          if (that.opts.dataIsComplete) {
+          // use urlForDownloading as the first choice
+          if (that.opts.urlForDownloading) {
+            a.setAttribute('href', `${that.opts.urlForDownloading}&type=${type.toLowerCase()}`);
+          } else if (that.opts.dataIsComplete && that.opts.dataToDownload) {
             let str;
             switch (type) {
               case 'CSV':
@@ -816,7 +1169,9 @@ class DataTable {
             }
             a.setAttribute('href', `data:text/${type.toLowerCase()};charset=utf-8,${encodeURIComponent(str)}`);
           } else {
-            a.setAttribute('href', `${that.opts.urlForDownloading}&type=${type.toLowerCase()}`);
+            a.addEventListener('click', () => {
+              alert("Sorry, the data is not ready for downloading.");
+            });
           }
 
           a.style.display = 'none';
@@ -846,6 +1201,26 @@ class DataTable {
     let vizSection = container.appendChild(document.createElement('div'));
     vizSection.id = this._targetId + '-visualization-section';
     vizSection.classList.add('visualization-section');
+
+    // create notification panel
+    let notifySection = container.appendChild(document.createElement('div'));
+    notifySection.id = this._targetId + '-notification-section';
+    notifySection.classList.add('notification-section');
+    let progressBar = notifySection.appendChild(document.createElement('div'));
+    progressBar.classList.add('progress-bar');
+    let dotWrapper = progressBar.appendChild(document.createElement('div'));
+    dotWrapper.classList.add('progress-dot-wrapper');
+    for (let i = 0; i < 3; i++) {
+      let sp = dotWrapper.appendChild(document.createElement('span'));
+      sp.classList.add('progress-dot');
+      sp.classList.add(`dot-num-${i+1}`);
+    }
+    let errorBar = notifySection.appendChild(document.createElement('div'));
+    errorBar.classList.add('error-message');
+    errorBar.classList.add('message-bar');
+    let alertBar = notifySection.appendChild(document.createElement('div'));
+    alertBar.classList.add('alert-message');
+    alertBar.classList.add('message-bar');
 
     // create table panel
     let table = container.appendChild(document.createElement('table'));
@@ -946,7 +1321,7 @@ class DataTable {
     let inp2 = m.appendChild(document.createElement('input'));
     inp2.id = 'table-page-number-total';
     inp2.readonly = true;
-
+    inp2.value = this._totalPages;
 
     // next page button
     let plusOne = c.appendChild(document.createElement('div'));
@@ -956,8 +1331,8 @@ class DataTable {
 
     // add the df to div
     div.appendChild(container);
-    this.updateTableView();
-    this.attachListeners();
+    this._updateTableView();
+    this._attachListeners();
     if (this.configuration.filterButton) {
       this.createFilterSection();
     }
@@ -970,7 +1345,11 @@ class DataTable {
   // created. Because there are only a few of elements to take care of.
   // Below are event listener to update the table view. Other listeners are
   // registered when they were created.
-  attachListeners() {
+  /**
+   * This is an internal method to add event listeners
+   * @private
+   */
+  _attachListeners() {
     let that = this;
     // document.getElementById(this._targetId)
     //     .addEventListener('click', function (evt) {
@@ -999,17 +1378,13 @@ class DataTable {
         }
       }
       if (evt.target.classList.contains('table-sorting-up-control')) {
-        let col = evt.target._colName;
-        that.sort(col, false);
         evt.target.classList.add('table-sorting-control-active');
-        that.setPageNumber(1);
-        that.updateTableView();
+        let col = evt.target._colName;
+        that._sort(col, 1);
       } else if (evt.target.classList.contains('table-sorting-down-control')) {
-        let col = evt.target._colName;
-        that.sort(col, true);
         evt.target.classList.add('table-sorting-control-active');
-        that.setPageNumber(1);
-        that.updateTableView();
+        let col = evt.target._colName;
+        that._sort(col, -1);
       }
     });
 
@@ -1019,24 +1394,31 @@ class DataTable {
       // console.log('pager clicked');
       if (evt.target.classList.contains('table-page-number-minus-one')) {
         if (+currentPageNumber.value > 1) {
-          that.setPageNumber(+currentPageNumber.value - 1);
-          that.updateTableView();
+          let v = +currentPageNumber.value - 1;
+          that._checkPageNumber(v);
         }
       }
       if (evt.target.classList.contains('table-page-number-plus-one')) {
         if (+currentPageNumber.value < that._totalPages) {
-          that.setPageNumber(+currentPageNumber.value + 1);
-          that.updateTableView();
+          let v = +currentPageNumber.value + 1;
+          that._checkPageNumber(v);
         }
       }
     });
 
     // add event listener to number of rows per page selector
     rowPerPageSelector.addEventListener('change', function () {
-      // update table view
+      // setRowsPerPage will update both the _rowsPerPage and _totalPages
       that.setRowsPerPage(+this.value);
-      that.setPageNumber(1);
-      that.updateTableView();
+
+      // Below is not strict. The filterSetting and sortSetting may be set.
+      // It is not safe to reset to originalData.
+      // that._data = that._originalData;
+      // that._setPageNumber(1);
+      // that._updateTableView();
+
+      // A safe means is just _checkPageNumber(1), which can handle it.
+      that._checkPageNumber(1);
 
       // Below is redundant???
       that._changePageByUser = false;
@@ -1058,10 +1440,7 @@ class DataTable {
       }
 
       // whether the _changePageByUser is necessary here?
-      if (that._changePageByUser) {
-        that.setPageNumber(+this.value);
-        that.updateTableView();
-      }
+      that._checkPageNumber(+this.value);
     });
   }
 
@@ -1081,6 +1460,23 @@ class DataTable {
     if (filterNames.length === 0) {
       console.error('No filters found.');
       return;
+    }
+
+    let btns = document.getElementsByClassName('filter-viz-download-buttons-wrapper')[0];
+
+    if (btns.getElementsByClassName('filter-section-control-button').length === 0) {
+      let fBtn = btns.appendChild(document.createElement('div'));
+      fBtn.classList.add('table-top-button', 'filter-section-control-button');
+      fBtn.appendChild(document.createTextNode('Filters'));
+      fBtn.setAttribute('role', 'button');
+      fBtn.setAttribute('aria-label', 'filter button');
+      fBtn.addEventListener('click', function () {
+        document.getElementById(that._targetId).classList.toggle('filter-section-active');
+      });
+      fBtn.classList.add('filter-ready-signal');
+      setTimeout(function() {
+        fBtn.classList.remove('filter-ready-signal');
+      }, 6000);
     }
 
     let df = document.createDocumentFragment();
@@ -1108,19 +1504,28 @@ class DataTable {
 
         let inp = span.appendChild(document.createElement('input'));
         inp.type = 'checkbox';
-        let uid = `${that._targetId}-filter-value-${filterName}-${obj.facetValue}`;
+        let uid = `${that._targetId}-filter-value-${filterName}-value-${i}`;
         inp.id = uid;
 
         inp.counterpart = obj;
         inp.addEventListener('change', function() {
           this.counterpart.selected = this.checked;
-          if (!that._partition) {
-            that.filterData();
-          }
+          that._filterData();
         });
         let label = span.appendChild(document.createElement('label'));
         label.setAttribute('for', uid);
         label.appendChild(document.createTextNode(`${obj.facetValue} (${obj.count})`));
+
+        if (i > this.maxNumOfFacets - 1) {
+          let info = td.appendChild(document.createElement('span'));
+          info.classList.add('filter-value-hidden');
+          info.innerText = ". . .";
+          this._notifyStatus({
+            type: 'alert',
+            message: `Too many filtered values, only the first ${this.maxNumOfFacets} are showing`
+          });
+          break;
+        }
       }
       if (this._filters[filterName].length > 10) {
         let ctrl = td.appendChild(document.createElement('span'));
@@ -1131,9 +1536,6 @@ class DataTable {
       }
     }
     filterSection.appendChild(df);
-
-    // add event listener to input[type='checkbox'] elements
-
   }
 
   // create Visualization section

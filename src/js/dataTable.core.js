@@ -721,6 +721,9 @@ class DataTable {
       // Therefore, it is not required to consider the filterSetting here
       this._setPageNumber(1);
       this._updateTableView();
+      this._notifyStatus({
+        type: 'success'
+      });
 
     } else {
       // sort will update the underlying data, therefore it is necessary to re-fetch
@@ -736,11 +739,13 @@ class DataTable {
         // newData is in the form of {totalCount: number, data: array}
         // Using arrow functions, therefore "this" points to real this
         try {
-          this._notifyStatus({type: 'success'});
           // the newData should be ready to use without any pre-processing
           this._data = newData.data;
           this._setPageNumber(1);
           this._updateTableView();
+          this._notifyStatus({
+            type: 'success'
+          });
         } catch(err) {
           // console.error(err.toString());
           this._notifyStatus({
@@ -850,6 +855,16 @@ class DataTable {
         this._updateTableView();
       }
 
+      this._notifyStatus({
+        type: 'success'
+      });
+
+      if (this._data.length === 0) {
+        this._notifyStatus({
+          type: 'alert',
+          message: 'No data match to the given filter.'
+        });
+      }
     } else {
       // It is most likely that the underlying data will be changed, therefore
       // it is necessary to re-fetch data from server. We can not use _checkPageNumber
@@ -867,7 +882,6 @@ class DataTable {
       this.fetchData(0, opts).then(newData => {
         try {
           // newData is in the form of {totalCount: number, data: array}
-          this._notifyStatus({type: 'success'});
           // update the _data
           this._data = newData.data;
           // update the totalPages!!!!
@@ -876,6 +890,16 @@ class DataTable {
           this._setPageNumber(1);
           // update table view
           this._updateTableView();
+
+          // hide progress bar or error/alert message in the notification section
+          this._notifyStatus({type: 'success'});
+          // add a reminder to the notification section if no data
+          if (this._data.length === 0) {
+            this._notifyStatus({
+              type: 'alert',
+              message: 'No data match to the given filter.'
+            });
+          }
         } catch (err) {
           // console.error(err.toString());
           this._notifyStatus({

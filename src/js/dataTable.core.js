@@ -850,6 +850,12 @@ class DataTable {
         this._updateTableView();
       }
 
+      if (this._data.length === 0) {
+        this._notifyStatus({
+          type: 'alert',
+          message: 'No data match to the given filter.'
+        });
+      }
     } else {
       // It is most likely that the underlying data will be changed, therefore
       // it is necessary to re-fetch data from server. We can not use _checkPageNumber
@@ -876,6 +882,14 @@ class DataTable {
           this._setPageNumber(1);
           // update table view
           this._updateTableView();
+
+          // add a reminder if no data
+          if (this._data.length === 0) {
+            this._notifyStatus({
+              type: 'alert',
+              message: 'No data match to the given filter.'
+            });
+          }
         } catch (err) {
           // console.error(err.toString());
           this._notifyStatus({

@@ -277,13 +277,22 @@ class DataTable {
         let p = this.fetchData(t * this._binSize, opts);
         p.then(data => {
           // data is in the form of {totalCount: number, data: array}
-          this._notifyStatus({type: 'success'});
           // the data should be ready to use without any pre-processing
-          this._data = data.data;
-          console.log("Loading new data.");
-          // console.log(this);
-          this._setPageNumber(v);
-          this._updateTableView();
+          try {
+            this._data = data.data;
+            console.log("Loading new data.");
+            // console.log(this);
+            this._setPageNumber(v);
+            this._updateTableView();
+            this._notifyStatus({
+              type: 'success'
+            });
+          } catch(err) {
+            this._notifyStatus({
+              type: 'error',
+              message: 'New data loaded but error happens in switching page'
+            });
+          }
         }).catch(err => {
           this._notifyStatus({
             type: 'error',
@@ -294,6 +303,9 @@ class DataTable {
       } else {
         this._setPageNumber(v);
         this._updateTableView();
+        this._notifyStatus({
+          type: 'success'
+        });
       }
     }
   }
@@ -862,7 +874,7 @@ class DataTable {
       if (this._data.length === 0) {
         this._notifyStatus({
           type: 'alert',
-          message: 'No data match to the given filter.'
+          message: 'No data match to the given filter'
         });
       }
     } else {
@@ -897,7 +909,7 @@ class DataTable {
           if (this._data.length === 0) {
             this._notifyStatus({
               type: 'alert',
-              message: 'No data match to the given filter.'
+              message: 'No data match to the given filter'
             });
           }
         } catch (err) {

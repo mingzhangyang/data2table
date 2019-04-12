@@ -34,6 +34,7 @@ class DataTable {
    *    # urlForDownloading: <String>, a link to download the whole data
    *    # fetchFacetingData: <Function>, fetch faceting data function is required
    *      if the data is not complete
+   *    # columnsToDownload: <Array>, defines the columns to be downloaded
    * @returns {number|any}
    *******************************************************************************/
   constructor(arr, targetId, opts) {
@@ -143,8 +144,8 @@ class DataTable {
 
     // below are sort setting and filter setting
     this._filters = {};
-    this.sortSetting = null;
-    this.filterSetting = null;
+    this.sortSetting = null; // format: {colName: order}, where order = 1 or -1
+    this.filterSetting = null; // format: [{colName1: [v1, v2, ...]}, {colName2: [v3, ...]}, ...]
 
     // properties required to configure the whole
     this._charts = [];
@@ -673,6 +674,25 @@ class DataTable {
   }
 
   /**
+   * serialize the filter/sort setting object to query string parameters
+   * @param obj, <Object>, format: {key: value} or {key: [v1, v2, ...]}
+   * @param delimiter, <String>, default: _._
+   * @returns {*} <String>, 'key_._value' or ['key_._v1', 'key_._v2', ...]
+   */
+  static serialize(obj, delimiter) {
+    // return a serialized string or an array of serialized string
+    if (typeof delimiter === 'undefined') {
+      delimiter = '_._';
+    }
+    let key = Object.keys(obj)[0];
+    if (Array.isArray(obj[key])) {
+      return obj[key].map(v => `${key}${delimiter}${v}`);
+    } else {
+      return `${key}${delimiter}${obj[key]}`;
+    }
+  }
+
+  /**
    * This is an internal method to sort the data on a specified column and update the table
    * @param col: <String>, must be a valid column name
    * @param order: <Number>, 1 for ascending; -1 for descending. If order is not provided, -1 will be taken.
@@ -683,12 +703,15 @@ class DataTable {
       order = -1;
     }
 
-    this.sortSetting = {name: col, order: order};
+    this.sortSetting = {};
+    this.sortSetting[col] = order;
 
     if (!this._partition) {
       // Below is very important. Without the checking, if the _data is empty,
-      // the code below to sort will throw error. this_data[0] is undefined.
-      if (this._data.length === 0) {
+      // the code below to sort will throw error -- this._data[0] is undefined.
+      // if _data contains 0 or just 1 object, we can return immediately,
+      // no need to do anything.
+      if (this._data.length < 2) {
         return;
       }
       if (order === -1) {
@@ -706,7 +729,7 @@ class DataTable {
           console.error(err);
           this._notifyStatus({
             type: 'error',
-            message: "Error happens when sorting column " + col + " locally"
+            message: "Error happens while sorting column " + col + " locally"
           });
         }
       } else if (order === 1) {
@@ -724,7 +747,7 @@ class DataTable {
           console.error(err);
           this._notifyStatus({
             type: 'error',
-            message: "Error happens when sorting column " + col + " locally"
+            message: "Error happens while sorting column " + col + " locally"
           });
         }
       }
@@ -762,14 +785,14 @@ class DataTable {
           // console.error(err.toString());
           this._notifyStatus({
             type: 'error',
-            message: `Error happens when process the data from server for sorting on ${col}`
+            message: `Error happens while processing the data from server for sorting on ${col}`
           });
         }
       }).catch(err => {
         // console.error(err);
         this._notifyStatus({
           type: 'error',
-          message: 'Error happens when load data from server for sorting on ' + col
+          message: 'Error happens while loading data from server for sorting on ' + col
         });
       });
     }
@@ -782,7 +805,7 @@ class DataTable {
     this.resetData();
     // iterate the _filters object
     let cond = {};
-    this.filterSetting = {};
+    this.filterSetting = [];
     let colNames = Object.keys(this._filters);
     for (let colName of colNames) {
       let arr = this._filters[colName].filter(d => d.selected);
@@ -792,7 +815,9 @@ class DataTable {
           facetType: this._filters[colName][0].facetType,
           facetValues: t
         };
-        this.filterSetting[colName] = t;
+        let o = {};
+        o[colName] = t;
+        this.filterSetting.push(o);
       }
     }
 
@@ -826,7 +851,7 @@ class DataTable {
               console.error(err);
               this._notifyStatus({
                 type: 'error',
-                message: "Error happens when filter the data locally"
+                message: "Error happens while filtering the data locally"
               });
             }
             break;
@@ -861,7 +886,9 @@ class DataTable {
       // filter will change the underlying data, therefore if the sorting is on,
       // it is required to resort the data. CRITICAL!
       if (this.sortSetting) {
-        this._sort(this.sortSetting.name, this.sortSetting.order);
+        let name = Object.keys(this.sortSetting)[0];
+        let order = this.sortSetting[name];
+        this._sort(name, order);
       } else {
         this._setPageNumber(1);
         this._updateTableView();
@@ -916,7 +943,7 @@ class DataTable {
           // console.error(err.toString());
           this._notifyStatus({
             type: 'error',
-            message: `Error happens when process the data from server for filtering`
+            message: `Error happens while processing the data from server for filtering`
           });
         }
       }).catch(err => {
@@ -1171,7 +1198,7 @@ class DataTable {
         inp.value = type;
         inp.id = 'data-table-download-type-option ' + type;
         inp.classList.add('data-table-download-type-option');
-        inp.checked = type === 'CSV';
+        // inp.checked = type === 'CSV';
         inp.name = 'data-table-download-type';
         span.appendChild(inp);
         let label = document.createElement('label');
@@ -1188,7 +1215,23 @@ class DataTable {
 
           // use urlForDownloading as the first choice
           if (that.opts.urlForDownloading) {
-            a.setAttribute('href', `${that.opts.urlForDownloading}&type=${type.toLowerCase()}`);
+            let url = `${that.opts.urlForDownloading}&type=${type.toLowerCase()}`;
+            let fields = that.opts.columnsToDownload ? that.opts.columnsToDownload : that.shownColumns;
+            for (let field of fields) {
+              url += `&field=${field}`;
+            }
+            if (that.filterSetting) {
+              for (let obj of that.filterSetting) {
+                let arr = DataTable.serialize(obj, '_._');
+                for (let s of arr) {
+                  url += `&filter=${s}`;
+                }
+              }
+            }
+            if (that.sortSetting) {
+              url += `&sort=${DataTable.serialize(that.sortSetting, '_._')}`;
+            }
+            a.setAttribute('href', url);
           } else if (that.opts.dataIsComplete && that.opts.dataToDownload) {
             let str;
             switch (type) {
@@ -1340,10 +1383,11 @@ class DataTable {
     let c = pager.appendChild(document.createElement('div'));
     c.classList.add('table-page-number-control-container');
     // last page button
-    let minusOne = c.appendChild(document.createElement('div'));
-    minusOne.classList.add('table-page-number-control', 'table-page-number-minus-one');
-    minusOne.setAttribute('role', 'button');
-    minusOne.setAttribute('aria-label', 'last page');
+    let minusOneBtn = c.appendChild(document.createElement('div'));
+    minusOneBtn.classList.add('table-page-number-control-block', 'table-page-number-minus-one');
+    minusOneBtn.setAttribute('role', 'button');
+    minusOneBtn.setAttribute('aria-label', 'last page');
+
 
     // middle content
     let m = c.appendChild(document.createElement('div'));
@@ -1351,19 +1395,22 @@ class DataTable {
     m.appendChild(document.createElement('span'))
     .appendChild(document.createTextNode('Page'));
     let inp1 = m.appendChild(document.createElement('input'));
+    inp1.type = 'text';
     inp1.id = 'table-page-number-current';
     m.appendChild(document.createElement('span'))
     .appendChild(document.createTextNode('of'));
     let inp2 = m.appendChild(document.createElement('input'));
+    inp2.type = 'text';
     inp2.id = 'table-page-number-total';
     inp2.readonly = true;
     inp2.value = this._totalPages;
 
     // next page button
-    let plusOne = c.appendChild(document.createElement('div'));
-    plusOne.classList.add('table-page-number-control', 'table-page-number-plus-one');
-    plusOne.setAttribute('role', 'button');
-    plusOne.setAttribute('aria-label', 'next page');
+    let plusOneBtn = c.appendChild(document.createElement('div'));
+    plusOneBtn.classList.add('table-page-number-control-block', 'table-page-number-plus-one');
+    plusOneBtn.setAttribute('role', 'button');
+    plusOneBtn.setAttribute('aria-label', 'next page');
+
 
     // add the df to div
     div.appendChild(container);
@@ -1434,6 +1481,7 @@ class DataTable {
           that._checkPageNumber(v);
         }
       }
+
       if (evt.target.classList.contains('table-page-number-plus-one')) {
         if (+currentPageNumber.value < that._totalPages) {
           let v = +currentPageNumber.value + 1;
@@ -1558,7 +1606,7 @@ class DataTable {
           info.innerText = ". . .";
           this._notifyStatus({
             type: 'alert',
-            message: `Too many filtered values, only the first ${this.maxNumOfFacets} are showing`
+            message: `Too many facets, only a partial list is shown in the Filter section`
           });
           break;
         }

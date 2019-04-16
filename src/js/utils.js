@@ -3,7 +3,7 @@
  */
 'use strict';
 
-function splitLineB(s, sep) {
+export function splitLineB(s, sep) {
   sep = sep || ',';
   let elem = '';
   let quo = 0;
@@ -30,7 +30,7 @@ function splitLineB(s, sep) {
   return array;
 }
 
-function csvString2JSON(str, delimiter, firstLineAsColName) {
+export function csvString2JSON(str, delimiter, firstLineAsColName) {
   let arr = str.split('\n').map(line => line.trim());
   arr = arr.map(line => splitLineB(line, delimiter));
   let colNames = [];
@@ -54,7 +54,7 @@ function csvString2JSON(str, delimiter, firstLineAsColName) {
   return res;
 }
 
-function jsonArrayToJsonObj(arr) {
+export function jsonArrayToJsonObj(arr) {
   let colNames = [];
   for (let i = 0; i < arr[0].length; i++) {
     colNames.push(`Col #${i+1}`);
@@ -70,7 +70,7 @@ function jsonArrayToJsonObj(arr) {
   return res;
 }
 
-function getData(url, targetId, prop) {
+export function getData(url, targetId, prop) {
   fetch(url).then(res => {
     if (res.ok) {
       return res.text().then(text => {
@@ -87,7 +87,7 @@ function getData(url, targetId, prop) {
  * Flatten a nested object to get a flatten object
  * @param obj: object
  */
-function flatten(obj) {
+export function flatten(obj) {
   if (typeof obj !== 'object' || obj === null) {
     throw new TypeError('an object expected');
   }
@@ -113,7 +113,7 @@ function flatten(obj) {
  * return an array of arrays instructing a table head with
  * colspan and rowspan
  */
-function analyzePaths(arr) {
+export function analyzePaths(arr) {
   let a = arr.map(d => d.split('/').filter(d => d));
   let maxDepth = a.reduce((acc, d) => {
     return acc > d.length ? acc : d.length;
@@ -168,7 +168,7 @@ function analyzePaths(arr) {
  * This is required to create table headers with multiple rows
  * @param obj: object
  */
-function propStat(obj) {
+export function propStat(obj) {
   if (typeof obj !== 'object' || obj === null) {
     throw new TypeError('an object expected');
   }

@@ -256,10 +256,12 @@
 .my-1535567872393-product div.filter-viz-download-buttons-wrapper {
     display: block;
     position: relative;
-    min-height: 30px;
+    /*min-height: 30px;*/
+    height: 34px;
 }
 
 .my-1535567872393-product div.table-top-button {
+    box-sizing: border-box;
     position: relative;
     display: inline-block;
     margin: 0 8px 4px 0;

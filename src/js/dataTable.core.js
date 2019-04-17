@@ -1203,7 +1203,7 @@ class DataTable {
         span.appendChild(inp);
         let label = document.createElement('label');
         label.classList.add('data-table-download-type-option-label');
-        label.append(document.createTextNode(type));
+        label.appendChild(document.createTextNode(type));
         label.htmlFor = 'data-table-download-type-option ' + type;
 
         label.addEventListener('click', () => {

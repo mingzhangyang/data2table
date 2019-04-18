@@ -1161,7 +1161,8 @@ class DataTable {
 
     if (this.configuration.filterButton) {
       let fBtn = btns.appendChild(document.createElement('div'));
-      fBtn.classList.add('table-top-button', 'filter-section-control-button');
+      fBtn.classList.add('table-top-button');
+      fBtn.classList.add('filter-section-control-button');
       fBtn.appendChild(document.createTextNode('Filters'));
       fBtn.setAttribute('role', 'button');
       fBtn.setAttribute('aria-label', 'filter button');
@@ -1172,7 +1173,8 @@ class DataTable {
 
     if (this.configuration.vizButton) {
       let vBtn = btns.appendChild(document.createElement('div'));
-      vBtn.classList.add('table-top-button', 'viz-section-control-button');
+      vBtn.classList.add('table-top-button');
+      vBtn.classList.add('viz-section-control-button');
       vBtn.appendChild(document.createTextNode('Visualize'));
       vBtn.addEventListener('click', function () {
         document.getElementById(that._targetId).classList.toggle('viz-section-active');
@@ -1182,7 +1184,8 @@ class DataTable {
     if (this.configuration.downloadButton) {
       let that = this;
       let dBtn = btns.appendChild(document.createElement('div'));
-      dBtn.classList.add('table-top-button', 'download-control-button');
+      dBtn.classList.add('table-top-button');
+      dBtn.classList.add('download-control-button');
       let sp = document.createElement('span');
       sp.appendChild(document.createTextNode('Download'));
       dBtn.appendChild(sp);
@@ -1347,12 +1350,14 @@ class DataTable {
         control.classList.add('table-sorting-control-container');
         control._colName = name;
         let up = control.appendChild(document.createElement('i'));
-        up.classList.add('table-sorting-control', 'table-sorting-up-control');
+        up.classList.add('table-sorting-control');
+        up.classList.add('table-sorting-up-control');
         up._colName = name;
         up.setAttribute('role', 'button');
         up.setAttribute('aria-label', 'sort in ascending order');
         let down = control.appendChild(document.createElement('i'));
-        down.classList.add('table-sorting-control', 'table-sorting-down-control');
+        down.classList.add('table-sorting-control');
+        down.classList.add('table-sorting-down-control');
         down._colName = name;
         down.setAttribute('role', 'button');
         down.setAttribute('aria-label', 'sort in descending order');
@@ -1385,7 +1390,8 @@ class DataTable {
     c.classList.add('table-page-number-control-container');
     // last page button
     let minusOneBtn = c.appendChild(document.createElement('div'));
-    minusOneBtn.classList.add('table-page-number-control-block', 'table-page-number-minus-one');
+    minusOneBtn.classList.add('table-page-number-control-block');
+    minusOneBtn.classList.add('table-page-number-minus-one');
     minusOneBtn.setAttribute('role', 'button');
     minusOneBtn.setAttribute('aria-label', 'last page');
 
@@ -1408,7 +1414,8 @@ class DataTable {
 
     // next page button
     let plusOneBtn = c.appendChild(document.createElement('div'));
-    plusOneBtn.classList.add('table-page-number-control-block', 'table-page-number-plus-one');
+    plusOneBtn.classList.add('table-page-number-control-block');
+    plusOneBtn.classList.add('table-page-number-plus-one');
     plusOneBtn.setAttribute('role', 'button');
     plusOneBtn.setAttribute('aria-label', 'next page');
 
@@ -1551,7 +1558,8 @@ class DataTable {
 
     if (btns.getElementsByClassName('filter-section-control-button').length === 0) {
       let fBtn = btns.appendChild(document.createElement('div'));
-      fBtn.classList.add('table-top-button', 'filter-section-control-button');
+      fBtn.classList.add('table-top-button');
+      fBtn.classList.add('filter-section-control-button');
       fBtn.appendChild(document.createTextNode('Filters'));
       fBtn.setAttribute('role', 'button');
       fBtn.setAttribute('aria-label', 'filter button');

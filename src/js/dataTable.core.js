@@ -1365,7 +1365,7 @@ class DataTable {
     // create page controller panel
     let pager = container.appendChild(document.createElement('div'));
     pager.id = this._targetId + '-pager-section';
-    pager.classList.add('pager-section', 'table-page-control-container');
+    pager.classList.add('table-page-control-container');
 
     // create number of rows per page selector
     let a = pager.appendChild(document.createElement('div'));

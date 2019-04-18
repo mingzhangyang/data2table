@@ -163,6 +163,8 @@
 
 .my-1535567872393-product .table-page-number-current-container {
     margin: 4px;
+    display: inline-block;
+    vertical-align: middle;
 }
 .my-1535567872393-product .table-page-number-current-container input[type="text"] {
     display: inline-block;

@@ -106,6 +106,10 @@
     opacity: 1;
 }
 
+.my-1535567872393-product .table-rows-per-page-control-container {
+    display: inline-block;
+    vertical-align: middle;
+}
 .my-1535567872393-product .table-page-control-container select {
     display: inline-block;
     margin-left: 10px;

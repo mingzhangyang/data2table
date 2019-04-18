@@ -1369,6 +1369,7 @@ class DataTable {
 
     // create number of rows per page selector
     let a = pager.appendChild(document.createElement('div'));
+    a.classList.add('table-rows-per-page-control-container');
     a.appendChild(document.createElement('span'))
     .appendChild(document.createTextNode('Rows per Page'));
     let num = a.appendChild(document.createElement('select'));

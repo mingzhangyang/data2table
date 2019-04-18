@@ -1203,7 +1203,7 @@ class DataTable {
         span.appendChild(inp);
         let label = document.createElement('label');
         label.classList.add('data-table-download-type-option-label');
-        label.append(document.createTextNode(type));
+        label.appendChild(document.createTextNode(type));
         label.htmlFor = 'data-table-download-type-option ' + type;
 
         label.addEventListener('click', () => {
@@ -1369,6 +1369,7 @@ class DataTable {
 
     // create number of rows per page selector
     let a = pager.appendChild(document.createElement('div'));
+    a.classList.add('table-rows-per-page-control-container');
     a.appendChild(document.createElement('span'))
     .appendChild(document.createTextNode('Rows per Page'));
     let num = a.appendChild(document.createElement('select'));

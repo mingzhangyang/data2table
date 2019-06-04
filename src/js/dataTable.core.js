@@ -712,45 +712,47 @@ class DataTable {
       // if _data contains 0 or just 1 object, we can return immediately,
       // no need to do anything.
       if (this._data.length < 2) {
-        return;
-      }
-      if (order === -1) {
-        try {
-          switch (typeof this._data[0][col]) {
-            case 'object':
-              this._data.sort((x, y) => {
-                return x[col].valueForSorting < y[col].valueForSorting ? 1 : -1;
-              });
-              break;
-            default:
-              this._data.sort((x, y) => x[col] < y[col] ? 1 : -1);
+        // do nothing
+      } else {
+        if (order === -1) {
+          try {
+            switch (typeof this._data[0][col]) {
+              case 'object':
+                this._data.sort((x, y) => {
+                  return x[col].valueForSorting < y[col].valueForSorting ? 1 : -1;
+                });
+                break;
+              default:
+                this._data.sort((x, y) => x[col] < y[col] ? 1 : -1);
+            }
+          } catch(err) {
+            console.error(err);
+            this._notifyStatus({
+              type: 'error',
+              message: "Error happens while sorting column " + col + " locally"
+            });
           }
-        } catch(err) {
-          console.error(err);
-          this._notifyStatus({
-            type: 'error',
-            message: "Error happens while sorting column " + col + " locally"
-          });
-        }
-      } else if (order === 1) {
-        try {
-          switch (typeof this._data[0][col]) {
-            case 'object':
-              this._data.sort((x, y) => {
-                return x[col].valueForSorting < y[col].valueForSorting ? -1 : 1;
-              });
-              break;
-            default:
-              this._data.sort((x, y) => x[col] < y[col] ? -1 : 1);
+        } else if (order === 1) {
+          try {
+            switch (typeof this._data[0][col]) {
+              case 'object':
+                this._data.sort((x, y) => {
+                  return x[col].valueForSorting < y[col].valueForSorting ? -1 : 1;
+                });
+                break;
+              default:
+                this._data.sort((x, y) => x[col] < y[col] ? -1 : 1);
+            }
+          } catch(err) {
+            console.error(err);
+            this._notifyStatus({
+              type: 'error',
+              message: "Error happens while sorting column " + col + " locally"
+            });
           }
-        } catch(err) {
-          console.error(err);
-          this._notifyStatus({
-            type: 'error',
-            message: "Error happens while sorting column " + col + " locally"
-          });
         }
       }
+
 
       // sort doesn't change the underlying data
       // Therefore, it is not required to consider the filterSetting here
@@ -802,7 +804,6 @@ class DataTable {
    * _filterData change the underlying data and update the table view accordingly
    */
   _filterData() {
-    this.resetData();
     // iterate the _filters object
     let cond = {};
     this.filterSetting = [];
@@ -831,6 +832,7 @@ class DataTable {
     }
 
     if (!this._partition) {
+      this.resetData();
       // filter the data
       let cols = Object.keys(cond);
       let newData = this._data;

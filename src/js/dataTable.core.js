@@ -1526,10 +1526,12 @@ class DataTable {
       let n = +this.value;
       if (isNaN(n)) {
         alert('invalid page number!');
+        this.value = that._pageNumberInAll;
         return;
       }
       if (n < 1 || n > that._totalPages) {
         alert('page number out of range');
+        this.value = that._pageNumberInAll;
         return;
       }
 

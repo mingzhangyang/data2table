@@ -1,6 +1,13 @@
-## Separate the data and view, bridge the data and the view with a view updater function
+### 6/8/2019 Rethink the project, restructure it
+#### Overhaul branch created
 
-### Important props to watch
+- DataManager | StateManager | Render Function
+ 
+
+
+#### Separate the data and view, bridge the data and the view with a view updater function
+
+#### Important props to watch
 
 - totalRows/totalPages
   - initialized at start

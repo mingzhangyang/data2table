@@ -24,7 +24,7 @@ export function splitLineB(s, sep) {
         continue;
       }
     }
-    elem  += s[i];
+    elem += s[i];
   }
   array.push(elem);
   return array;
@@ -40,7 +40,7 @@ export function csvString2JSON(str, delimiter, firstLineAsColName) {
     num = 1;
   } else {
     for (let i = 0; i < arr[0].length; i++) {
-      colNames.push(`Col #${i+1}`);
+      colNames.push(`Col #${i + 1}`);
     }
   }
   let res = [];
@@ -57,7 +57,7 @@ export function csvString2JSON(str, delimiter, firstLineAsColName) {
 export function jsonArrayToJsonObj(arr) {
   let colNames = [];
   for (let i = 0; i < arr[0].length; i++) {
-    colNames.push(`Col #${i+1}`);
+    colNames.push(`Col #${i + 1}`);
   }
   let res = [];
   for (let k = 0; k < arr.length; k++) {
@@ -92,6 +92,7 @@ export function flatten(obj) {
     throw new TypeError('an object expected');
   }
   let res = {};
+
   function worker(obj, path) {
     let keys = Object.keys(obj);
     for (let key of keys) {
@@ -103,6 +104,7 @@ export function flatten(obj) {
       }
     }
   }
+
   worker(obj, '');
   return res;
 }
@@ -123,8 +125,8 @@ export function analyzePaths(arr) {
   for (let i = 0; i < maxDepth; i++) {
     tmp[i] = a.map(d => {
       let obj = {
-        path: d.slice(0, i+1).join('/'),
-        depth: i+1
+        path: d.slice(0, i + 1).join('/'),
+        depth: i + 1,
       };
       if (d.length > i) {
         obj.prop = d[i];
@@ -136,9 +138,9 @@ export function analyzePaths(arr) {
   // calculate rowSpan and mark the field to be removed
   for (let k = tmp.length - 2; k > -1; k--) {
     for (let h = 0; h < arr.length; h++) {
-      if (tmp[k][h].path === tmp[k+1][h].path) {
-        tmp[k][h].rowSpan = tmp[k+1][h].rowSpan ? tmp[k+1][h].rowSpan + 1 : 1 + 1;
-        tmp[k+1][h].toBeDeleted = true;
+      if (tmp[k][h].path === tmp[k + 1][h].path) {
+        tmp[k][h].rowSpan = tmp[k + 1][h].rowSpan ? tmp[k + 1][h].rowSpan + 1 : 1 + 1;
+        tmp[k + 1][h].toBeDeleted = true;
       }
     }
   }
@@ -150,11 +152,11 @@ export function analyzePaths(arr) {
     let t = [tmp[i][0]];
     t[0].colSpan = 1;
     for (let j = 1; j < arr.length; j++) {
-      if (t[t.length-1].path === tmp[i][j].path) {
-        t[t.length-1].colSpan += 1;
+      if (t[t.length - 1].path === tmp[i][j].path) {
+        t[t.length - 1].colSpan += 1;
       } else {
         t.push(tmp[i][j]);
-        t[t.length-1].colSpan = 1;
+        t[t.length - 1].colSpan = 1;
       }
     }
     res[i] = t.filter(d => !d.toBeDeleted);
@@ -177,8 +179,9 @@ export function propStat(obj) {
     prop: '',
     depth: 0,
     children: [],
-    maxDepth: 0
+    maxDepth: 0,
   };
+
   // below is the worker for recursion
   function worker(obj, parentStatObj) {
     let keys = Object.keys(obj);
@@ -188,14 +191,14 @@ export function propStat(obj) {
         let o = {
           prop: key,
           depth: parentStatObj.depth + 1,
-          children: []
+          children: [],
         };
         parentStatObj.children.push(o);
         worker(value, o);
       } else {
         parentStatObj.children.push({
           prop: key,
-          depth: parentStatObj.depth + 1
+          depth: parentStatObj.depth + 1,
         });
         if (parentStatObj.depth + 1 > root.maxDepth) {
           root.maxDepth = parentStatObj.depth + 1;
@@ -203,6 +206,7 @@ export function propStat(obj) {
       }
     }
   }
+
   worker(obj, root);
 
   // recursive function to count colSpan
@@ -218,9 +222,31 @@ export function propStat(obj) {
     }
     return obj.colSpan;
   }
+
   count(root);
   return root;
 }
+
+
+/**
+ * serialize the filter/sort setting object to query string parameters
+ * @param obj, <Object>, format: {key: value} or {key: [v1, v2, ...]}
+ * @param delimiter, <String>, default: _._
+ * @returns {*} <String>, 'key_._value' or ['key_._v1', 'key_._v2', ...]
+ */
+export function serialize(obj, delimiter) {
+  // return a serialized string or an array of serialized string
+  if (typeof delimiter === 'undefined') {
+    delimiter = '_._';
+  }
+  let key = Object.keys(obj)[0];
+  if (Array.isArray(obj[key])) {
+    return obj[key].map(v => `${key}${delimiter}${v}`);
+  } else {
+    return `${key}${delimiter}${obj[key]}`;
+  }
+}
+
 
 if (typeof module !== 'undefined' && module.parent) {
   // Node environment, required as module
@@ -256,6 +282,6 @@ if (typeof module !== 'undefined' && module.parent) {
 
   console.dir(analyzePaths(Object.keys(flatten(obj))), {
     colors: true,
-    depth: null
+    depth: null,
   });
 }

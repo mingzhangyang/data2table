@@ -144,8 +144,8 @@ class DataTable {
 
     // below are sort setting and filter setting
     this._filters = {};
-    this.sortSetting = null; // format: {colName: order}, where order = 1 or -1
-    this.filterSetting = null; // format: [{colName1: [v1, v2, ...]}, {colName2: [v3, ...]}, ...]
+    this.sortSetting = null;
+    this.filterSetting = null;
 
     // properties required to configure the whole
     this._charts = [];
@@ -477,7 +477,7 @@ class DataTable {
           ' scheme | caption');
         return;
     }
-    console.log('Configuration updated.');
+    // console.log('Configuration updated.');
   }
 
   /**
@@ -674,25 +674,6 @@ class DataTable {
   }
 
   /**
-   * serialize the filter/sort setting object to query string parameters
-   * @param obj, <Object>, format: {key: value} or {key: [v1, v2, ...]}
-   * @param delimiter, <String>, default: _._
-   * @returns {*} <String>, 'key_._value' or ['key_._v1', 'key_._v2', ...]
-   */
-  static serialize(obj, delimiter) {
-    // return a serialized string or an array of serialized string
-    if (typeof delimiter === 'undefined') {
-      delimiter = '_._';
-    }
-    let key = Object.keys(obj)[0];
-    if (Array.isArray(obj[key])) {
-      return obj[key].map(v => `${key}${delimiter}${v}`);
-    } else {
-      return `${key}${delimiter}${obj[key]}`;
-    }
-  }
-
-  /**
    * This is an internal method to sort the data on a specified column and update the table
    * @param col: <String>, must be a valid column name
    * @param order: <Number>, 1 for ascending; -1 for descending. If order is not provided, -1 will be taken.
@@ -703,8 +684,7 @@ class DataTable {
       order = -1;
     }
 
-    this.sortSetting = {};
-    this.sortSetting[col] = order;
+    this.sortSetting = {name: col, order: order};
 
     if (!this._partition) {
       // Below is very important. Without the checking, if the _data is empty,
@@ -752,7 +732,6 @@ class DataTable {
           }
         }
       }
-
 
       // sort doesn't change the underlying data
       // Therefore, it is not required to consider the filterSetting here
@@ -806,7 +785,7 @@ class DataTable {
   _filterData() {
     // iterate the _filters object
     let cond = {};
-    this.filterSetting = [];
+    this.filterSetting = {};
     let colNames = Object.keys(this._filters);
     for (let colName of colNames) {
       let arr = this._filters[colName].filter(d => d.selected);
@@ -816,9 +795,7 @@ class DataTable {
           facetType: this._filters[colName][0].facetType,
           facetValues: t
         };
-        let o = {};
-        o[colName] = t;
-        this.filterSetting.push(o);
+        this.filterSetting[colName] = t;
       }
     }
 
@@ -836,12 +813,12 @@ class DataTable {
       // filter the data
       let cols = Object.keys(cond);
       let newData = this._data;
+      // console.log(cond);
       for (let col of cols) {
         switch (cond[col].facetType) {
           case 'value':
             try {
               let values = cond[col].facetValues;
-
               switch (typeof newData[0][col]) {
                 case 'object':
                   newData = newData.filter(d => values.includes(d[col].valueForFiltering));
@@ -888,9 +865,8 @@ class DataTable {
       // filter will change the underlying data, therefore if the sorting is on,
       // it is required to resort the data. CRITICAL!
       if (this.sortSetting) {
-        let name = Object.keys(this.sortSetting)[0];
-        let order = this.sortSetting[name];
-        this._sort(name, order);
+        // console.log(this.sortSetting);
+        this._sort(this.sortSetting.name, this.sortSetting.order);
       } else {
         this._setPageNumber(1);
         this._updateTableView();
@@ -1086,8 +1062,8 @@ class DataTable {
     tBody.appendChild(df);
 
     // update current page number and total page number
-    document.getElementById('table-page-number-current').value = this._pageNumberInAll;
-    document.getElementById('table-page-number-total').value = this._totalPages;
+    document.getElementById(this._targetId + '-table-page-number-current').value = this._pageNumberInAll;
+    document.getElementById(this._targetId + '-table-page-number-total').value = this._totalPages;
   }
 
   // generate all table related panels,
@@ -1201,7 +1177,7 @@ class DataTable {
         let inp = span.appendChild(document.createElement('input'));
         inp.type = 'radio';
         inp.value = type;
-        inp.id = 'data-table-download-type-option ' + type;
+        inp.id = this._targetId + '-data-table-download-type-option-' + type;
         inp.classList.add('data-table-download-type-option');
         // inp.checked = type === 'CSV';
         inp.name = 'data-table-download-type';
@@ -1221,21 +1197,26 @@ class DataTable {
           // use urlForDownloading as the first choice
           if (that.opts.urlForDownloading) {
             let url = `${that.opts.urlForDownloading}&type=${type.toLowerCase()}`;
-            let fields = that.opts.columnsToDownload ? that.opts.columnsToDownload : that.shownColumns;
-            for (let field of fields) {
-              url += `&field=${field}`;
-            }
+//            let fields = that.opts.columnsToDownload ? that.opts.columnsToDownload : that.shownColumns;
+//            for (let field of fields) {
+//              url += `&field=${field}`;
+//            }
             if (that.filterSetting) {
-              for (let obj of that.filterSetting) {
-                let arr = DataTable.serialize(obj, '_._');
-                for (let s of arr) {
-                  url += `&filter=${s}`;
+              let filters = Object.keys(that.filterSetting);
+              if (filters.length > 0) {
+                for (let filter of filters) {
+                  let arr = that.filterSetting[filter];
+                  for (let v of arr) {
+                    url += `&filter=${filter}_._${v}`;
+                  }
                 }
               }
             }
-            if (that.sortSetting) {
-              url += `&sort=${DataTable.serialize(that.sortSetting, '_._')}`;
-            }
+            // Should below be disabled due to a bug on server-side cgi?
+//            if (that.sortSetting) {
+//              url += `&sort=${that.sortSetting.name}_._${that.sortSetting.order}`;
+//            }
+            // console.log(url);
             a.setAttribute('href', url);
           } else if (that.opts.dataIsComplete && that.opts.dataToDownload) {
             let str;
@@ -1343,7 +1324,8 @@ class DataTable {
         let tip = th.appendChild(document.createElement('span'));
         tip.classList.add('tooltiptext');
         tip.setAttribute('aria-label', model.tips);
-        tip.appendChild(document.createTextNode(model.tips));
+        let t = tip.appendChild(document.createElement('span'));
+        t.innerHTML = model.tips;
       }
       // create sorting icon if sortable
       if (model.sortable) {
@@ -1357,12 +1339,31 @@ class DataTable {
         up._colName = name;
         up.setAttribute('role', 'button');
         up.setAttribute('aria-label', 'sort in ascending order');
+
+        up.addEventListener('click', function() {
+          let ctrls = head.getElementsByClassName('table-sorting-control');
+          for (let i = 0, n = ctrls.length; i < n; i++) {
+            ctrls[i].classList.remove('table-sorting-control-active');
+          }
+          up.classList.add('table-sorting-control-active');
+          that._sort(up._colName, 1);
+        });
+
         let down = control.appendChild(document.createElement('i'));
         down.classList.add('table-sorting-control');
         down.classList.add('table-sorting-down-control');
         down._colName = name;
         down.setAttribute('role', 'button');
         down.setAttribute('aria-label', 'sort in descending order');
+
+        down.addEventListener('click', function() {
+          let ctrls = head.getElementsByClassName('table-sorting-control');
+          for (let i = 0, n = ctrls.length; i < n; i++) {
+            ctrls[i].classList.remove('table-sorting-control-active');
+          }
+          down.classList.add('table-sorting-control-active');
+          that._sort(down._colName, -1);
+        });
       }
     }
 
@@ -1378,130 +1379,17 @@ class DataTable {
     let a = pager.appendChild(document.createElement('div'));
     a.classList.add('table-rows-per-page-control-container');
     a.appendChild(document.createElement('span'))
-    .appendChild(document.createTextNode('Rows per Page'));
+    .appendChild(document.createTextNode('Rows per page:'));
     let num = a.appendChild(document.createElement('select'));
     num.classList.add('table-row-number-selector');
-    for (let i of [5, 10, 20, 50, 100, 200]) {
+    let arr = [5, 10, 20, 50, 100, 200];
+    for (let i of arr) {
       num.appendChild(document.createElement('option'))
       .appendChild(document.createTextNode(i+''));
     }
-    num.value = this._rowsPerPage;
-
-    // page selector candidate
-    let c = pager.appendChild(document.createElement('div'));
-    c.classList.add('table-page-number-control-container');
-    // last page button
-    let minusOneBtn = c.appendChild(document.createElement('div'));
-    minusOneBtn.classList.add('table-page-number-control-block');
-    minusOneBtn.classList.add('table-page-number-minus-one');
-    minusOneBtn.setAttribute('role', 'button');
-    minusOneBtn.setAttribute('aria-label', 'last page');
-
-
-    // middle content
-    let m = c.appendChild(document.createElement('div'));
-    m.classList.add('table-page-number-current-container');
-    m.appendChild(document.createElement('span'))
-    .appendChild(document.createTextNode('Page'));
-    let inp1 = m.appendChild(document.createElement('input'));
-    inp1.type = 'text';
-    inp1.id = 'table-page-number-current';
-    m.appendChild(document.createElement('span'))
-    .appendChild(document.createTextNode('of'));
-    let inp2 = m.appendChild(document.createElement('input'));
-    inp2.type = 'text';
-    inp2.id = 'table-page-number-total';
-    inp2.readonly = true;
-    inp2.value = this._totalPages;
-
-    // next page button
-    let plusOneBtn = c.appendChild(document.createElement('div'));
-    plusOneBtn.classList.add('table-page-number-control-block');
-    plusOneBtn.classList.add('table-page-number-plus-one');
-    plusOneBtn.setAttribute('role', 'button');
-    plusOneBtn.setAttribute('aria-label', 'next page');
-
-
-    // add the df to div
-    div.appendChild(container);
-    this._updateTableView();
-    this._attachListeners();
-    if (this.configuration.filterButton) {
-      this.createFilterSection();
-    }
-  }
-
-  // attach event listeners to controller elements
-  // Although it is better to add event listener as the element was created,
-  // which you save the time searching the DOM tree to get the elements,
-  // it is acceptable to add event listener after all the elements have been
-  // created. Because there are only a few of elements to take care of.
-  // Below are event listener to update the table view. Other listeners are
-  // registered when they were created.
-  /**
-   * This is an internal method to add event listeners
-   * @private
-   */
-  _attachListeners() {
-    let that = this;
-    // document.getElementById(this._targetId)
-    //     .addEventListener('click', function (evt) {
-    //         that.messageQueue.push({
-    //           target: evt.target,
-    //           //....
-    //         });
-    //         console.log(`${evt.target.tagName} clicked.`);
-    // });
-
-    let table = document.getElementById(this._targetId + '-table-section');
-    if (!table) {
-      throw new Error('failed to locate the table');
-    }
-
-    let pager = document.getElementById(this._targetId + '-pager-section');
-    let rowPerPageSelector = pager.getElementsByTagName('select')[0];
-    let currentPageNumber = document.getElementById('table-page-number-current');
-
-    // add event listener to up/down sort controls
-    let sortingControls = document.getElementsByClassName('table-sorting-control');
-    table.addEventListener('click', function (evt) {
-      if (evt.target.classList.contains('table-sorting-control')) {
-        for (let ctrl of sortingControls) {
-          ctrl.classList.remove('table-sorting-control-active');
-        }
-      }
-      if (evt.target.classList.contains('table-sorting-up-control')) {
-        evt.target.classList.add('table-sorting-control-active');
-        let col = evt.target._colName;
-        that._sort(col, 1);
-      } else if (evt.target.classList.contains('table-sorting-down-control')) {
-        evt.target.classList.add('table-sorting-control-active');
-        let col = evt.target._colName;
-        that._sort(col, -1);
-      }
-    });
-
-    // add event listener to page-number-control minus/plus icon using event
-    // delegation
-    pager.addEventListener('click', function (evt) {
-      // console.log('pager clicked');
-      if (evt.target.classList.contains('table-page-number-minus-one')) {
-        if (+currentPageNumber.value > 1) {
-          let v = +currentPageNumber.value - 1;
-          that._checkPageNumber(v);
-        }
-      }
-
-      if (evt.target.classList.contains('table-page-number-plus-one')) {
-        if (+currentPageNumber.value < that._totalPages) {
-          let v = +currentPageNumber.value + 1;
-          that._checkPageNumber(v);
-        }
-      }
-    });
-
-    // add event listener to number of rows per page selector
-    rowPerPageSelector.addEventListener('change', function () {
+    // num.value = this._rowsPerPage;
+    num.selectedIndex = arr.indexOf(this._rowsPerPage);
+    num.addEventListener('change', function() {
       // setRowsPerPage will update both the _rowsPerPage and _totalPages
       that.setRowsPerPage(+this.value);
 
@@ -1521,21 +1409,186 @@ class DataTable {
       }, 1000);
     });
 
-    // add event listener to page selector
-    currentPageNumber.addEventListener('change', function () {
+    // page selector candidate
+    let c = pager.appendChild(document.createElement('div'));
+    c.classList.add('table-page-number-control-container');
+    // last page button
+    let minusOneBtn = c.appendChild(document.createElement('div'));
+    minusOneBtn.classList.add('table-page-number-control-block');
+    minusOneBtn.classList.add('table-page-number-minus-one');
+    minusOneBtn.setAttribute('role', 'button');
+    minusOneBtn.setAttribute('aria-label', 'last page');
+
+    minusOneBtn.addEventListener('click', function() {
+      if (that._pageNumberInAll > 1) {
+        let v = that._pageNumberInAll - 1;
+        that._checkPageNumber(v);
+      }
+    });
+
+    // middle content
+    let m = c.appendChild(document.createElement('div'));
+    m.classList.add('table-page-number-current-container');
+    m.appendChild(document.createElement('span'))
+    .appendChild(document.createTextNode('Page'));
+    let inp1 = m.appendChild(document.createElement('input'));
+    inp1.type = 'text';
+    inp1.id = this._targetId + '-table-page-number-current';
+    inp1.addEventListener('change', function() {
       let n = +this.value;
       if (isNaN(n)) {
         alert('invalid page number!');
+        this.value = that._pageNumberInAll;
         return;
       }
       if (n < 1 || n > that._totalPages) {
         alert('page number out of range');
+        this.value = that._pageNumberInAll;
         return;
       }
 
-      // whether the _changePageByUser is necessary here?
       that._checkPageNumber(+this.value);
     });
+
+    m.appendChild(document.createElement('span'))
+    .appendChild(document.createTextNode('of'));
+    let inp2 = m.appendChild(document.createElement('input'));
+    inp2.type = 'text';
+    inp2.id = this._targetId + '-table-page-number-total';
+    inp2.classList.add('table-page-number-total');
+    inp2.readonly = true;
+    inp2.value = this._totalPages;
+
+    // next page button
+    let plusOneBtn = c.appendChild(document.createElement('div'));
+    plusOneBtn.classList.add('table-page-number-control-block');
+    plusOneBtn.classList.add('table-page-number-plus-one');
+    plusOneBtn.setAttribute('role', 'button');
+    plusOneBtn.setAttribute('aria-label', 'next page');
+
+    plusOneBtn.addEventListener('click', function() {
+      if (that._pageNumberInAll < that._totalPages) {
+        let v = that._pageNumberInAll + 1;
+        that._checkPageNumber(v);
+      }
+    });
+
+
+    // add the df to div
+    div.appendChild(container);
+    this._updateTableView();
+    this._attachListeners();
+    if (this.configuration.filterButton) {
+      this.createFilterSection();
+    }
+  }
+
+  // The listeners below have been moved inside of "generate" function
+  // so that two or more DataTable instances will not interfere each other
+  /**
+   * This is an internal method to add event listeners
+   * @private
+   */
+  _attachListeners() {
+    // let that = this;
+    // document.getElementById(this._targetId)
+    //     .addEventListener('click', function (evt) {
+    //         that.messageQueue.push({
+    //           target: evt.target,
+    //           //....
+    //         });
+    //         console.log(`${evt.target.tagName} clicked.`);
+    // });
+
+    // let table = document.getElementById(this._targetId + '-table-section');
+    // if (!table) {
+    //   throw new Error('failed to locate the table');
+    // }
+
+    // let pager = document.getElementById(this._targetId + '-pager-section');
+    // let rowPerPageSelector = pager.getElementsByTagName('select')[0];
+    // let currentPageNumber = document.getElementById('table-page-number-current');
+
+    // add event listener to up/down sort controls
+    // let sortingControls = document.getElementsByClassName('table-sorting-control');
+    // table.addEventListener('click', function (evt) {
+    //   if (evt.target.classList.contains('table-sorting-control')) {
+    //     // for (let ctrl of sortingControls) {
+    //     //   ctrl.classList.remove('table-sorting-control-active');
+    //     // }
+    //     for (let i = 0, len = sortingControls.length; i < len; i++) {
+    //       let ctrl = sortingControls[i];
+    //       ctrl.classList.remove('table-sorting-control-active');
+    //     }
+    //   }
+    //   if (evt.target.classList.contains('table-sorting-up-control')) {
+    //     evt.target.classList.add('table-sorting-control-active');
+    //     let col = evt.target._colName;
+    //     that._sort(col, 1);
+    //   } else if (evt.target.classList.contains('table-sorting-down-control')) {
+    //     evt.target.classList.add('table-sorting-control-active');
+    //     let col = evt.target._colName;
+    //     that._sort(col, -1);
+    //   }
+    // });
+
+    // add event listener to page-number-control minus/plus icon using event
+    // delegation
+    // pager.addEventListener('click', function (evt) {
+    //   // console.log('pager clicked');
+    //   if (evt.target.classList.contains('table-page-number-minus-one')) {
+    //     if (+currentPageNumber.value > 1) {
+    //       let v = +currentPageNumber.value - 1;
+    //       that._checkPageNumber(v);
+    //     }
+    //   }
+    //
+    //   if (evt.target.classList.contains('table-page-number-plus-one')) {
+    //     if (+currentPageNumber.value < that._totalPages) {
+    //       let v = +currentPageNumber.value + 1;
+    //       that._checkPageNumber(v);
+    //     }
+    //   }
+    // });
+
+    // add event listener to number of rows per page selector
+    // rowPerPageSelector.addEventListener('change', function () {
+    //   // setRowsPerPage will update both the _rowsPerPage and _totalPages
+    //   that.setRowsPerPage(+this.value);
+    //
+    //   // Below is not strict. The filterSetting and sortSetting may be set.
+    //   // It is not safe to reset to originalData.
+    //   // that._data = that._originalData;
+    //   // that._setPageNumber(1);
+    //   // that._updateTableView();
+    //
+    //   // A safe means is just _checkPageNumber(1), which can handle it.
+    //   that._checkPageNumber(1);
+    //
+    //   // Below is redundant???
+    //   that._changePageByUser = false;
+    //   setTimeout(function () {
+    //     that._changePageByUser = true;
+    //   }, 1000);
+    // });
+
+    // add event listener to page selector
+    // currentPageNumber.addEventListener('change', function () {
+    //   let n = +this.value;
+    //   if (isNaN(n)) {
+    //     alert('invalid page number!');
+    //     this.value = that._pageNumberInAll;
+    //     return;
+    //   }
+    //   if (n < 1 || n > that._totalPages) {
+    //     alert('page number out of range');
+    //     this.value = that._pageNumberInAll;
+    //     return;
+    //   }
+    //
+    //   // whether the _changePageByUser is necessary here?
+    //   that._checkPageNumber(+this.value);
+    // });
   }
 
   // create or update the Filter section
@@ -1559,7 +1612,8 @@ class DataTable {
     let btns = document.getElementsByClassName('filter-viz-download-buttons-wrapper')[0];
 
     if (btns.getElementsByClassName('filter-section-control-button').length === 0) {
-      let fBtn = btns.appendChild(document.createElement('div'));
+      // let fBtn = btns.appendChild(document.createElement('div'));
+      let fBtn = btns.insertBefore(document.createElement('div'), btns.firstElementChild);
       fBtn.classList.add('table-top-button');
       fBtn.classList.add('filter-section-control-button');
       fBtn.appendChild(document.createTextNode('Filters'));
@@ -1571,7 +1625,7 @@ class DataTable {
       fBtn.classList.add('filter-ready-signal');
       setTimeout(function() {
         fBtn.classList.remove('filter-ready-signal');
-      }, 6000);
+      }, 2000);
     }
 
     let df = document.createDocumentFragment();
@@ -1614,11 +1668,12 @@ class DataTable {
         if (i > this.maxNumOfFacets - 1) {
           let info = td.appendChild(document.createElement('span'));
           info.classList.add('filter-value-hidden');
-          info.innerText = ". . .";
-          this._notifyStatus({
-            type: 'alert',
-            message: `Too many facets, only a partial list is shown in the Filter section`
-          });
+          info.classList.add('filter-value-overflow-message');
+          info.innerText = "(showing the first 50 items only)";
+//          this._notifyStatus({
+//            type: 'alert',
+//            message: `Too many facets, only a partial list is shown in the Filter section`
+//          });
           break;
         }
       }

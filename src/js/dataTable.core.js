@@ -53,8 +53,8 @@ class DataTable {
     } else {
       this.opts = {
         caption: '',
-        dataIsComplete: true
-      }
+        dataIsComplete: true,
+      };
     }
 
     if (!this.opts.downloadFileName) {
@@ -63,22 +63,22 @@ class DataTable {
 
     if (!this.opts.dataIsComplete) {
       if (!this.opts.urlForDownloading) {
-        throw "Data is not complete. An url for downloading the data is required.";
+        throw 'Data is not complete. An url for downloading the data is required.';
       }
       if (!this.opts.fetchData) {
-        throw "Data is not complete. A fetchData function is required.";
+        throw 'Data is not complete. A fetchData function is required.';
       }
       if (!this.opts.fetchFacetingData) {
-        throw "Data is not complete. A fetchFacetingData function is required.";
+        throw 'Data is not complete. A fetchFacetingData function is required.';
       }
 
-      if (typeof this.opts.fetchData !== "function") {
-        throw new TypeError("fetchData should be a function")
+      if (typeof this.opts.fetchData !== 'function') {
+        throw new TypeError('fetchData should be a function');
       }
       this.fetchData = this.opts.fetchData;
 
-      if (typeof this.opts.fetchFacetingData !== "function") {
-        throw new TypeError("fetchFacetingData should be a function")
+      if (typeof this.opts.fetchFacetingData !== 'function') {
+        throw new TypeError('fetchFacetingData should be a function');
       }
       this.fetchFacetingData = this.opts.fetchFacetingData;
     }
@@ -137,7 +137,7 @@ class DataTable {
         hidden: false, // redundant, use shownColumns to manage shown/hidden
         width: '',
         align: '',
-        formatter: undefined // must a function
+        formatter: undefined, // must a function
       };
       this.shownColumns.push(name);
     }
@@ -150,7 +150,7 @@ class DataTable {
     // properties required to configure the whole
     this._charts = [];
     this._colorSchemes = {
-      default: 'default-color-scheme'
+      default: 'default-color-scheme',
     };
     this.configuration = {
       caption: typeof this.opts.caption === 'string' ? this.opts.caption : '',
@@ -176,9 +176,9 @@ class DataTable {
    * @private
    */
   _setTotalPages(n) {
-    if (typeof n !== "undefined") {
-      if (typeof n !== "number") {
-        throw new TypeError("a number argument expected");
+    if (typeof n !== 'undefined') {
+      if (typeof n !== 'number') {
+        throw new TypeError('a number argument expected');
       }
       this._totalRows = n;
       this._totalPages = Math.ceil(n / this._rowsPerPage);
@@ -274,30 +274,30 @@ class DataTable {
             opts = {filter: this.filterSetting};
           }
         }
-        this._notifyStatus({ type: 'progress'});
+        this._notifyStatus({type: 'progress'});
         let p = this.fetchData(t * this._binSize, opts);
         p.then(data => {
           // data is in the form of {totalCount: number, data: array}
           // the data should be ready to use without any pre-processing
           try {
             this._data = data.data;
-            console.log("Loading new data.");
+            console.log('Loading new data.');
             // console.log(this);
             this._setPageNumber(v);
             this._updateTableView();
             this._notifyStatus({
-              type: 'success'
+              type: 'success',
             });
-          } catch(err) {
+          } catch (err) {
             this._notifyStatus({
               type: 'error',
-              message: 'New data loaded but error happens in switching page'
+              message: 'New data loaded but error happens in switching page',
             });
           }
         }).catch(err => {
           this._notifyStatus({
             type: 'error',
-            message: 'Failed to load new data (pagination)'
+            message: 'Failed to load new data (pagination)',
           });
           console.error(err);
         });
@@ -305,7 +305,7 @@ class DataTable {
         this._setPageNumber(v);
         this._updateTableView();
         this._notifyStatus({
-          type: 'success'
+          type: 'success',
         });
       }
     }
@@ -522,7 +522,7 @@ class DataTable {
           arr.push({
             facetType: 'value',
             facetValue: k,
-            count: c
+            count: c,
           });
         }
         arr.sort((d1, d2) => d2.count - d1.count);
@@ -531,7 +531,8 @@ class DataTable {
 
       if (type === 'range') {
         // if type is range, the values of that column should be number
-        if (typeof this._data[0][colName] !== 'number' || typeof this._data[0][colName].valueForFiltering !== 'number') {
+        if (typeof this._data[0][colName] !== 'number' || typeof this._data[0][colName].valueForFiltering !==
+          'number') {
           throw 'This column should be of type of number or object that contains a valueForFiltering of number type.';
         }
         this._sort(colName, -1);
@@ -554,7 +555,7 @@ class DataTable {
         }
         let arr = [];
         for (let i = 0; i < 5; i++) {
-          arr.push([min + i * d, min + (i+1) * d, 0]);
+          arr.push([min + i * d, min + (i + 1) * d, 0]);
         }
 
         // To avoid errors when categorized the max value
@@ -567,7 +568,7 @@ class DataTable {
           if (item[colName] >= arr[idx][0] && item[colName] < arr[idx][1]) {
             arr[idx][2]++;
           } else {
-            arr[idx+1][2]++;
+            arr[idx + 1][2]++;
             idx++;
           }
         }
@@ -575,7 +576,7 @@ class DataTable {
           return {
             facetType: 'range',
             facetValue: `[${d[0]}, ${d[1]})`,
-            count: d[2]
+            count: d[2],
           };
         });
       }
@@ -641,18 +642,18 @@ class DataTable {
   // Predefined formatter
   static formatterPool(name) {
     const pool = {
-      highlight: function (s) {
+      highlight: function(s) {
         return `<mark>${s}</mark>`;
       },
-      addLink: function (obj) {
+      addLink: function(obj) {
         return `<a href="${obj.link}">${obj.text}</a>`;
       },
-      bold: function (word) {
+      bold: function(word) {
         return `<strong>${word}</strong>`;
       },
-      colorText: function (obj) {
+      colorText: function(obj) {
         return `<span style="color: ${obj.color}">${obj.text}</span>`;
-      }
+      },
     };
     return pool[name];
   }
@@ -672,6 +673,7 @@ class DataTable {
     }
     return res;
   }
+
 
   /**
    * This is an internal method to sort the data on a specified column and update the table
@@ -705,11 +707,11 @@ class DataTable {
               default:
                 this._data.sort((x, y) => x[col] < y[col] ? 1 : -1);
             }
-          } catch(err) {
+          } catch (err) {
             console.error(err);
             this._notifyStatus({
               type: 'error',
-              message: "Error happens while sorting column " + col + " locally"
+              message: 'Error happens while sorting column ' + col + ' locally',
             });
           }
         } else if (order === 1) {
@@ -723,11 +725,11 @@ class DataTable {
               default:
                 this._data.sort((x, y) => x[col] < y[col] ? -1 : 1);
             }
-          } catch(err) {
+          } catch (err) {
             console.error(err);
             this._notifyStatus({
               type: 'error',
-              message: "Error happens while sorting column " + col + " locally"
+              message: 'Error happens while sorting column ' + col + ' locally',
             });
           }
         }
@@ -738,7 +740,7 @@ class DataTable {
       this._setPageNumber(1);
       this._updateTableView();
       this._notifyStatus({
-        type: 'success'
+        type: 'success',
       });
 
     } else {
@@ -760,20 +762,20 @@ class DataTable {
           this._setPageNumber(1);
           this._updateTableView();
           this._notifyStatus({
-            type: 'success'
+            type: 'success',
           });
-        } catch(err) {
+        } catch (err) {
           // console.error(err.toString());
           this._notifyStatus({
             type: 'error',
-            message: `Error happens while processing the data from server for sorting on ${col}`
+            message: `Error happens while processing the data from server for sorting on ${col}`,
           });
         }
       }).catch(err => {
         // console.error(err);
         this._notifyStatus({
           type: 'error',
-          message: 'Error happens while loading data from server for sorting on ' + col
+          message: 'Error happens while loading data from server for sorting on ' + col,
         });
       });
     }
@@ -793,7 +795,7 @@ class DataTable {
         let t = arr.map(d => d.facetValue);
         cond[colName] = {
           facetType: this._filters[colName][0].facetType,
-          facetValues: t
+          facetValues: t,
         };
         this.filterSetting[colName] = t;
       }
@@ -830,7 +832,7 @@ class DataTable {
               console.error(err);
               this._notifyStatus({
                 type: 'error',
-                message: "Error happens while filtering the data locally"
+                message: 'Error happens while filtering the data locally',
               });
             }
             break;
@@ -853,7 +855,7 @@ class DataTable {
             // console.log(cond[col][0].facetType);
             this._notifyStatus({
               type: 'error',
-              message: cond[col][0].facetType + ' is not a valid facet type'
+              message: cond[col][0].facetType + ' is not a valid facet type',
             });
         }
       }
@@ -873,13 +875,13 @@ class DataTable {
       }
 
       this._notifyStatus({
-        type: 'success'
+        type: 'success',
       });
 
       if (this._data.length === 0) {
         this._notifyStatus({
           type: 'alert',
-          message: 'No data match to the given filter'
+          message: 'No data match to the given filter',
         });
       }
     } else {
@@ -890,7 +892,7 @@ class DataTable {
       // how to deal with the sort settings?
       this._notifyStatus({
         type: 'progress',
-        message: 'filtering'
+        message: 'filtering',
       });
       let opts = {filter: this.filterSetting};
       if (this.sortSetting) {
@@ -914,14 +916,14 @@ class DataTable {
           if (this._data.length === 0) {
             this._notifyStatus({
               type: 'alert',
-              message: 'No data match to the given filter'
+              message: 'No data match to the given filter',
             });
           }
         } catch (err) {
           // console.error(err.toString());
           this._notifyStatus({
             type: 'error',
-            message: `Error happens while processing the data from server for filtering`
+            message: `Error happens while processing the data from server for filtering`,
           });
         }
       }).catch(err => {
@@ -929,7 +931,7 @@ class DataTable {
         // deal with errors
         this._notifyStatus({
           type: 'error',
-          message: 'Failed to load new data (filtering)'
+          message: 'Failed to load new data (filtering)',
         });
       });
     }
@@ -983,7 +985,7 @@ class DataTable {
     console.log(`Current offset: ${this._offset}`);
     let start = (this._offset - 1) * this._rowsPerPage;
     for (let i = 0; i < this._rowsPerPage && start + i < this._data.length; i++) {
-      res.push(this._data[start+i]);
+      res.push(this._data[start + i]);
     }
     this._dataToShow = res;
   }
@@ -1098,7 +1100,7 @@ class DataTable {
       sb.id = this._targetId + '-search-box';
       sb.classList.add('search-box');
       sb.setAttribute('aria-label', 'search box');
-      sb.addEventListener('focus', function () {
+      sb.addEventListener('focus', function() {
         searchBar.classList.remove('search-hints-active');
       });
 
@@ -1113,7 +1115,7 @@ class DataTable {
       sp.classList.add('question-mark');
       sp.setAttribute('role', 'button');
       sp.setAttribute('aria-label', 'hints for search syntax');
-      sp.addEventListener('click', function () {
+      sp.addEventListener('click', function() {
         searchBar.classList.add('search-hints-active');
       });
 
@@ -1125,12 +1127,10 @@ class DataTable {
       hint.setAttribute('role', 'row');
       let example = hintWrapper.appendChild(document.createElement('p'));
       example.appendChild(document.createTextNode('e.g. '));
-      example.appendChild(document.createElement('span'))
-      .appendChild(document.createTextNode('"length": > 120'));
-      example.appendChild(document.createElement('span'))
-      .appendChild(document.createTextNode(';'));
-      example.appendChild(document.createElement('span'))
-      .appendChild(document.createTextNode('"height": 80 AND "width": 100'));
+      example.appendChild(document.createElement('span')).appendChild(document.createTextNode('"length": > 120'));
+      example.appendChild(document.createElement('span')).appendChild(document.createTextNode(';'));
+      example.appendChild(document.createElement('span')).
+        appendChild(document.createTextNode('"height": 80 AND "width": 100'));
       example.setAttribute('role', 'row');
     }
 
@@ -1144,7 +1144,7 @@ class DataTable {
       fBtn.appendChild(document.createTextNode('Filters'));
       fBtn.setAttribute('role', 'button');
       fBtn.setAttribute('aria-label', 'filter button');
-      fBtn.addEventListener('click', function () {
+      fBtn.addEventListener('click', function() {
         document.getElementById(that._targetId).classList.toggle('filter-section-active');
       });
     }
@@ -1154,7 +1154,7 @@ class DataTable {
       vBtn.classList.add('table-top-button');
       vBtn.classList.add('viz-section-control-button');
       vBtn.appendChild(document.createTextNode('Visualize'));
-      vBtn.addEventListener('click', function () {
+      vBtn.addEventListener('click', function() {
         document.getElementById(that._targetId).classList.toggle('viz-section-active');
       });
     }
@@ -1235,7 +1235,7 @@ class DataTable {
             a.setAttribute('href', `data:text/${type.toLowerCase()};charset=utf-8,${encodeURIComponent(str)}`);
           } else {
             a.addEventListener('click', () => {
-              alert("Sorry, the data is not ready for downloading.");
+              alert('Sorry, the data is not ready for downloading.');
             });
           }
 
@@ -1278,7 +1278,7 @@ class DataTable {
     for (let i = 0; i < 3; i++) {
       let sp = dotWrapper.appendChild(document.createElement('span'));
       sp.classList.add('progress-dot');
-      sp.classList.add(`dot-num-${i+1}`);
+      sp.classList.add(`dot-num-${i + 1}`);
     }
     let errorBar = notifySection.appendChild(document.createElement('div'));
     errorBar.classList.add('error-message');
@@ -1293,13 +1293,12 @@ class DataTable {
     table.classList.add('table-section');
 
     // add caption to the table
-    table.appendChild(document.createElement('caption'))
-    .appendChild(document.createTextNode(this.configuration.caption));
+    table.appendChild(document.createElement('caption')).
+      appendChild(document.createTextNode(this.configuration.caption));
 
     // create table header
     // Since the header is supposed not to update, create it once
-    let head = table.appendChild(document.createElement('thead'))
-    .appendChild(document.createElement('tr'));
+    let head = table.appendChild(document.createElement('thead')).appendChild(document.createElement('tr'));
     head.classList.add('table-header-row');
 
     if (this._firstColumnAsRowNumber) {
@@ -1378,14 +1377,12 @@ class DataTable {
     // create number of rows per page selector
     let a = pager.appendChild(document.createElement('div'));
     a.classList.add('table-rows-per-page-control-container');
-    a.appendChild(document.createElement('span'))
-    .appendChild(document.createTextNode('Rows per page:'));
+    a.appendChild(document.createElement('span')).appendChild(document.createTextNode('Rows per page:'));
     let num = a.appendChild(document.createElement('select'));
     num.classList.add('table-row-number-selector');
     let arr = [5, 10, 20, 50, 100, 200];
     for (let i of arr) {
-      num.appendChild(document.createElement('option'))
-      .appendChild(document.createTextNode(i+''));
+      num.appendChild(document.createElement('option')).appendChild(document.createTextNode(i + ''));
     }
     // num.value = this._rowsPerPage;
     num.selectedIndex = arr.indexOf(this._rowsPerPage);
@@ -1404,7 +1401,7 @@ class DataTable {
 
       // Below is redundant???
       that._changePageByUser = false;
-      setTimeout(function () {
+      setTimeout(function() {
         that._changePageByUser = true;
       }, 1000);
     });
@@ -1429,8 +1426,7 @@ class DataTable {
     // middle content
     let m = c.appendChild(document.createElement('div'));
     m.classList.add('table-page-number-current-container');
-    m.appendChild(document.createElement('span'))
-    .appendChild(document.createTextNode('Page'));
+    m.appendChild(document.createElement('span')).appendChild(document.createTextNode('Page'));
     let inp1 = m.appendChild(document.createElement('input'));
     inp1.type = 'text';
     inp1.id = this._targetId + '-table-page-number-current';
@@ -1450,8 +1446,7 @@ class DataTable {
       that._checkPageNumber(+this.value);
     });
 
-    m.appendChild(document.createElement('span'))
-    .appendChild(document.createTextNode('of'));
+    m.appendChild(document.createElement('span')).appendChild(document.createTextNode('of'));
     let inp2 = m.appendChild(document.createElement('input'));
     inp2.type = 'text';
     inp2.id = this._targetId + '-table-page-number-total';
@@ -1596,7 +1591,7 @@ class DataTable {
     let that = this;
     let filterSection = document.getElementById(this._targetId + '-filter-section');
     if (!filterSection) {
-      throw new Error('Creating filter section failed.')
+      throw new Error('Creating filter section failed.');
     }
 
     while (filterSection.lastChild) {
@@ -1619,7 +1614,7 @@ class DataTable {
       fBtn.appendChild(document.createTextNode('Filters'));
       fBtn.setAttribute('role', 'button');
       fBtn.setAttribute('aria-label', 'filter button');
-      fBtn.addEventListener('click', function () {
+      fBtn.addEventListener('click', function() {
         document.getElementById(that._targetId).classList.toggle('filter-section-active');
       });
       fBtn.classList.add('filter-ready-signal');
@@ -1638,7 +1633,8 @@ class DataTable {
       row.filterName = filterName;
       let td = row.appendChild(document.createElement('td'));
       td.classList.add('filter-name');
-      td.appendChild(document.createTextNode(this._colModel[filterName].label ? this._colModel[filterName].label : filterName));
+      td.appendChild(
+        document.createTextNode(this._colModel[filterName].label ? this._colModel[filterName].label : filterName));
       // reuse td variable below
       td = row.appendChild(document.createElement('td'));
       td.classList.add('filter-values');
@@ -1669,7 +1665,7 @@ class DataTable {
           let info = td.appendChild(document.createElement('span'));
           info.classList.add('filter-value-hidden');
           info.classList.add('filter-value-overflow-message');
-          info.innerText = "(showing the first 50 items only)";
+          info.innerText = '(showing the first 50 items only)';
 //          this._notifyStatus({
 //            type: 'alert',
 //            message: `Too many facets, only a partial list is shown in the Filter section`
@@ -1729,7 +1725,7 @@ if (typeof module !== 'undefined' && !module.parent) {
     {a: 'a', b: 'f', c: 4},
     {a: 'a', b: 'x', c: 17},
     {a: 'a', b: 'r', c: 19},
-    {a: 'a', b: 'r', c: 27}
+    {a: 'a', b: 'r', c: 27},
   ];
 
   let start = Date.now();

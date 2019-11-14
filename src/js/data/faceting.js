@@ -26,3 +26,5 @@ export const getValueFacets = (arr, prop) => {
     });
     return res;
 };
+
+export default getValueFacets;

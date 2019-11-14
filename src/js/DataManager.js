@@ -100,7 +100,7 @@ if (typeof module === "object" && !module.parent) {
     opts = {sort: {foo: -1}};
     console.log(opts, dm.serve(opts));
 } else {
-
+  // place holder
 }
 
 export default DataManager;

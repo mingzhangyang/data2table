@@ -4,6 +4,14 @@ import fetchData from './fetchData.js';
 import getValueFacets from './faceting.js';
 import {assertQueryObject} from '../utils/cmp.js';
 
+const maxRowsPerPage = 200;
+const series = [
+  5 * maxRowsPerPage,
+  4 * maxRowsPerPage,
+  3 * maxRowsPerPage,
+  2 * maxRowsPerPage,
+  maxRowsPerPage
+];
 
 class DataManager {
   /**
@@ -21,16 +29,33 @@ class DataManager {
       throw new TypeError('an array of objects expected');
     }
 
-    this.data = arr;
-    this.batchSize = arr.length;
-    this.cache = {
-      data: this.data.slice(),
-      queryObject: {},
-      range: [0, this.batchSize],
-      totalCount: arr.length
-    };
+    if (opts["dataIsComplete"]) {
+      this.data = arr;
+      this.batchSize = arr.length;
+      this.cache = {
+        data: this.data.slice(),
+        queryObject: {},
+        range: [0, this.batchSize],
+        totalCount: arr.length
+      };
+      this.fetchData = fetchData.bind(this);
 
-    if (!opts["dataIsComplete"]) {
+    } else {
+      if (arr.length < maxRowsPerPage) {
+        throw `dataIsComplete is set false, but the provided dataset contains less than ${maxRowsPerPage} rows`;
+      }
+      for (let n of series) {
+        if (arr.length >= n) {
+          this.data = arr.slice(0, n);
+          this.batchSize = n;
+          this.cache = {
+            data: this.data.slice(),
+            queryObject: {},
+            range: [0, this.batchSize]
+          };
+          break;
+        }
+      }
       if (!opts.fetchData) {
         throw 'data is not complete, a fetchData function is required';
       }
@@ -42,8 +67,6 @@ class DataManager {
       }
       this.fetchData = opts.fetchData;
       this.cache.totalCount = opts.totalCount;
-    } else {
-      this.fetchData = fetchData.bind(this);
     }
   }
 

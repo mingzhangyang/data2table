@@ -1,27 +1,30 @@
 'use strict';
 
 class StateManager {
-    constructor(setting) {
-        this.state = Object.assign({}, setting);
+    constructor() {
+        this.rowsPerPage = 10;
+        this.currentPageNumber = 1;
+        this.sort = {};
+        this.filter = {};
     }
     setRowsPerPage(n) {
-        this.state.rowsPerPage = n;
+        this.rowsPerPage = n;
     }
     setPageNumber(n) {
-        this.state.pageNumber = n;
+        this.currentPageNumber = n;
     }
     updateFilters(obj) {
-        this.state.filter = obj;
+        this.filter = obj;
     }
     updateSorting(obj) {
-        this.state.sort = obj;
+        this.sort = obj;
     }
-    toOptions() {
+    queryObject() {
         return {
-            start: this.state.pageNumber - 1,
-            limit: this.state.rowsPerPage,
-            filter: this.state.filter,
-            sort: this.state.sort
+            start: (this.currentPageNumber - 1) * this.rowsPerPage,
+            limit: this.rowsPerPage,
+            filter: this.filter,
+            sort: this.sort
         };
     }
 }

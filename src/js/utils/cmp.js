@@ -1,4 +1,4 @@
-export default function cmp(obj1, obj2) {
+function cmp(obj1, obj2) {
     if (Object.prototype.toString.call(obj1) !== Object.prototype.toString.call(obj2)) {
         return false;
     }
@@ -28,4 +28,13 @@ export default function cmp(obj1, obj2) {
         }
     }
     return true;
+};
+
+function assertQueryObject(obj1, obj2) {
+    return cmp(obj1.sort, obj2.sort) && cmp(obj1.filter, obj2.filter)
+}
+
+export {
+    cmp,
+    assertQueryObject
 };

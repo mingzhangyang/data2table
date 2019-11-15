@@ -1,4 +1,4 @@
-import cmp from "../src/js/utils/cmp.js"
+import {cmp} from "../src/js/utils/cmp.js"
 
 function test(expected, returned) {
     let div = document.createElement('div');

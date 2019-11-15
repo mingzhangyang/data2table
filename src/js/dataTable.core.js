@@ -194,27 +194,6 @@ class DataTable {
     }
   }
 
-  /**
-   * setRowsPerPage is used to set and update _rowsPerPage and _totalPages
-   * @param n
-   */
-  setRowsPerPage(n) {
-    if (typeof n !== 'number' || n < 0) {
-      throw new Error('a natural number expected');
-    }
-    this._rowsPerPage = n;
-    this._totalPages = Math.ceil(this._totalRows / this._rowsPerPage);
-  }
-
-  // reset source data after sorting or filtering
-  resetData() {
-    if (!this._partition) {
-      this._data = this._originalData.slice();
-      // console.log(this._data.length);
-    } else {
-      // fetch data from the server?
-    }
-  }
 
   /**
    * internal method to set page number (starts from 1)
@@ -311,33 +290,7 @@ class DataTable {
     }
   }
 
-  /**
-   * fetchData should be overwritten by the user to load new data
-   * @param n: <Number>, this will be used as "skip" parameter in the query string
-   * n is the number of rows/docs to skip
-   * @param opts: <Object>, options including filtering fields, sorting fields and so on
-   * should be provided as an object
-   * This function should return a promise, which resolved as an object with the pattern
-   * {totalCount: number, data: array}
-   */
-  fetchData(n, opts) {
-    // should return a promise
-  }
 
-  /**
-   * fetchFacetingData should be over-written by the user to get faceting info from server
-   * @param arr: <Array>, a list of field names for faceting
-   */
-  fetchFacetingData(arr) {
-    // fetch faceting data from server
-  }
-
-  // set table caption
-  setTableCaption(str) {
-    if (typeof str === 'string' && str.length > 0) {
-      this._tableCaption = str;
-    }
-  }
 
 
 
@@ -465,149 +418,10 @@ class DataTable {
    *    ...
    * }
    */
-  addCharts(chart) {
-    this.configuration.vizButton = true;
-    this._charts.push(chart);
-  }
-
-  /**
-   * ChangeColorScheme change the color scheme of the whole object
-   * @param scheme: string
-   */
-  changeColorScheme(scheme) {
-    if (!this._colorSchemes[scheme]) {
-      throw new Error(scheme + ' not set.');
-    }
-    this.configuration.colorScheme = scheme;
-  }
 
 
-  /**
-   * serialize the filter/sort setting object to query string parameters
-   * @param obj, <Object>, format: {key: value} or {key: [v1, v2, ...]}
-   * @param delimiter, <String>, default: _._
-   * @returns {*} <String>, 'key_._value' or ['key_._v1', 'key_._v2', ...]
-   */
-  static serialize(obj, delimiter) {
-    // return a serialized string or an array of serialized string
-    if (typeof delimiter === 'undefined') {
-      delimiter = '_._';
-    }
-    let key = Object.keys(obj)[0];
-    if (Array.isArray(obj[key])) {
-      return obj[key].map(v => `${key}${delimiter}${v}`);
-    } else {
-      return `${key}${delimiter}${obj[key]}`;
-    }
-  }
-
-  /**
-   * This is an internal method to sort the data on a specified column and update the table
-   * @param col: <String>, must be a valid column name
-   * @param order: <Number>, 1 for ascending; -1 for descending. If order is not provided, -1 will be taken.
-   * @private
-   */
-  _sort(col, order) {
-    if (!order) {
-      order = -1;
-    }
-
-    this.sortSetting = {};
-    this.sortSetting[col] = order;
-
-    if (!this._partition) {
-      // Below is very important. Without the checking, if the _data is empty,
-      // the code below to sort will throw error -- this._data[0] is undefined.
-      // if _data contains 0 or just 1 object, we can return immediately,
-      // no need to do anything.
-      if (this._data.length < 2) {
-        // do nothing
-      } else {
-        if (order === -1) {
-          try {
-            switch (typeof this._data[0][col]) {
-              case 'object':
-                this._data.sort((x, y) => {
-                  return x[col].valueForSorting < y[col].valueForSorting ? 1 : -1;
-                });
-                break;
-              default:
-                this._data.sort((x, y) => x[col] < y[col] ? 1 : -1);
-            }
-          } catch(err) {
-            console.error(err);
-            this._notifyStatus({
-              type: 'error',
-              message: "Error happens while sorting column " + col + " locally"
-            });
-          }
-        } else if (order === 1) {
-          try {
-            switch (typeof this._data[0][col]) {
-              case 'object':
-                this._data.sort((x, y) => {
-                  return x[col].valueForSorting < y[col].valueForSorting ? -1 : 1;
-                });
-                break;
-              default:
-                this._data.sort((x, y) => x[col] < y[col] ? -1 : 1);
-            }
-          } catch(err) {
-            console.error(err);
-            this._notifyStatus({
-              type: 'error',
-              message: "Error happens while sorting column " + col + " locally"
-            });
-          }
-        }
-      }
 
 
-      // sort doesn't change the underlying data
-      // Therefore, it is not required to consider the filterSetting here
-      this._setPageNumber(1);
-      this._updateTableView();
-      this._notifyStatus({
-        type: 'success'
-      });
-
-    } else {
-      // sort will update the underlying data, therefore it is necessary to re-fetch
-      // data from the server. It is not correct to use _checkPageNumber to replace the
-      // codes below, which will not fetch new data if the _partitionIndex doesn't change
-      // get data from server side
-      this._notifyStatus({type: 'progress'});
-      let opts = {sort: this.sortSetting};
-      if (this.filterSetting) {
-        opts.filter = this.filterSetting;
-      }
-      this.fetchData(0, opts).then(newData => {
-        // newData is in the form of {totalCount: number, data: array}
-        // Using arrow functions, therefore "this" points to real this
-        try {
-          // the newData should be ready to use without any pre-processing
-          this._data = newData.data;
-          this._setPageNumber(1);
-          this._updateTableView();
-          this._notifyStatus({
-            type: 'success'
-          });
-        } catch(err) {
-          // console.error(err.toString());
-          this._notifyStatus({
-            type: 'error',
-            message: `Error happens while processing the data from server for sorting on ${col}`
-          });
-        }
-      }).catch(err => {
-        // console.error(err);
-        this._notifyStatus({
-          type: 'error',
-          message: 'Error happens while loading data from server for sorting on ' + col
-        });
-      });
-    }
-  }
 
   /**
    * _filterData change the underlying data and update the table view accordingly
@@ -768,42 +582,7 @@ class DataTable {
     }
   }
 
-  /**
-   * Show status on the top of the table
-   * @param o: <Object> {type: 'progress|success|error'(required), message: <String> (optional)>}
-   */
-  _notifyStatus(o) {
-    let ns = document.getElementById(this._targetId + '-notification-section');
-    let msgs = ns.getElementsByClassName('message-bar');
-    switch (o.type) {
-      case 'progress':
-        ns.classList.add('progress-active');
-        ns.classList.remove('error-active');
-        ns.classList.remove('alert-active');
-        break;
-      case 'error':
-        ns.classList.add('error-active');
-        ns.classList.remove('alert-active');
-        ns.classList.remove('progress-active');
-        msgs[0].innerText = o.message;
-        break;
-      case 'alert':
-        ns.classList.add('alert-active');
-        ns.classList.remove('error-active');
-        ns.classList.remove('progress-active');
-        msgs[1].innerText = o.message;
-        break;
-      case 'success':
-        ns.classList.remove('progress-active');
-        ns.classList.remove('error-active');
-        ns.classList.remove('alert-active');
-        break;
-      default:
-        ns.classList.remove('progress-active');
-        ns.classList.remove('error-active');
-        ns.classList.remove('alert-active');
-    }
-  }
+
 
 
   // internal method, determine the range of data to show

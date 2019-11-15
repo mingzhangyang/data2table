@@ -5,6 +5,7 @@
 import createColModel from './utils/colModel.js';
 import DataManager from './data/dataManager.js';
 import formatterPool from './utils/formatterPool.js';
+import notifyStatus from './methods/notify.js';
  
 class DataTable {
   /******************************************************************************
@@ -46,6 +47,19 @@ class DataTable {
 
     this._uid = 'my-1535567872393-product';
   }
+
+  /**
+   * setRowsPerPage is used to set and update _rowsPerPage and _totalPages
+   * @param n
+   */
+  setRowsPerPage(n) {
+    if (typeof n !== 'number' || n < 0) {
+      throw new Error('a natural number expected');
+    }
+    this._stateManager.rowsPerPage = n;
+    this._totalPages = Math.ceil(this._dataManager.cache.totalCount / this._stateManager.rowsPerPage);
+  }
+
 
   /**
    * formatter to create customized elements with the data,
@@ -171,5 +185,9 @@ class DataTable {
     let data = this._dataManager.serve(this._stateManager.queryObject());
     this._dataToShow = data.data;
     this._totalPages = Math.ceil(data.totalCount / this._stateManager.rowsPerPage);
+  }
+
+  _notifyStatus(status) {
+    notifyStatus(this._targetId, status);
   }
 }

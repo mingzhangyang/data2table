@@ -2,7 +2,7 @@
  * Created by yangm11 on 11/14/2019.
  */
 
-import createColModel from './support/colModel.js';
+import createColModel from './utils/colModel.js';
 import DataManager from './data/dataManager.js';
 import updateData from './methods/updateData.js';
  

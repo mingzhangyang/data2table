@@ -27,7 +27,12 @@ class DataManager {
       }
     }
 
-    this.fetchData = fetchData;
+    this.fetchData = fetchData.bind(this);
+    this.cache = {
+      data: this.data,
+      queryObject: {},
+      range: [0, this.data.length]
+    };
   }
 
   serve(queryObj) {

@@ -1,0 +1,89 @@
+div.test-block {
+    width: 80%;
+    min-height: 60px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    margin: 80px auto;
+    border-radius: 8px;
+}
+
+div.test-block.test-success {
+    border: 2px solid deepskyblue;
+}
+
+div.test-block.test-fail {
+    border: 2px solid #ff6666;
+}
+
+div.test-block::before {
+    display: block;
+    width: 300px;
+    height: 42px;
+    text-align: center;
+    line-height: 42px;
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, -100%);
+    border-radius: 8px 8px 0 0;
+    color: white;
+}
+
+div.test-block.test-success::before {
+    content: "Pass";
+    background-color: deepskyblue;
+}
+
+div.test-block.test-fail::before {
+    content: "Failed";
+    background-color: #ff6666;
+}
+
+div.result-panel {
+    width: 50%;
+    position: relative;
+}
+
+div.result-panel::before {
+    display: block;
+    position: absolute;
+    width: 100px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: -2px;
+    border-radius: 0 0 8px 8px;
+    background-color: white;
+}
+
+div.test-success div.result-panel::before {
+    border: 2px solid deepskyblue;
+}
+
+div.test-fail div.result-panel::before {
+    border: 2px solid #ff6666;
+}
+
+div.left-panel {
+    background-color: #f2f2f2;
+    border-radius: 8px 0 0 8px;
+}
+
+div.result-panel.left-panel::before {
+    content: "expected";
+}
+
+div.right-panel {
+    background-color: #fff1d2;
+    border-radius: 0 8px 8px 0;
+}
+
+div.result-panel.right-panel:before {
+    content: "returned";
+}
+
+pre {
+    margin: 50px 20px 20px 20px;
+}

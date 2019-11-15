@@ -1,11 +1,9 @@
-'use strict';
-
-export const getValueFacets = (arr, prop) => {
+function getValueFacetsForOneProp(arr, prop) {
     let m = new Map();
     for (let obj of arr) {
         let v = obj[prop];
         if (typeof v === "object") {
-            v = v.valueForFaceting;
+            v = v["valueForFaceting"];
         }
         let c = m.get(v);
         if (c === undefined) {
@@ -17,13 +15,30 @@ export const getValueFacets = (arr, prop) => {
     let res = [];
     for (let [k, v] of m) {
         res.push({
+            facetType: "value",
             facetValue: k,
             count: v
         });
     }
     res.sort((a, b) => {
-        return a.count > b.count ? -1 : 1;
+        if (a.count > b.count) {
+            return -1;
+        }
+        if (a.count < b.count) {
+            return 1;
+        }
+        return a.facetValue > b.facetValue ? -1 : 1;
     });
+    return res;
+}
+
+export const getValueFacets = function(data, facets) {
+    let res = [];
+    for (let facet of facets) {
+        let obj = {name: facet};
+        obj.facets = getValueFacetsForOneProp(data, facet);
+        res.push(obj);
+    }
     return res;
 };
 

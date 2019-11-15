@@ -40,7 +40,7 @@ class DataManager {
     try {
       data = this.fetchData(queryObj);
     } catch(err) {
-      return err;
+      throw err;
     }
     return data;
   }

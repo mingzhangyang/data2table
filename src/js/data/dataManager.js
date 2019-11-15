@@ -35,8 +35,14 @@ class DataManager {
     };
   }
 
-  serve(queryObj) {
-      return this.fetchData(queryObj);
+  async serve(queryObj) {
+    let data = null;
+    try {
+      data = this.fetchData(queryObj);
+    } catch(err) {
+      return err;
+    }
+    return data;
   }
 }
 

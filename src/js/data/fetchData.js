@@ -27,7 +27,7 @@ const fetchData = function(queryObject) {
     };
   }
 
-  let tmp = this.data;
+  let tmp = this.data.slice();
   if (filter) {
     let props = Object.keys(filter);
     for (let prop of props) {

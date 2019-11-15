@@ -29,7 +29,7 @@ class DataManager {
 
     this.fetchData = fetchData.bind(this);
     this.cache = {
-      data: this.data,
+      data: this.data.slice(),
       queryObject: {},
       range: [0, this.data.length]
     };

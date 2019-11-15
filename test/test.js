@@ -11,12 +11,22 @@ function test(expected, returned) {
     pre.innerText = JSON.stringify(expected, null, "    ");
     pre = right.appendChild(document.createElement("pre"));
     pre.innerText = JSON.stringify(returned, null, "    ");
+    let res = false;
     if (cmp(expected, returned)) {
         div.classList.add("test-success");
+        res = true;
     } else {
         div.classList.add("test-fail");
     }
     document.getElementById("test-results").append(div);
+    return res;
 }
 
-export default test;
+async function asyncTest(expected, aPromise) {
+    return test(expected, await aPromise);
+}
+
+export {
+    test,
+    asyncTest,
+};

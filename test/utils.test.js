@@ -1,5 +1,5 @@
 import {propStat, flatten} from "../src/js/utils/utils.js";
-import test from "./test.js";
+import {test} from "./test.js";
 
 let objA = {x: 3, y: 4, z: 5};
 let objB = {

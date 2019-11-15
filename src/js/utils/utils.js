@@ -70,19 +70,6 @@ export function jsonArrayToJsonObj(arr) {
   return res;
 }
 
-export function getData(url, targetId, prop) {
-  fetch(url).then(res => {
-    if (res.ok) {
-      return res.text().then(text => {
-        document.getElementById(targetId)[prop] = text;
-      });
-    }
-    alert(`Failed with status code: ${res.status}`);
-  }).catch(err => {
-    alert(`Fetching data failed:, ${err.message}`);
-  });
-}
-
 /**
  * Flatten a nested object to get a flatten object
  * @param obj: object
@@ -165,7 +152,7 @@ export function analyzePaths(arr) {
 
 /**
  * statistics of the properties of an nested object.
- * This is required to create table headers with multiple rows
+ * This is required to create table headers spanning multiple columns
  * @param obj: object
  */
 export function propStat(obj) {
@@ -220,42 +207,4 @@ export function propStat(obj) {
   }
   count(root);
   return root;
-}
-
-if (typeof module !== 'undefined' && module.parent) {
-  // Node environment, required as module
-} else if (typeof window === 'object') {
-  // Browser environment
-} else {
-  // Node environment, run directly
-  // test code go here
-
-  // let obj = {
-  //   x: {
-  //     a: {
-  //       m: 3,
-  //       n: 4
-  //     },
-  //     b: {
-  //       p: 5,
-  //       q: 6
-  //     },
-  //     c: [7, 8, 9]
-  //   },
-  //   y: {
-  //     s: 'hello',
-  //     w: 'world'
-  //   },
-  //   z: 'test'
-  // };
-
-  let obj = {x: 3, y: 4, z: 5};
-
-  // console.log(flatten(obj));
-  // console.dir(propStat(obj), {colors: true, depth: null});
-
-  console.dir(analyzePaths(Object.keys(flatten(obj))), {
-    colors: true,
-    depth: null
-  });
 }

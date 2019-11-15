@@ -16,7 +16,7 @@ function test(expected, returned) {
     } else {
         div.classList.add("test-fail");
     }
-    document.body.append(div);
+    document.getElementById("test-results").append(div);
 }
 
 export default test;

@@ -10,7 +10,7 @@ const series = [
   4 * maxRowsPerPage,
   3 * maxRowsPerPage,
   2 * maxRowsPerPage,
-  maxRowsPerPage
+  maxRowsPerPage,
 ];
 
 class DataManager {
@@ -29,14 +29,14 @@ class DataManager {
       throw new TypeError('an array of objects expected');
     }
 
-    if (opts["dataIsComplete"]) {
+    if (opts['dataIsComplete']) {
       this.data = arr;
       this.batchSize = arr.length;
       this.cache = {
         data: this.data.slice(),
         queryObject: {},
         range: [0, this.batchSize],
-        totalCount: arr.length
+        totalCount: arr.length,
       };
       this.fetchData = fetchData.bind(this);
 
@@ -51,7 +51,7 @@ class DataManager {
           this.cache = {
             data: this.data.slice(),
             queryObject: {},
-            range: [0, this.batchSize]
+            range: [0, this.batchSize],
           };
           break;
         }
@@ -63,7 +63,7 @@ class DataManager {
         throw new TypeError('fetchData should be a function');
       }
       if (!opts.totalCount) {
-        throw 'data is not complete, a totalCount property indicating total rows is missing'
+        throw 'data is not complete, a totalCount property indicating total rows is missing';
       }
       this.fetchData = opts.fetchData;
       this.cache.totalCount = opts.totalCount;
@@ -99,7 +99,7 @@ class DataManager {
       && (start >= this.cache.range[0] && start < this.cache.range[1])) {
       return {
         data: this.cache.data.slice(start, (start + limit)),
-        totalCount: this.cache.totalCount
+        totalCount: this.cache.totalCount,
       };
     }
 
@@ -109,12 +109,12 @@ class DataManager {
       start: newStart,
       limit: this.batchSize,
       filter: filter,
-      sort: sort
+      sort: sort,
     };
     let data = null;
     try {
       data = await this.fetchData(qo);
-    } catch(err) {
+    } catch (err) {
       throw err;
     }
     this.cache.data = data.data;
@@ -123,7 +123,7 @@ class DataManager {
     this.cache.totalCount = data.totalCount;
     return {
       data: this.cache.data.slice(start, (start + limit)),
-      totalCount: data.totalCount
+      totalCount: data.totalCount,
     };
   }
 }

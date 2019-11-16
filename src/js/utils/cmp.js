@@ -5,6 +5,9 @@ function cmp(obj1, obj2) {
     if (typeof obj1 !== "object") {
         return obj1 === obj2;
     }
+    if (obj1 === null && obj2 === null) {
+        return true;
+    }
     let keys1 = Object.keys(obj1);
     let keys2 = Object.keys(obj2);
     if (keys1.length !== keys2.length) {

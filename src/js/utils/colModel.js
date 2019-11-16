@@ -7,7 +7,7 @@ const createColModel = (arr) => {
   // Create column model object
   let res = {};
   res.colModel = {};
-  res.shownColumns = [];
+  res.allColumns = [];
   let s = new Set();
   for (let d of arr) {
     let keys = Object.keys(d);
@@ -26,8 +26,10 @@ const createColModel = (arr) => {
       align: '',
       formatter: undefined, // must a function
     };
-    res.shownColumns.push(name);
+    res.allColumns.push(name);
   }
+  res.shownColumns = res.allColumns;
+  res.hiddenColumns = [];
   return res;
 };
 

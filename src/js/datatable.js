@@ -28,7 +28,7 @@ class DataTable {
 
     this._dataToShow = this._dataManager.cache.data.slice(0, this._stateManager.rowsPerPage);
 
-    this.configuration = {
+    this._configuration = {
       caption: '',
       maxNumOfFacets: 50,
       layout: {
@@ -113,19 +113,19 @@ class DataTable {
     }
     switch (prop.toUpperCase()) {
       case 'DOWNLOAD':
-        this.configuration.layout.download = value;
+        this._configuration.layout.download = value;
         break;
       case 'FILTER':
-        this.configuration.layout.filter = value;
+        this._configuration.layout.filter = value;
         break;
       case 'CHART':
-        this.configuration.layout.chart = value;
+        this._configuration.layout.chart = value;
         break;
       case 'SEARCH':
-        this.configuration.layout.search = value;
+        this._configuration.layout.search = value;
         break;
       case 'COLUMN_SELECTOR':
-        this.configuration.layout.selectColumns = value;
+        this._configuration.layout.selectColumns = value;
         break;
       default:
         console.log('Property not recognized!');
@@ -160,14 +160,14 @@ class DataTable {
     if (!this._columnSetting.shownColumns.includes(colName)) {
       throw `the column name ${colName} is invalid`;
     }
-    this._facetFields.push(colName);
-    this.configuration.layout.filter = true;
+    this._stateManager.filterStatus[colName] = [];
+    this._configuration.layout.filter = true;
   }
 
   // set table caption
   setCaption(str) {
     if (typeof str === 'string' && str.length > 0) {
-      this.configuration.caption = str;
+      this._configuration.caption = str;
     }
   }
 
@@ -182,19 +182,19 @@ class DataTable {
     }
     switch (type.toLowerCase()) {
       case "number":
-        this.configuration.firstColumnType = "number";
+        this._configuration.firstColumnType = "number";
         break;
       case "checkbox":
-        this.configuration.firstColumnType = "checkbox";
+        this._configuration.firstColumnType = "checkbox";
         break;
       case "image":
-        this.configuration.firstColumnType = "image";
+        this._configuration.firstColumnType = "image";
         if (elementDescriptor.tagName !== "img") {
           throw new TypeError("an img element descriptor expected")
         }
         break;
       case "custom":
-        this.configuration.firstColumnType = "custom";
+        this._configuration.firstColumnType = "custom";
         let t = document.createElement(elementDescriptor.tagName);
         if (Object.prototype.toString.call(d) === "[object HTMLUnknownElement]") {
           throw "invalid tag name to create custom element";
@@ -203,6 +203,10 @@ class DataTable {
       default:
         throw new TypeError("valid types: number, checkbox, image, custom")
     }
+  }
+
+  generate() {
+
   }
 
   /************************* Below are methods for internal use *****************************/
@@ -309,6 +313,14 @@ class DataTable {
 
   _notifyStatus(status) {
     notifyStatus(this._targetId, status);
+  }
+
+  _updateView() {
+
+  }
+
+  _createFilterSection() {
+    
   }
 
 }

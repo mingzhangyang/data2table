@@ -1,13 +1,24 @@
+/**
+ * compare two objects, return true if they are equal in value
+ * e.g. {a: 3, b: 4} equals {b: 4, a: 3}
+ * @param obj1
+ * @param obj2
+ * @returns {boolean}
+ */
 function cmp(obj1, obj2) {
+    if (obj1 === obj2) {
+        return true;
+    }
     if (Object.prototype.toString.call(obj1) !== Object.prototype.toString.call(obj2)) {
         return false;
     }
-    if (typeof obj1 !== "object") {
-        return obj1 === obj2;
-    }
-    if (obj1 === null && obj2 === null) {
-        return true;
-    }
+    // below is handled in the first check
+    // if (typeof obj1 !== "object") {
+    //     return obj1 === obj2;
+    // }
+    // if (obj1 === null && obj2 === null) {
+    //     return true;
+    // }
     let keys1 = Object.keys(obj1);
     let keys2 = Object.keys(obj2);
     if (keys1.length !== keys2.length) {

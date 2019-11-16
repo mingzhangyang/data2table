@@ -34,7 +34,7 @@ class DataManager {
       this.batchSize = arr.length;
       this.cache = {
         data: this.data.slice(),
-        queryObject: {},
+        queryObject: {filter: {}, sort: {}},
         range: [0, this.batchSize],
         totalCount: arr.length,
       };
@@ -50,7 +50,7 @@ class DataManager {
           this.batchSize = n;
           this.cache = {
             data: this.data.slice(),
-            queryObject: {},
+            queryObject: {filter: {}, sort: {}},
             range: [0, this.batchSize],
           };
           break;
@@ -95,6 +95,7 @@ class DataManager {
 
     // serve data query from cache
     // we assume here start + limit will not exceed the current batch, given that start is in the current batch
+    // except for the last batch, but it doesn't matter
     if (assertQueryObject(queryObject, this.cache.queryObject)
       && (start >= this.cache.range[0] && start < this.cache.range[1])) {
       return {

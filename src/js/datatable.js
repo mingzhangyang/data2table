@@ -26,8 +26,6 @@ class DataTable {
 
     this._columnSetting = createColModel(this._dataManager.data);
 
-    this._dataToShow = this._dataManager.cache.data.slice(0, this._stateManager.rowsPerPage);
-
     this._configuration = {
       caption: '',
       maxNumOfFacets: 50,
@@ -315,12 +313,24 @@ class DataTable {
     notifyStatus(this._targetId, status);
   }
 
+  /**
+   * The most called function
+   * @private
+   */
   _updateView() {
+    let data = this._dataToShow();
+    let totalPages = this._totalPages();
+    // below is the steps to update the table
 
   }
 
-  _createFilterSection() {
-    
+  /**
+   * This should be an async function, which will not block the table rendering
+   * @private
+   */
+  async _createFilterSection() {
+    let data = this._dataManager.serve({facets: Object.keys(this._stateManager.filterStatus)});
+    // to be continued
   }
 
 }

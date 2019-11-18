@@ -3,15 +3,6 @@
  */
 'use strict';
 
-/*******************************************************************************
- * To-DO:
- *    1. Panel for download options
- *    2. Add charts (d3 or G2)
- *    3. Layout adjustment
- *    4. More color schemes
- *    5. Probably rewrite in TypeScript
- *******************************************************************************/
-
 class DataTable {
   /******************************************************************************
    * To create an instance of DataTable class
@@ -799,8 +790,7 @@ class DataTable {
     }
 
     // console.log(this.filterSetting);
-
-    let wrapper = document.getElementsByClassName('filter-viz-download-buttons-wrapper')[0];
+    let wrapper = document.getElementById(this._targetId + '-filter-viz-download-buttons-wrapper');
     if (Object.keys(cond).length) {
       wrapper.classList.add('filter-active');
     } else {
@@ -1062,10 +1052,10 @@ class DataTable {
 
     // update current page number and total page number
     // Below is necessary and indispensable!
-    let cPage = document.getElementById(this._targetId + 'table-page-number-current');
+    let cPage = document.getElementById(this._targetId + '-table-page-number-current');
     cPage.value = this._pageNumberInAll;
     cPage.setAttribute('aria-label', 'current page is ' + cPage.value);
-    let tPages = document.getElementById(this._targetId + 'table-page-number-total');
+    let tPages = document.getElementById(this._targetId + '-table-page-number-total');
     tPages.value = this._totalPages;
     tPages.setAttribute('aria-label', `all ${this._totalPages} pages`);
   }
@@ -1139,6 +1129,7 @@ class DataTable {
     }
 
     let btns = container.appendChild(document.createElement('div'));
+    btns.id = this._targetId + '-filter-viz-download-buttons-wrapper';
     btns.classList.add('filter-viz-download-buttons-wrapper');
 
     if (this.configuration.filterButton) {
@@ -1181,7 +1172,7 @@ class DataTable {
         let inp = span.appendChild(document.createElement('input'));
         inp.type = 'radio';
         inp.value = type;
-        inp.id = this._targetId + 'data-table-download-type-option ' + type;
+        inp.id = this._targetId + '-data-table-download-type-option-' + type;
         inp.classList.add('data-table-download-type-option');
         // inp.checked = type === 'CSV';
         inp.name = 'data-table-download-type';
@@ -1381,7 +1372,7 @@ class DataTable {
     let rpp = a.appendChild(document.createElement('label'));
     rpp.appendChild(document.createTextNode('Rows per page:'));
     let num = a.appendChild(document.createElement('select'));
-    num.id = this._targetId + 'table-row-number-selector';
+    num.id = this._targetId + '-table-row-number-selector';
     rpp.setAttribute('for', num.id);
     num.classList.add('table-row-number-selector');
     num.setAttribute('aria-label', `showing ${this._rowsPerPage} rows per page`);
@@ -1434,7 +1425,7 @@ class DataTable {
     cPage.appendChild(document.createTextNode('Page'));
     let inp1 = m.appendChild(document.createElement('input'));
     inp1.type = 'text';
-    inp1.id = this._targetId + 'table-page-number-current';
+    inp1.id = this._targetId + '-table-page-number-current';
     cPage.setAttribute('for', inp1.id);
     inp1.setAttribute('aria-label', 'current page is 1');
 
@@ -1457,7 +1448,7 @@ class DataTable {
     tPages.appendChild(document.createTextNode('of'));
     let inp2 = m.appendChild(document.createElement('input'));
     inp2.type = 'text';
-    inp2.id = this._targetId + 'table-page-number-total';
+    inp2.id = this._targetId + '-table-page-number-total';
     tPages.setAttribute('for', inp2.id);
     inp2.classList.add('table-page-number-total');
     inp2.readonly = true;
@@ -1529,10 +1520,9 @@ class DataTable {
       return;
     }
 
-    let btns = document.getElementsByClassName('filter-viz-download-buttons-wrapper')[0];
+    let btns = document.getElementById(this._targetId + '-filter-viz-download-buttons-wrapper');
 
     if (btns.getElementsByClassName('filter-section-control-button').length === 0) {
-      // let fBtn = btns.appendChild(document.createElement('div'));
       let fBtn = btns.insertBefore(document.createElement('div'), btns.firstElementChild);
       fBtn.classList.add('table-top-button');
       fBtn.classList.add('filter-section-control-button');
@@ -1623,41 +1613,6 @@ class DataTable {
   }
 
 
-}
-
-
-// testing code
-if (typeof module !== 'undefined' && !module.parent) {
-  let data = [
-    {a: 'a', b: 'x', c: 17},
-    {a: 'a', b: 'y', c: 1},
-    {a: 'a', b: 'd', c: 7},
-    {a: 'a', b: 'e', c: 27},
-    {a: 'a', b: 'd', c: 12},
-    {a: 'a', b: 'c', c: 4},
-    {a: 'a', b: 'e', c: 8},
-    {a: 'a', b: 'c', c: 23},
-    {a: 'a', b: 'v', c: 21},
-    {a: 'a', b: 'd', c: 78},
-    {a: 'a', b: 's', c: 65},
-    {a: 'a', b: 'c', c: 34},
-    {a: 'a', b: 'x', c: 89},
-    {a: 'a', b: 'x', c: 3},
-    {a: 'a', b: 'z', c: 56},
-    {a: 'a', b: 'e', c: 27},
-    {a: 'a', b: 'r', c: 62},
-    {a: 'a', b: 'f', c: 4},
-    {a: 'a', b: 'x', c: 17},
-    {a: 'a', b: 'r', c: 19},
-    {a: 'a', b: 'r', c: 27},
-  ];
-
-  let start = Date.now();
-  let t = new DataTable(data, 'test');
-  t.addFilter('c', 'range');
-  t.addFilter('b', 'value');
-  console.log(t._filters);
-  console.log(Date.now() - start);
 }
 
 export default DataTable;

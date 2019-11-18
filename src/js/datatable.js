@@ -224,7 +224,10 @@ class DataTable {
    * @private
    */
   _totalPages() {
-    return Math.ceil(this._dataManager.cache.totalCount / this._stateManager.rowsPerPage);
+    // if totalCount is 0, the totalPages will be 1, not 0
+    // The reason that Math.floor() + 1 is used instead of Math.ceil() is Math.ceil(0) = 0
+    // However, we expect to see total page 1 if there are no rows
+    return Math.floor(this._dataManager.cache.totalCount / this._stateManager.rowsPerPage) + 1;
   }
 
   /**

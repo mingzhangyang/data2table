@@ -104,6 +104,7 @@ class DataManager {
     // except for the last batch, but it doesn't matter
     if (assertQueryObject(queryObject, this.cache.queryObject)
       && (start >= this.cache.range[0] && start < this.cache.range[1])) {
+      // Below is critical. Get the index of data in the current batch
       let idx = start - this.cache.range[0];
       return {
         data: this.cache.data.slice(idx, idx + limit),
@@ -129,6 +130,7 @@ class DataManager {
     this.cache.queryObject = qo;
     this.cache.range = [newStart, newStart + this.batchSize];
     this.cache.totalCount = data.totalCount;
+    // Below is critical to get the idx, the index of requested data in the current batch.
     let idx = start - newStart;
     return {
       data: this.cache.data.slice(idx, idx + limit),

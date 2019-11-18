@@ -6,6 +6,9 @@ import createColModel from './utils/colModel.js';
 import DataManager from './data/dataManager.js';
 import formatterPool from './utils/formatterPool.js';
 import notifyStatus from './methods/notify.js';
+import updateView from './methods/updateView.js';
+import createFilterSection from './methods/createFilterSection.js';
+import generate from './methods/generate.js';
  
 class DataTable {
   /******************************************************************************
@@ -37,7 +40,11 @@ class DataTable {
         column_selector: false,
       },
       firstColumnType: undefined, // 'number', 'checkbox', 'custom'
-      scheme: 'default'
+      scheme: 'default',
+      fileName: opts.fileName ? opts.fileName : "data",
+      urlForDownloading: opts.urlForDownloading,
+      columnsToDownload: opts.columnsToDownload,
+      dataToDownload: opts.dataToDownload,
     };
 
     this._uid = 'my-1535567872393-product';
@@ -67,7 +74,7 @@ class DataTable {
    * @param func
    */
   setFormatter(colName, func) {
-    if (typeof colName !== 'string' || !this._colModel[colName]) {
+    if (typeof colName !== 'string' || !this._columnSetting.colModel[colName]) {
       throw new Error(`Column name ${colName} not recognized.`);
     }
     if (typeof func === 'string') {
@@ -75,11 +82,11 @@ class DataTable {
       if (!f) {
         throw new Error(`The formatter name ${func} not recognized.`);
       }
-      this._colModel[colName].formatter = f;
+      this._columnSetting.colModel[colName].formatter = f;
       return;
     }
     if (typeof func === 'function') {
-      this._colModel[colName].formatter = func;
+      this._columnSetting.colModel[colName].formatter = func;
       return;
     }
     throw new Error('A predefined formatter name or custom function expected.');
@@ -91,13 +98,13 @@ class DataTable {
    * @param obj: object, an object describing the column
    */
   configureColumn(name, obj) {
-    if (!this._colModel[name]) {
+    if (!this._columnSetting.colModel[name]) {
       throw new Error('Column name not recognized.');
     }
     if (typeof obj !== 'object') {
       throw new Error('An object describing the column expected.');
     }
-    Object.assign(this._colModel[name], obj);
+    Object.assign(this._columnSetting.colModel[name], obj);
   }
 
   /**
@@ -190,13 +197,15 @@ class DataTable {
         if (elementDescriptor.tagName !== "img") {
           throw new TypeError("an img element descriptor expected")
         }
+        this._configuration.firstColumnFormatter = elementDescriptor.formatter;
         break;
       case "custom":
         this._configuration.firstColumnType = "custom";
         let t = document.createElement(elementDescriptor.tagName);
-        if (Object.prototype.toString.call(d) === "[object HTMLUnknownElement]") {
+        if (Object.prototype.toString.call(t) === "[object HTMLUnknownElement]") {
           throw "invalid tag name to create custom element";
         }
+        this._configuration.firstColumnFormatter = elementDescriptor.formatter;
         break;
       default:
         throw new TypeError("valid types: number, checkbox, image, custom")
@@ -204,7 +213,7 @@ class DataTable {
   }
 
   generate() {
-
+    generate.bind(this)();
   }
 
   /************************* Below are methods for internal use *****************************/
@@ -236,6 +245,10 @@ class DataTable {
    * @private
    */
   _setPageNumber(n) {
+    if (isNaN(n)) {
+      alert("Invalid page number!");
+      return;
+    }
     let max = this._totalPages();
     if (n < 1 || n > max) {
       alert("Page number out of range!");
@@ -274,7 +287,7 @@ class DataTable {
    */
   _filterData() {
     this._stateManager.currentPageNumber = 1;
-    this._upateView();
+    this._updateView();
   }
 
   /**
@@ -324,7 +337,7 @@ class DataTable {
     let data = this._dataToShow();
     let totalPages = this._totalPages();
     // below is the steps to update the table
-
+    updateView(this);
   }
 
   /**
@@ -334,6 +347,7 @@ class DataTable {
   async _createFilterSection() {
     let data = this._dataManager.serve({facets: Object.keys(this._stateManager.filterStatus)});
     // to be continued
+    createFilterSection(this);
   }
 
 }

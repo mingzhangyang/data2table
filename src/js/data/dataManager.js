@@ -28,8 +28,8 @@ class DataManager {
     if (Object.prototype.toString.call(arr[0]) !== '[object Object]') {
       throw new TypeError('an array of objects expected');
     }
-
-    if (opts['dataIsComplete']) {
+    this.dataIsComplete = opts.dataIsComplete;
+    if (this.dataIsComplete) {
       this.data = arr;
       this.batchSize = arr.length;
       this.cache = {
@@ -54,8 +54,8 @@ class DataManager {
           this.cache = {
             data: this.data.slice(),
             queryObject: {
-              filter: {},
-              sort: {},
+              filter: {}, // default {}
+              sort: {}, // default {}
             },
             range: [0, this.batchSize],
           };
@@ -94,10 +94,10 @@ class DataManager {
     }
 
     // this is an internal method, all the arguments are supposed to be valid
-    let start = queryObject.start ? queryObject.start : 0;
-    let limit = queryObject.limit ? queryObject.limit : 10;
-    let filter = queryObject.filter ? queryObject.filter : undefined;
-    let sort = queryObject.sort ? queryObject.sort : undefined;
+    let start = queryObject.start ? queryObject.start : 0; // the index of the first row of requested data
+    let limit = queryObject.limit ? queryObject.limit : 10; // the number of rows requested
+    let filter = queryObject.filter ? queryObject.filter : {}; // default {}
+    let sort = queryObject.sort ? queryObject.sort : {}; // default {}
 
     // serve data query from cache
     // we assume here start + limit will not exceed the current batch, given that start is in the current batch

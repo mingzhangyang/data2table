@@ -1,3 +1,5 @@
+import {jsonToXSV} from '../utils/convert.js';
+
 // generate all table related panels,
 // can be used to refresh the whole object
 export default function generate() {
@@ -8,7 +10,7 @@ export default function generate() {
   target.parentNode.removeChild(target);
   div.id = this._targetId;
   div.classList.add(this._uid);
-  div.classList.add(this._colorSchemes[this.configuration.colorScheme]);
+  div.classList.add(this._configuration.scheme);
   // set ARIA attribute
   div.setAttribute('role', 'table');
 
@@ -20,7 +22,7 @@ export default function generate() {
   let sbPanel = container.appendChild(document.createElement('div'));
   sbPanel.classList.add('search-bar-panel');
 
-  if (this.configuration.searchBar) {
+  if (this._configuration.search) {
     let searchBar = sbPanel.appendChild(document.createElement('div'));
     searchBar.id = this._targetId + '-search-bar';
     searchBar.classList.add('search-bar-wrapper');
@@ -30,7 +32,7 @@ export default function generate() {
     sb.id = this._targetId + '-search-box';
     sb.classList.add('search-box');
     sb.setAttribute('aria-label', 'search box');
-    sb.addEventListener('focus', function () {
+    sb.addEventListener('focus', function() {
       searchBar.classList.remove('search-hints-active');
     });
 
@@ -45,7 +47,7 @@ export default function generate() {
     sp.classList.add('question-mark');
     sp.setAttribute('role', 'button');
     sp.setAttribute('aria-label', 'hints for search syntax');
-    sp.addEventListener('click', function () {
+    sp.addEventListener('click', function() {
       searchBar.classList.add('search-hints-active');
     });
 
@@ -57,12 +59,10 @@ export default function generate() {
     hint.setAttribute('role', 'row');
     let example = hintWrapper.appendChild(document.createElement('p'));
     example.appendChild(document.createTextNode('e.g. '));
-    example.appendChild(document.createElement('span'))
-    .appendChild(document.createTextNode('"length": > 120'));
-    example.appendChild(document.createElement('span'))
-    .appendChild(document.createTextNode(';'));
-    example.appendChild(document.createElement('span'))
-    .appendChild(document.createTextNode('"height": 80 AND "width": 100'));
+    example.appendChild(document.createElement('span')).appendChild(document.createTextNode('"length": > 120'));
+    example.appendChild(document.createElement('span')).appendChild(document.createTextNode(';'));
+    example.appendChild(document.createElement('span')).
+      appendChild(document.createTextNode('"height": 80 AND "width": 100'));
     example.setAttribute('role', 'row');
   }
 
@@ -70,33 +70,31 @@ export default function generate() {
   btns.id = this._targetId + '-filter-viz-download-buttons-wrapper';
   btns.classList.add('filter-viz-download-buttons-wrapper');
 
-  if (this.configuration.filterButton) {
+  if (this._configuration.filter) {
     let fBtn = btns.appendChild(document.createElement('div'));
-    fBtn.classList.add('table-top-button');
-    fBtn.classList.add('filter-section-control-button');
+    fBtn.classList.add('table-top-button', 'filter-section-control-button');
     fBtn.appendChild(document.createTextNode('Filters'));
     fBtn.setAttribute('role', 'button');
     fBtn.setAttribute('aria-label', 'filter button');
-    fBtn.addEventListener('click', function () {
+    fBtn.addEventListener('click', function() {
       document.getElementById(that._targetId).classList.toggle('filter-section-active');
     });
   }
 
-  if (this.configuration.vizButton) {
+  if (this._configuration.chart) {
     let vBtn = btns.appendChild(document.createElement('div'));
     vBtn.classList.add('table-top-button');
     vBtn.classList.add('viz-section-control-button');
     vBtn.appendChild(document.createTextNode('Visualize'));
-    vBtn.addEventListener('click', function () {
+    vBtn.addEventListener('click', function() {
       document.getElementById(that._targetId).classList.toggle('viz-section-active');
     });
   }
 
-  if (this.configuration.downloadButton) {
+  if (this._configuration.download) {
     let that = this;
     let dBtn = btns.appendChild(document.createElement('div'));
-    dBtn.classList.add('table-top-button');
-    dBtn.classList.add('download-control-button');
+    dBtn.classList.add('table-top-button', 'download-control-button');
     let sp = document.createElement('span');
     sp.appendChild(document.createTextNode('Download'));
     dBtn.appendChild(sp);
@@ -125,50 +123,53 @@ export default function generate() {
         // console.log(type);
         // need to be done
         let a = document.createElement('a');
-        a.setAttribute('download', that.opts.downloadFileName + '.' + type.toLowerCase());
+        a.setAttribute('download', that._configuration.fileName + '.' + type.toLowerCase());
 
         // use urlForDownloading as the first choice
-        if (that.opts.urlForDownloading) {
-          let url = `${that.opts.urlForDownloading}&type=${type.toLowerCase()}`;
-//            let fields = that.opts.columnsToDownload ? that.opts.columnsToDownload : that.shownColumns;
-//            for (let field of fields) {
-//              url += `&field=${field}`;
-//            }
-          if (that.filterSetting) {
-            let filters = Object.keys(that.filterSetting);
+        if (that._configuration.urlForDownloading) {
+          let url = `${that._configuration.urlForDownloading}&type=${type.toLowerCase()}`;
+          let fields = that._configuration.columnsToDownload
+            ? that._configuration.columnsToDownload
+            : that.shownColumns;
+          for (let field of fields) {
+            url += `&field=${field}`;
+          }
+          let qo = that._stateManager.queryObject();
+          if (qo.filter) {
+            let filters = Object.keys(qo.filter);
             if (filters.length > 0) {
               for (let filter of filters) {
-                let arr = that.filterSetting[filter];
+                let arr = qo.filter[filter];
                 for (let v of arr) {
                   url += `&filter=${filter}_._${v}`;
                 }
               }
             }
           }
-          // Should below be disabled due to a bug on server-side cgi?
-//            if (that.sortSetting) {
-//              url += `&sort=${that.sortSetting.name}_._${that.sortSetting.order}`;
-//            }
-          // console.log(url);
+          let keys = Object.keys(qo.sort);
+          if (keys.length) {
+            url += `&sort=${keys[0]}_._${qo.sort[keys[0]]}`;
+          }
+          console.log(url);
           a.setAttribute('href', url);
-        } else if (that.opts.dataIsComplete && that.opts.dataToDownload) {
+        } else if (that._dataManager.dataIsComplete && that._configuration.dataToDownload) {
           let str;
           switch (type) {
             case 'CSV':
-              str = DataTable.convert(that.opts.dataToDownload, ',');
+              str = jsonToXSV(that._configuration.dataToDownload, ',');
               break;
             case 'TSV':
-              str = DataTable.convert(that.opts.dataToDownload, '\t');
+              str = jsonToXSV(that._configuration.dataToDownload, '\t');
               break;
             case 'JSON':
-              str = JSON.stringify(that.opts.dataToDownload);
+              str = JSON.stringify(that._configuration.dataToDownload);
               break;
             default:
           }
           a.setAttribute('href', `data:text/${type.toLowerCase()};charset=utf-8,${encodeURIComponent(str)}`);
         } else {
           a.addEventListener('click', () => {
-            alert("Sorry, the data is not ready for downloading.");
+            alert('Sorry, the data is not ready for downloading.');
           });
         }
 
@@ -207,7 +208,7 @@ export default function generate() {
   for (let i = 0; i < 3; i++) {
     let sp = dotWrapper.appendChild(document.createElement('span'));
     sp.classList.add('progress-dot');
-    sp.classList.add(`dot-num-${i+1}`);
+    sp.classList.add(`dot-num-${i + 1}`);
   }
   let errorBar = notifySection.appendChild(document.createElement('div'));
   errorBar.classList.add('error-message');
@@ -222,28 +223,36 @@ export default function generate() {
   table.classList.add('table-section');
 
   // add caption to the table
-  table.appendChild(document.createElement('caption'))
-  .appendChild(document.createTextNode(this.configuration.caption));
+  table.appendChild(document.createElement('caption')).appendChild(document.createTextNode(this._configuration.caption));
 
   // create table header
   // Since the header is supposed not to update, create it once
-  let head = table.appendChild(document.createElement('thead'))
-  .appendChild(document.createElement('tr'));
+  let head = table.appendChild(document.createElement('thead')).appendChild(document.createElement('tr'));
   head.classList.add('table-header-row');
 
-  if (this._firstColumnAsRowNumber) {
-    let firstCol = head.appendChild(document.createElement('th'));
-    firstCol.innerHTML = '#';
-    firstCol.classList.add('table-row-index-column');
-    firstCol.style.width = ((this._totalRows + '').length) * 15 + 'px';
+  switch (this._configuration.firstColumnType) {
+    case 'number':
+      let firstCol = head.appendChild(document.createElement('th'));
+      firstCol.innerHTML = '#';
+      firstCol.classList.add('table-row-index-column');
+      firstCol.style.width = ((this._dataManager.cache.totalCount + '').length) * 6 + 24 + 'px';
+      break;
+    case 'checkbox':
+      break;
+    case 'image':
+      break;
+    case 'custom':
+      break;
+    default:
   }
+
   for (let name of this.shownColumns) {
     let th = head.appendChild(document.createElement('th'));
     let sp = th.appendChild(document.createElement('span'));
     sp.classList.add('table-row-regular-column-name');
-    sp.appendChild(document.createTextNode(this._colModel[name].label));
-    sp.setAttribute('aria-label', this._colModel[name].label);
-    let model = this._colModel[name];
+    sp.appendChild(document.createTextNode(this._columnSetting.colModel[name].label));
+    sp.setAttribute('aria-label', this._columnSetting.colModel[name].label);
+    let model = this._columnSetting.colModel[name];
     // set width
     if (model.width) {
       th.style.width = model.width;
@@ -263,8 +272,7 @@ export default function generate() {
       control.classList.add('table-sorting-control-container');
       control._colName = name;
       let up = control.appendChild(document.createElement('i'));
-      up.classList.add('table-sorting-control');
-      up.classList.add('table-sorting-up-control');
+      up.classList.add('table-sorting-control', 'table-sorting-up-control');
       up._colName = name;
       up.setAttribute('role', 'button');
       up.setAttribute('aria-label', 'sort in ascending order');
@@ -275,12 +283,11 @@ export default function generate() {
           ctrls[i].classList.remove('table-sorting-control-active');
         }
         up.classList.add('table-sorting-control-active');
-        that._sort(up._colName, 1);
+        that._sortOnColumn(up._colName, 1);
       });
 
       let down = control.appendChild(document.createElement('i'));
-      down.classList.add('table-sorting-control');
-      down.classList.add('table-sorting-down-control');
+      down.classList.add('table-sorting-control', 'table-sorting-down-control');
       down._colName = name;
       down.setAttribute('role', 'button');
       down.setAttribute('aria-label', 'sort in descending order');
@@ -291,7 +298,7 @@ export default function generate() {
           ctrls[i].classList.remove('table-sorting-control-active');
         }
         down.classList.add('table-sorting-control-active');
-        that._sort(down._colName, -1);
+        that._sortOnColumn(down._colName, -1);
       });
     }
   }
@@ -313,29 +320,16 @@ export default function generate() {
   num.id = this._targetId + '-table-row-number-selector';
   rpp.setAttribute('for', num.id);
   num.classList.add('table-row-number-selector');
-  num.setAttribute('aria-label', `showing ${this._rowsPerPage} rows per page`);
+  num.setAttribute('aria-label', `showing ${this._stateManager.rowsPerPage} rows per page`);
   let arr = [5, 10, 20, 50, 100, 200];
   for (let i of arr) {
-    num.appendChild(document.createElement('option'))
-    .appendChild(document.createTextNode(i+''));
+    num.appendChild(document.createElement('option')).appendChild(document.createTextNode(i + ''));
   }
-  // num.value = this._rowsPerPage;
-  num.selectedIndex = arr.indexOf(this._rowsPerPage);
+
+  num.selectedIndex = arr.indexOf(this._stateManager.rowsPerPage);
   num.addEventListener('change', function() {
     num.setAttribute('aria-label', `showing ${this.value} rows per page`);
-    // setRowsPerPage will update both the _rowsPerPage and _totalPages
-    that.setRowsPerPage(+this.value);
-
-    // Below is not strict. The filterSetting and sortSetting may be set.
-    // It is not safe to reset to originalData.
-    // A safe means is just _checkPageNumber(1), which can handle it.
-    that._checkPageNumber(1);
-
-    // Below is redundant??? YES!!!
-    // that._changePageByUser = false;
-    // setTimeout(function () {
-    //   that._changePageByUser = true;
-    // }, 1000);
+    that._updateRowsPerPage(+this.value);
   });
 
   // page selector candidate
@@ -343,16 +337,12 @@ export default function generate() {
   c.classList.add('table-page-number-control-container');
   // last page button
   let minusOneBtn = c.appendChild(document.createElement('div'));
-  minusOneBtn.classList.add('table-page-number-control-block');
-  minusOneBtn.classList.add('table-page-number-minus-one');
+  minusOneBtn.classList.add('table-page-number-control-block', 'table-page-number-minus-one');
   minusOneBtn.setAttribute('role', 'button');
   minusOneBtn.setAttribute('aria-label', 'last page');
 
   minusOneBtn.addEventListener('click', function() {
-    if (that._pageNumberInAll > 1) {
-      let v = that._pageNumberInAll - 1;
-      that._checkPageNumber(v);
-    }
+    that._setPageNumber(that._stateManager.currentPageNumber - 1);
   });
 
 
@@ -368,18 +358,7 @@ export default function generate() {
   inp1.setAttribute('aria-label', 'current page is 1');
 
   inp1.addEventListener('change', function() {
-    let n = +this.value;
-    if (isNaN(n)) {
-      alert('invalid page number!');
-      this.value = that._pageNumberInAll;
-      return;
-    }
-    if (n < 1 || n > that._totalPages) {
-      alert('page number out of range');
-      this.value = that._pageNumberInAll;
-      return;
-    }
-    that._checkPageNumber(+this.value);
+    that._setPageNumber(+this.value);
   });
 
   let tPages = m.appendChild(document.createElement('label'));
@@ -390,8 +369,8 @@ export default function generate() {
   tPages.setAttribute('for', inp2.id);
   inp2.classList.add('table-page-number-total');
   inp2.readonly = true;
-  inp2.value = this._totalPages;
-  inp2.setAttribute('aria-label', `all ${this._totalPages} pages`);
+  inp2.value = this._totalPages();
+  inp2.setAttribute('aria-label', `all ${this._totalPages()} pages`);
 
   // next page button
   let plusOneBtn = c.appendChild(document.createElement('div'));
@@ -401,18 +380,20 @@ export default function generate() {
   plusOneBtn.setAttribute('aria-label', 'next page');
 
   plusOneBtn.addEventListener('click', function() {
-    if (that._pageNumberInAll < that._totalPages) {
-      let v = that._pageNumberInAll + 1;
-      that._checkPageNumber(v);
-    }
+    that._setPageNumber(that._stateManager.currentPageNumber + 1);
   });
 
   // add the df to div
   div.appendChild(container);
-  this._updateTableView();
-  this._attachListeners();
-  if (this.configuration.filterButton) {
-    this.createFilterSection();
+  this._updateView();
+  if (this._configuration.filter) {
+    this._createFilterSection()
+      .then(() => {
+        console.log("Filter section created!");
+    })
+      .catch(err => {
+        console.error(err.message);
+    });
   }
 }
 

@@ -367,5 +367,4 @@ export default class DataTable {
     }
     return true;
   }
-
 }

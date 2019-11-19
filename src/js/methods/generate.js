@@ -358,7 +358,12 @@ export default function generateTable(datatable) {
   inp1.setAttribute('aria-label', 'current page is 1');
 
   inp1.addEventListener('change', function() {
-    datatable._setPageNumber(this.value);
+    let n = +this.value;
+    if (isNaN(n)) {
+      alert('Invalid page number!');
+      return;
+    }
+    datatable._setPageNumber(n);
   });
 
   let tPages = m.appendChild(document.createElement('label'));
@@ -369,8 +374,9 @@ export default function generateTable(datatable) {
   tPages.setAttribute('for', inp2.id);
   inp2.classList.add('table-page-number-total');
   inp2.readonly = true;
-  inp2.value = datatable._totalPages();
-  inp2.setAttribute('aria-label', `all ${datatable._totalPages()} pages`);
+  let t = datatable._totalPages();
+  inp2.value = t;
+  inp2.setAttribute('aria-label', `all ${t} pages`);
 
   // next page button
   let plusOneBtn = c.appendChild(document.createElement('div'));

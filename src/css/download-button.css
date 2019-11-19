@@ -1,0 +1,43 @@
+/* download button position setting */
+.my-1535567872393-product div.download-control-button {
+    margin-right: 0;
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+.my-1535567872393-product div.download-control-button form {
+    border-left: 1px solid var(--download-button);
+    border-right: 1px solid var(--download-button);
+    background-color: var(--download-button);
+    width: 100%;
+    position: absolute;
+    z-index: 10;
+    height: 0;
+    transition: height .6s;
+    border-radius: 4px;
+    opacity: .8;
+    margin-top: -1px;
+    overflow: hidden;
+}
+.my-1535567872393-product div.download-control-button:hover form {
+    height: auto;
+}
+.my-1535567872393-product div.download-control-button .data-table-download-type-options span {
+    display: block;
+    cursor: pointer;
+    text-align: left;
+    padding-left: 12px;
+}
+.my-1535567872393-product div.download-control-button .data-table-download-type-options span:hover {
+    background-color: var(--font-color);
+}
+.my-1535567872393-product div.download-control-button input[type="radio"].data-table-download-type-option {
+    display: none;
+}
+
+.my-1535567872393-product div.download-control-button .data-table-download-type-option-label {
+    color: white;
+    cursor: pointer;
+    display: block;
+    margin: 1em 0;
+}

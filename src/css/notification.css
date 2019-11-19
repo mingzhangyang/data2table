@@ -1,0 +1,90 @@
+/* notification section style */
+.my-1535567872393-product .notification-section {
+    width: 100%;
+    position: relative;
+    margin-top: 2px;
+    margin-bottom: -2px;
+    height: 30px;
+    display: none;
+}
+.my-1535567872393-product .notification-section.progress-active {
+    display: block;
+}
+
+.notification-section.progress-active + table {
+    opacity: .6;
+}
+
+.my-1535567872393-product .notification-section.error-active {
+    display: block;
+}
+.my-1535567872393-product .notification-section.alert-active {
+    display: block;
+}
+.my-1535567872393-product .notification-section.progress-active .progress-bar {
+    display: block;
+}
+.my-1535567872393-product .notification-section.error-active .error-message {
+    display: block;
+}
+.my-1535567872393-product .notification-section.alert-active .alert-message {
+    display: block;
+}
+.my-1535567872393-product .notification-section .progress-bar {
+    display: none;
+    width: 100%;
+    height: 100%;
+    border-top: 1px solid var(--border-color);
+    border-left: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+    background-color: var(--hover-blue-color);
+    position: relative;
+}
+
+.my-1535567872393-product .notification-section .progress-dot-wrapper {
+    width: 20%;
+    height: 100%;
+    margin: auto;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+.my-1535567872393-product span.progress-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--hover-blue-color);
+    animation-name: progress;
+    animation-duration: 1.2s;
+    animation-iteration-count: infinite;
+}
+
+.my-1535567872393-product span.progress-dot.dot-num-2 {
+    animation-delay: -.8s;
+}
+.my-1535567872393-product span.progress-dot.dot-num-3 {
+    animation-delay: -.4s;
+}
+
+@keyframes progress {
+    0% {opacity: 1}
+    28% {opacity: 1}
+    33.33% {opacity: .5}
+    100% {opacity: .5}
+}
+
+.my-1535567872393-product .notification-section .message-bar {
+    display: none;
+    width: 100%;
+    height: 100%;
+    color: white;
+    text-align: center;
+    line-height: 30px;
+}
+
+.my-1535567872393-product .notification-section .error-message {
+    background-color: var(--error-color);
+}
+.my-1535567872393-product .notification-section .alert-message {
+    background-color: var(--alert-color);
+}

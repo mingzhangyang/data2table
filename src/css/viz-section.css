@@ -1,0 +1,12 @@
+/* visualization section style */
+.my-1535567872393-product.viz-section-active .viz-section-control-button {
+    background-color: var(--hover-color);
+}
+
+.my-1535567872393-product.viz-section-active .viz-section-control-button::after {
+    transform: rotate(-135deg);
+}
+
+.my-1535567872393-product.viz-section-active div.filter-viz-download-buttons-wrapper {
+    border-bottom: 1px solid var(--border-color);
+}

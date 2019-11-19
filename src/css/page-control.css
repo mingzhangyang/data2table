@@ -1,0 +1,91 @@
+.my-1535567872393-product .table-page-control-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.my-1535567872393-product .table-page-control-container label {
+    display: inline-block;
+    margin-top: 0;
+}
+
+.my-1535567872393-product .table-page-control-container select {
+    display: inline-block;
+    margin-left: 10px;
+    width: 48px;
+    padding: 0 0 0 4px;
+    height: 24px;
+    border: 1px solid var(--border-color);
+}
+
+.my-1535567872393-product .table-page-number-control-container {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.my-1535567872393-product .table-page-number-control-block {
+    display: flex;
+    width: 36px;
+    height: 28px;
+    border-radius: 6px;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.my-1535567872393-product .table-page-number-control-block:hover {
+    background-color: var(--hover-color);
+}
+
+.my-1535567872393-product .table-page-number-control-block:hover .table-page-number-control {
+    opacity: .8;
+}
+
+.my-1535567872393-product .table-page-number-control-block::before {
+    content: "";
+    display: block;
+    width: 0;
+    height: 0;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+}
+
+.my-1535567872393-product .table-page-number-plus-one::before {
+    border-left: 10px solid var(--icon-color);
+}
+
+.my-1535567872393-product .table-page-number-minus-one::before {
+    border-right: 10px solid var(--icon-color);
+}
+
+.my-1535567872393-product .table-page-number-current-container {
+    margin: 4px;
+    width: 240px;
+    display: inline-block;
+    vertical-align: middle;
+    text-align: right;
+}
+
+.my-1535567872393-product .table-page-number-current-container input[type="text"] {
+    display: inline-block;
+    width: 60px;
+    height: 24px;
+    text-align: center;
+    margin: 0 8px;
+    padding: 2px;
+    border: 1px solid var(--border-color);
+    outline: none;
+}
+.my-1535567872393-product .table-page-number-current-container input[type="text"].table-page-number-total {
+    border-style: none;
+    background-color: transparent;
+}
+
+/*css setting for rows per page*/
+.my-1535567872393-product .table-rows-per-page-control-container {
+    display: inline-block;
+    width: 180px;
+    vertical-align: middle;
+}

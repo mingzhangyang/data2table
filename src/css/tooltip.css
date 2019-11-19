@@ -1,0 +1,37 @@
+/*table tooltips setting*/
+.my-1535567872393-product .table-header-row th {
+    position: relative;
+}
+.my-1535567872393-product .table-header-row th .tooltiptext {
+    visibility: hidden;
+    opacity: .7;
+    width: 240px;
+    background-color: var(--background-color-dark);
+    color: var(--background-color-white);
+    text-align: center;
+    border-radius: 6px;
+    padding: 8px;
+    font-weight: 400;
+    /* Position the tooltip */
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 72;
+}
+.my-1535567872393-product .table-header-row th .tooltiptext::before {
+    content: '';
+    display: block;
+    position: absolute;
+    background-color: black;
+    width: 10px;
+    height: 10px;
+    left: 50%;
+    margin-left: -5px;
+    bottom: 0;
+    margin-bottom: -5px;
+    transform: rotate(45deg);
+}
+.my-1535567872393-product .table-header-row th:hover .tooltiptext {
+    visibility: visible;
+}

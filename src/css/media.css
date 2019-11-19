@@ -1,0 +1,6 @@
+@media screen and (max-width: 494px) {
+    .table-rows-per-page-control-container label:first-of-type {
+        display: none;
+    }
+}
+

@@ -9,6 +9,7 @@ window.onload = () => {
     downloadFileName: 'data2table.test',
     dataToDownload: sample
   });
+  // dt.setCaption("DataTable Demo");
   dt.addFilter('Gene_symbol', 'value');
   dt.configureColumn('Aff_id', {
     label: 'uid',

@@ -9,30 +9,25 @@ function notifyStatus(id, status) {
   switch (status.type) {
     case 'progress':
       ns.classList.add('progress-active');
-      ns.classList.remove('error-active');
-      ns.classList.remove('alert-active');
+      ns.classList.remove('error-active', 'alert-active');
       break;
     case 'error':
       ns.classList.add('error-active');
-      ns.classList.remove('alert-active');
-      ns.classList.remove('progress-active');
-      msgs[0].innerText = o.message;
+      ns.classList.remove('alert-active', 'progress-active');
+      msgs[0].innerText = status.message;
       break;
     case 'alert':
       ns.classList.add('alert-active');
-      ns.classList.remove('error-active');
-      ns.classList.remove('progress-active');
-      msgs[1].innerText = o.message;
+      ns.classList.remove('error-active', 'progress-active');
+      msgs[1].innerText = status.message;
       break;
     case 'success':
       ns.classList.remove('progress-active');
-      ns.classList.remove('error-active');
-      ns.classList.remove('alert-active');
+      ns.classList.remove('error-active', 'alert-active');
       break;
     default:
       ns.classList.remove('progress-active');
-      ns.classList.remove('error-active');
-      ns.classList.remove('alert-active');
+      ns.classList.remove('error-active', 'alert-active');
   }
 }
 

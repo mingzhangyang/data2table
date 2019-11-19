@@ -221,16 +221,6 @@ export default class DataTable {
 
   /**
    * set this as a function to always get up-to-date value
-   * @returns {*}
-   * @private
-   */
-  async _dataToShow() {
-    let res = await this._dataManager.serve(this._stateManager.queryObject());
-    return res.data;
-  }
-
-  /**
-   * set this as a function to always get up-to-date value
    * @returns {number}
    * @private
    */
@@ -238,7 +228,11 @@ export default class DataTable {
     // if totalCount is 0, the totalPages will be 1, not 0
     // The reason that Math.floor() + 1 is used instead of Math.ceil() is Math.ceil(0) = 0
     // However, we expect to see total page 1 if there are no rows
-    return Math.floor(this._dataManager.cache.totalCount / this._stateManager.rowsPerPage) + 1;
+    let n = Math.floor(this._dataManager.cache.totalCount / this._stateManager.rowsPerPage) + 1;
+    if (isNaN(n)) {
+      throw 'invalid total page number';
+    }
+    return n;
   }
 
   /**
@@ -247,12 +241,7 @@ export default class DataTable {
    * @private
    */
   _setPageNumber(n) {
-    if (isNaN(n)) {
-      alert('Invalid page number!');
-      return;
-    }
-    let max = this._totalPages();
-    if (n < 1 || n > max) {
+    if (n < 1 || n > this._totalPages()) {
       alert('Page number out of range!');
       return;
     }
@@ -344,9 +333,36 @@ export default class DataTable {
    * @private
    */
   async _updateView() {
-    let data = await this._dataToShow();
-    let totalPages = this._totalPages();
-    updateView(this, data, totalPages);
+    let data = null;
+    try {
+      this._notifyStatus({
+        type: 'progress',
+        message: '',
+      });
+      let res = await this._dataManager.serve(this._stateManager.queryObject());
+      data = res.data;
+    } catch (err) {
+      this._notifyStatus({
+        type: 'error',
+        message: 'failed to load data',
+      });
+      throw err;
+    }
+
+    try {
+      let totalPages = this._totalPages();
+      updateView(this, data, totalPages);
+      this._notifyStatus({
+        type: 'success',
+        message: '',
+      });
+    } catch (err) {
+      this._notifyStatus({
+        type: 'error',
+        message: 'failed to update the view',
+      });
+      throw err;
+    }
   }
 
   /**
@@ -354,17 +370,27 @@ export default class DataTable {
    * @private
    */
   async _createFilterSection() {
-    let facets = await this._dataManager.serve({facets: Object.keys(this._stateManager.filterStatus)});
+    let facets = null;
+    try {
+      facets = await this._dataManager.serve({facets: Object.keys(this._stateManager.filterStatus)});
+    } catch (err) {
+      this._notifyStatus({
+        type: 'error',
+        message: 'failed to create the filter section',
+      });
+      throw err;
+    }
+
     let tmp = {};
     for (let facet of facets) {
       tmp[facet.name] = facet.facets;
     }
     this._stateManager.filterStatus = tmp;
+
     try {
       createFilterSection(this);
     } catch (err) {
       throw err;
     }
-    return true;
   }
 }

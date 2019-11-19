@@ -1,4 +1,4 @@
-const formatterPool = {
+const pool = {
   highlight: function (s) {
     return `<mark>${s}</mark>`;
   },
@@ -13,5 +13,7 @@ const formatterPool = {
   }
 };
 
-export default  formatterPool;
+export default function formatterPool(type) {
+  return pool[type];
+};
  

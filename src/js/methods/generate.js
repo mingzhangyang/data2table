@@ -2,38 +2,37 @@ import {jsonToXSV} from '../utils/convert.js';
 
 // generate all table related panels,
 // can be used to refresh the whole object
-export default function generate() {
+export default function generateTable(datatable) {
   // replace the table with a div element
-  let target = document.getElementById(this._targetId);
+  let target = document.getElementById(datatable._targetId);
   let div = document.createElement('div');
   target.parentNode.insertBefore(div, target);
   target.parentNode.removeChild(target);
-  div.id = this._targetId;
-  div.classList.add(this._uid);
-  div.classList.add(this._configuration.scheme);
+  div.id = datatable._targetId;
+  div.classList.add(datatable._uid);
+  div.classList.add(datatable._configuration.scheme);
   // set ARIA attribute
   div.setAttribute('role', 'table');
 
   // create the contents of the new object
   let container = document.createDocumentFragment();
-  let that = this;
 
   // create control buttons, i.e. search box, filter button, download button
   let sbPanel = container.appendChild(document.createElement('div'));
   sbPanel.classList.add('search-bar-panel');
 
-  if (this._configuration.search) {
+  if (datatable._configuration.search) {
     let searchBar = sbPanel.appendChild(document.createElement('div'));
-    searchBar.id = this._targetId + '-search-bar';
+    searchBar.id = datatable._targetId + '-search-bar';
     searchBar.classList.add('search-bar-wrapper');
 
     let sb = searchBar.appendChild(document.createElement('input'));
     sb.type = 'search';
-    sb.id = this._targetId + '-search-box';
+    sb.id = datatable._targetId + '-search-box';
     sb.classList.add('search-box');
     sb.setAttribute('aria-label', 'search box');
     sb.addEventListener('focus', function() {
-      searchBar.classList.remove('search-hints-active');
+      this.parentElement.classList.remove('search-hints-active');
     });
 
     let lb = searchBar.appendChild(document.createElement('label'));
@@ -48,7 +47,7 @@ export default function generate() {
     sp.setAttribute('role', 'button');
     sp.setAttribute('aria-label', 'hints for search syntax');
     sp.addEventListener('click', function() {
-      searchBar.classList.add('search-hints-active');
+      this.parentElement.classList.add('search-hints-active');
     });
 
     let hintWrapper = searchBar.appendChild(document.createElement('div'));
@@ -62,37 +61,37 @@ export default function generate() {
     example.appendChild(document.createElement('span')).appendChild(document.createTextNode('"length": > 120'));
     example.appendChild(document.createElement('span')).appendChild(document.createTextNode(';'));
     example.appendChild(document.createElement('span')).
-      appendChild(document.createTextNode('"height": 80 AND "width": 100'));
+      appendChild(document.createTextNode('"height": 80 AND "widatatableh": 100'));
     example.setAttribute('role', 'row');
   }
 
   let btns = container.appendChild(document.createElement('div'));
-  btns.id = this._targetId + '-filter-viz-download-buttons-wrapper';
+  btns.id = datatable._targetId + '-filter-viz-download-buttons-wrapper';
   btns.classList.add('filter-viz-download-buttons-wrapper');
 
-  if (this._configuration.filter) {
+  if (datatable._configuration.filter) {
     let fBtn = btns.appendChild(document.createElement('div'));
     fBtn.classList.add('table-top-button', 'filter-section-control-button');
     fBtn.appendChild(document.createTextNode('Filters'));
     fBtn.setAttribute('role', 'button');
     fBtn.setAttribute('aria-label', 'filter button');
     fBtn.addEventListener('click', function() {
-      document.getElementById(that._targetId).classList.toggle('filter-section-active');
+      document.getElementById(datatable._targetId).classList.toggle('filter-section-active');
     });
   }
 
-  if (this._configuration.chart) {
+  if (datatable._configuration.chart) {
     let vBtn = btns.appendChild(document.createElement('div'));
     vBtn.classList.add('table-top-button');
     vBtn.classList.add('viz-section-control-button');
     vBtn.appendChild(document.createTextNode('Visualize'));
     vBtn.addEventListener('click', function() {
-      document.getElementById(that._targetId).classList.toggle('viz-section-active');
+      document.getElementById(datatable._targetId).classList.toggle('viz-section-active');
     });
   }
 
-  if (this._configuration.download) {
-    let that = this;
+  if (datatable._configuration.download) {
+    let datatable = datatable;
     let dBtn = btns.appendChild(document.createElement('div'));
     dBtn.classList.add('table-top-button', 'download-control-button');
     let sp = document.createElement('span');
@@ -108,7 +107,7 @@ export default function generate() {
       let inp = span.appendChild(document.createElement('input'));
       inp.type = 'radio';
       inp.value = type;
-      inp.id = this._targetId + '-data-table-download-type-option-' + type;
+      inp.id = datatable._targetId + '-data-table-download-type-option-' + type;
       inp.classList.add('data-table-download-type-option');
       // inp.checked = type === 'CSV';
       inp.name = 'data-table-download-type';
@@ -123,18 +122,18 @@ export default function generate() {
         // console.log(type);
         // need to be done
         let a = document.createElement('a');
-        a.setAttribute('download', that._configuration.fileName + '.' + type.toLowerCase());
+        a.setAttribute('download', datatable._configuration.fileName + '.' + type.toLowerCase());
 
         // use urlForDownloading as the first choice
-        if (that._configuration.urlForDownloading) {
-          let url = `${that._configuration.urlForDownloading}&type=${type.toLowerCase()}`;
-          let fields = that._configuration.columnsToDownload
-            ? that._configuration.columnsToDownload
-            : that.shownColumns;
+        if (datatable._configuration.urlForDownloading) {
+          let url = `${datatable._configuration.urlForDownloading}&type=${type.toLowerCase()}`;
+          let fields = datatable._configuration.columnsToDownload
+            ? datatable._configuration.columnsToDownload
+            : datatable.shownColumns;
           for (let field of fields) {
             url += `&field=${field}`;
           }
-          let qo = that._stateManager.queryObject();
+          let qo = datatable._stateManager.queryObject();
           if (qo.filter) {
             let filters = Object.keys(qo.filter);
             if (filters.length > 0) {
@@ -152,17 +151,17 @@ export default function generate() {
           }
           console.log(url);
           a.setAttribute('href', url);
-        } else if (that._dataManager.dataIsComplete && that._configuration.dataToDownload) {
+        } else if (datatable._dataManager.dataIsComplete && datatable._configuration.dataToDownload) {
           let str;
           switch (type) {
             case 'CSV':
-              str = jsonToXSV(that._configuration.dataToDownload, ',');
+              str = jsonToXSV(datatable._configuration.dataToDownload, ',');
               break;
             case 'TSV':
-              str = jsonToXSV(that._configuration.dataToDownload, '\t');
+              str = jsonToXSV(datatable._configuration.dataToDownload, '\t');
               break;
             case 'JSON':
-              str = JSON.stringify(that._configuration.dataToDownload);
+              str = JSON.stringify(datatable._configuration.dataToDownload);
               break;
             default:
           }
@@ -189,17 +188,17 @@ export default function generate() {
 
   // create filter panel
   let filterSection = container.appendChild(document.createElement('div'));
-  filterSection.id = this._targetId + '-filter-section';
+  filterSection.id = datatable._targetId + '-filter-section';
   filterSection.classList.add('filter-section');
 
   // create visualization panel
   let vizSection = container.appendChild(document.createElement('div'));
-  vizSection.id = this._targetId + '-visualization-section';
+  vizSection.id = datatable._targetId + '-visualization-section';
   vizSection.classList.add('visualization-section');
 
   // create notification panel
   let notifySection = container.appendChild(document.createElement('div'));
-  notifySection.id = this._targetId + '-notification-section';
+  notifySection.id = datatable._targetId + '-notification-section';
   notifySection.classList.add('notification-section');
   let progressBar = notifySection.appendChild(document.createElement('div'));
   progressBar.classList.add('progress-bar');
@@ -219,23 +218,23 @@ export default function generate() {
 
   // create table panel
   let table = container.appendChild(document.createElement('table'));
-  table.id = this._targetId + '-table-section';
+  table.id = datatable._targetId + '-table-section';
   table.classList.add('table-section');
 
   // add caption to the table
-  table.appendChild(document.createElement('caption')).appendChild(document.createTextNode(this._configuration.caption));
+  table.appendChild(document.createElement('caption')).appendChild(document.createTextNode(datatable._configuration.caption));
 
   // create table header
   // Since the header is supposed not to update, create it once
   let head = table.appendChild(document.createElement('thead')).appendChild(document.createElement('tr'));
   head.classList.add('table-header-row');
 
-  switch (this._configuration.firstColumnType) {
+  switch (datatable._configuration.firstColumnType) {
     case 'number':
       let firstCol = head.appendChild(document.createElement('th'));
       firstCol.innerHTML = '#';
       firstCol.classList.add('table-row-index-column');
-      firstCol.style.width = ((this._dataManager.cache.totalCount + '').length) * 6 + 24 + 'px';
+      firstCol.style.widatatableh = ((datatable._dataManager.cache.totalCount + '').length) * 6 + 24 + 'px';
       break;
     case 'checkbox':
       break;
@@ -246,13 +245,13 @@ export default function generate() {
     default:
   }
 
-  for (let name of this.shownColumns) {
+  for (let name of datatable._columnSetting.shownColumns) {
     let th = head.appendChild(document.createElement('th'));
     let sp = th.appendChild(document.createElement('span'));
     sp.classList.add('table-row-regular-column-name');
-    sp.appendChild(document.createTextNode(this._columnSetting.colModel[name].label));
-    sp.setAttribute('aria-label', this._columnSetting.colModel[name].label);
-    let model = this._columnSetting.colModel[name];
+    sp.appendChild(document.createTextNode(datatable._columnSetting.colModel[name].label));
+    sp.setAttribute('aria-label', datatable._columnSetting.colModel[name].label);
+    let model = datatable._columnSetting.colModel[name];
     // set width
     if (model.width) {
       th.style.width = model.width;
@@ -283,7 +282,7 @@ export default function generate() {
           ctrls[i].classList.remove('table-sorting-control-active');
         }
         up.classList.add('table-sorting-control-active');
-        that._sortOnColumn(up._colName, 1);
+        datatable._sortOnColumn(up._colName, 1);
       });
 
       let down = control.appendChild(document.createElement('i'));
@@ -298,7 +297,7 @@ export default function generate() {
           ctrls[i].classList.remove('table-sorting-control-active');
         }
         down.classList.add('table-sorting-control-active');
-        that._sortOnColumn(down._colName, -1);
+        datatable._sortOnColumn(down._colName, -1);
       });
     }
   }
@@ -308,7 +307,7 @@ export default function generate() {
 
   // create page controller panel
   let pager = container.appendChild(document.createElement('div'));
-  pager.id = this._targetId + '-pager-section';
+  pager.id = datatable._targetId + '-pager-section';
   pager.classList.add('table-page-control-container');
 
   // create number of rows per page selector
@@ -317,19 +316,19 @@ export default function generate() {
   let rpp = a.appendChild(document.createElement('label'));
   rpp.appendChild(document.createTextNode('Rows per page:'));
   let num = a.appendChild(document.createElement('select'));
-  num.id = this._targetId + '-table-row-number-selector';
+  num.id = datatable._targetId + '-table-row-number-selector';
   rpp.setAttribute('for', num.id);
   num.classList.add('table-row-number-selector');
-  num.setAttribute('aria-label', `showing ${this._stateManager.rowsPerPage} rows per page`);
+  num.setAttribute('aria-label', `showing ${datatable._stateManager.rowsPerPage} rows per page`);
   let arr = [5, 10, 20, 50, 100, 200];
   for (let i of arr) {
     num.appendChild(document.createElement('option')).appendChild(document.createTextNode(i + ''));
   }
 
-  num.selectedIndex = arr.indexOf(this._stateManager.rowsPerPage);
+  num.selectedIndex = arr.indexOf(datatable._stateManager.rowsPerPage);
   num.addEventListener('change', function() {
-    num.setAttribute('aria-label', `showing ${this.value} rows per page`);
-    that._updateRowsPerPage(+this.value);
+    this.setAttribute('aria-label', `showing ${datatable.value} rows per page`);
+    datatable._updateRowsPerPage(+this.value);
   });
 
   // page selector candidate
@@ -342,7 +341,7 @@ export default function generate() {
   minusOneBtn.setAttribute('aria-label', 'last page');
 
   minusOneBtn.addEventListener('click', function() {
-    that._setPageNumber(that._stateManager.currentPageNumber - 1);
+    datatable._setPageNumber(datatable._stateManager.currentPageNumber - 1);
   });
 
 
@@ -353,24 +352,24 @@ export default function generate() {
   cPage.appendChild(document.createTextNode('Page'));
   let inp1 = m.appendChild(document.createElement('input'));
   inp1.type = 'text';
-  inp1.id = this._targetId + '-table-page-number-current';
+  inp1.id = datatable._targetId + '-table-page-number-current';
   cPage.setAttribute('for', inp1.id);
   inp1.setAttribute('aria-label', 'current page is 1');
 
   inp1.addEventListener('change', function() {
-    that._setPageNumber(+this.value);
+    datatable._setPageNumber(this.value);
   });
 
   let tPages = m.appendChild(document.createElement('label'));
   tPages.appendChild(document.createTextNode('of'));
   let inp2 = m.appendChild(document.createElement('input'));
   inp2.type = 'text';
-  inp2.id = this._targetId + '-table-page-number-total';
+  inp2.id = datatable._targetId + '-table-page-number-total';
   tPages.setAttribute('for', inp2.id);
   inp2.classList.add('table-page-number-total');
   inp2.readonly = true;
-  inp2.value = this._totalPages();
-  inp2.setAttribute('aria-label', `all ${this._totalPages()} pages`);
+  inp2.value = datatable._totalPages();
+  inp2.setAttribute('aria-label', `all ${datatable._totalPages()} pages`);
 
   // next page button
   let plusOneBtn = c.appendChild(document.createElement('div'));
@@ -380,19 +379,15 @@ export default function generate() {
   plusOneBtn.setAttribute('aria-label', 'next page');
 
   plusOneBtn.addEventListener('click', function() {
-    that._setPageNumber(that._stateManager.currentPageNumber + 1);
+    datatable._setPageNumber(datatable._stateManager.currentPageNumber + 1);
   });
 
   // add the df to div
   div.appendChild(container);
-  this._updateView();
-  if (this._configuration.filter) {
-    this._createFilterSection()
-      .then(() => {
-        console.log("Filter section created!");
-    })
-      .catch(err => {
-        console.error(err.message);
+  datatable._updateView().catch(err => {console.error(err.message)});
+  if (datatable._configuration.layout.filter) {
+    datatable._createFilterSection().catch(err => {
+        console.error(err);
     });
   }
 }

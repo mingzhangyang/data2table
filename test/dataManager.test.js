@@ -1,8 +1,3 @@
-/**
- * Created by yangm11 on 11/14/2019.
- */
-
-
 import DataManager from '../src/js/data/dataManager.js';
 import {asyncTest} from "./test.js";
 

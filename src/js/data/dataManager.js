@@ -13,7 +13,7 @@ const series = [
   maxRowsPerPage,
 ];
 
-class DataManager {
+export default class DataManager {
   /**
    * constructor of DataManger class
    * @param arr, <array>, required, array of objects
@@ -138,5 +138,3 @@ class DataManager {
     };
   }
 }
-
-export default DataManager;

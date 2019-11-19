@@ -1,19 +1,17 @@
-/**
- * This is an internal method to update the table view.
- * It is mainly invoked by _sort | _filterData | _checkPageNumber to update the table
- * @private
- */
-export default function updateTableView(dt) {
+import formatterPool from '../utils/formatterPool.js';
+import {stringify} from '../utils/convert.js';
+
+export default function updateTableView(datatable, dataToShow, totalPages) {
   // check formatter
-  for (let colName of dt.shownColumns) {
-    if (dt._colModel[colName].formatter) {
-      if (typeof dt._colModel[colName].formatter === 'string') {
-        if (!DataTable.formatterPool((dt._colModel[colName].formatter))) {
+  for (let colName of datatable._columnSetting.shownColumns) {
+    if (datatable._columnSetting.colModel[colName].formatter) {
+      if (typeof datatable._columnSetting.colModel[colName].formatter === 'string') {
+        if (!formatterPool((datatable._columnSetting.colModel[colName].formatter))) {
           throw new Error('formatter not recognized');
         } else {
-          dt._colModel[colName].formatter = DataTable.formatterPool((dt._colModel[colName].formatter));
+          datatable._columnSetting.colModel[colName].formatter = formatterPool((datatable._columnSetting.colModel[colName].formatter));
         }
-      } else if (typeof dt._colModel[colName].formatter === 'function') {
+      } else if (typeof datatable._columnSetting.colModel[colName].formatter === 'function') {
         // do nothing
       } else {
         throw new Error('Invalid formatter for ' + colName);
@@ -21,10 +19,10 @@ export default function updateTableView(dt) {
     }
   }
 
-  if (typeof dt._targetId !== 'string' || !dt._targetId) {
+  if (typeof datatable._targetId !== 'string' || !datatable._targetId) {
     throw new Error('an element id expected');
   }
-  let table = document.getElementById(dt._targetId + '-table-section');
+  let table = document.getElementById(datatable._targetId + '-table-section');
   if (!table) {
     throw new Error('failed to locate the table');
   }
@@ -35,21 +33,30 @@ export default function updateTableView(dt) {
     tBody.removeChild(tBody.lastChild);
   }
 
-  // _pageNumberInAll should be use below
-  let startIndex = (dt._pageNumberInAll - 1) * dt._rowsPerPage + 1;
+  // _stateManager.currentPageNumber should be use below
+  let baseIndex = datatable._stateManager.getStart() + 1;
   let df = document.createDocumentFragment();
-  for (let i = 0; i < dt._dataToShow.length; i++) {
-    let row = dt._dataToShow[i];
+  for (let i = 0; i < dataToShow.length; i++) {
+    let row = dataToShow[i];
     let tr = df.appendChild(document.createElement('tr'));
-    if (dt._firstColumnAsRowNumber) {
-      let td = tr.appendChild(document.createElement('td'));
-      td.innerText = startIndex + i;
-      td.classList.add('table-row-index-column');
+    switch (datatable._configuration.firstColumnType) {
+      case 'number':
+        let td = tr.appendChild(document.createElement('td'));
+        td.innerText = baseIndex + i;
+        td.classList.add('table-row-index-column');
+        break;
+      case 'checkbox':
+        break;
+      case 'image':
+        break;
+      case 'custom':
+        break;
+      default:
     }
-    for (let name of dt.shownColumns) {
+    for (let name of datatable._columnSetting.shownColumns) {
       let td = tr.appendChild(document.createElement('td'));
-      if (dt._colModel[name].formatter) {
-        let v = dt._colModel[name].formatter(row[name]);
+      if (datatable._columnSetting.colModel[name].formatter) {
+        let v = datatable._columnSetting.colModel[name].formatter(row[name]);
         switch (typeof v) {
           case 'string':
             td.innerHTML = v;
@@ -61,10 +68,10 @@ export default function updateTableView(dt) {
             td.innerText = 'invalid customized formatter';
         }
       } else {
-        td.innerText = DataTable.convertToString(row[name]);
+        td.innerText = stringify(row[name]);
       }
-      if (dt._colModel[name].align) {
-        td.style.textAlign = dt._colModel[name].align;
+      if (datatable._columnSetting.colModel[name].align) {
+        td.style.textAlign = datatable._columnSetting.colModel[name].align;
       }
     }
   }
@@ -72,12 +79,12 @@ export default function updateTableView(dt) {
 
   // update current page number and total page number
   // Below is necessary and indispensable!
-  let cPage = document.getElementById(dt._targetId + '-table-page-number-current');
-  cPage.value = dt._pageNumberInAll;
+  let cPage = document.getElementById(datatable._targetId + '-table-page-number-current');
+  cPage.value = datatable._stateManager.currentPageNumber;
   cPage.setAttribute('aria-label', 'current page is ' + cPage.value);
-  let tPages = document.getElementById(dt._targetId + '-table-page-number-total');
-  tPages.value = dt._totalPages;
-  tPages.setAttribute('aria-label', `all ${dt._totalPages} pages`);
+  let tPages = document.getElementById(datatable._targetId + '-table-page-number-total');
+  tPages.value = totalPages;
+  tPages.setAttribute('aria-label', `all ${totalPages} pages`);
 }
 
 

@@ -4,13 +4,14 @@
 
 import createColModel from './utils/colModel.js';
 import DataManager from './data/dataManager.js';
+import StateManager from './state/stateManager.js';
 import formatterPool from './utils/formatterPool.js';
 import notifyStatus from './methods/notify.js';
 import updateView from './methods/updateView.js';
 import createFilterSection from './methods/createFilterSection.js';
-import generate from './methods/generate.js';
- 
-class DataTable {
+import generateTable from './methods/generate.js';
+
+export default class DataTable {
   /******************************************************************************
    * To create an instance of DataTable class
    * @param arr: <Array>, array of data objects
@@ -19,7 +20,7 @@ class DataTable {
    *
    * @returns {object}
    *******************************************************************************/
-  constructor(arr, targetId, opts={dataIsComplete: true}) {
+  constructor(arr, targetId, opts = {dataIsComplete: true}) {
     if (typeof targetId !== 'string' || !targetId) {
       throw new TypeError('target id should be a non-empty string');
     }
@@ -41,7 +42,7 @@ class DataTable {
       },
       firstColumnType: undefined, // 'number', 'checkbox', 'custom'
       scheme: 'default',
-      fileName: opts.fileName ? opts.fileName : "data",
+      fileName: opts.fileName ? opts.fileName : 'data',
       urlForDownloading: opts.urlForDownloading,
       columnsToDownload: opts.columnsToDownload,
       dataToDownload: opts.dataToDownload,
@@ -148,7 +149,7 @@ class DataTable {
     let tmp = [];
     for (let col of arr) {
       if (!this._columnSetting.allColumns.includes(col)) {
-        throw "invalid column name found when set shown columns";
+        throw 'invalid column name found when set shown columns';
       }
       tmp.push(col);
     }
@@ -161,7 +162,7 @@ class DataTable {
    * @param colName
    * @param type, currently supporting value faceting only
    */
-  addFilter(colName, type="value") {
+  addFilter(colName, type = 'value') {
     if (!this._columnSetting.shownColumns.includes(colName)) {
       throw `the column name ${colName} is invalid`;
     }
@@ -182,38 +183,38 @@ class DataTable {
    * @param elementDescriptor <object>, e.g. {tagName: 'div', className: 'my-class', text: 'some text'}
    */
   setFirstColumnType(type, elementDescriptor) {
-    if (typeof type !== "string") {
-      throw new TypeError("a string expected to set the type of the first column")
+    if (typeof type !== 'string') {
+      throw new TypeError('a string expected to set the type of the first column');
     }
     switch (type.toLowerCase()) {
-      case "number":
-        this._configuration.firstColumnType = "number";
+      case 'number':
+        this._configuration.firstColumnType = 'number';
         break;
-      case "checkbox":
-        this._configuration.firstColumnType = "checkbox";
+      case 'checkbox':
+        this._configuration.firstColumnType = 'checkbox';
         break;
-      case "image":
-        this._configuration.firstColumnType = "image";
-        if (elementDescriptor.tagName !== "img") {
-          throw new TypeError("an img element descriptor expected")
+      case 'image':
+        this._configuration.firstColumnType = 'image';
+        if (elementDescriptor.tagName !== 'img') {
+          throw new TypeError('an img element descriptor expected');
         }
         this._configuration.firstColumnFormatter = elementDescriptor.formatter;
         break;
-      case "custom":
-        this._configuration.firstColumnType = "custom";
+      case 'custom':
+        this._configuration.firstColumnType = 'custom';
         let t = document.createElement(elementDescriptor.tagName);
-        if (Object.prototype.toString.call(t) === "[object HTMLUnknownElement]") {
-          throw "invalid tag name to create custom element";
+        if (Object.prototype.toString.call(t) === '[object HTMLUnknownElement]') {
+          throw 'invalid tag name to create custom element';
         }
         this._configuration.firstColumnFormatter = elementDescriptor.formatter;
         break;
       default:
-        throw new TypeError("valid types: number, checkbox, image, custom")
+        throw new TypeError('valid types: number, checkbox, image, custom');
     }
   }
 
   generate() {
-    generate.bind(this)();
+    generateTable(this);
   }
 
   /************************* Below are methods for internal use *****************************/
@@ -223,8 +224,9 @@ class DataTable {
    * @returns {*}
    * @private
    */
-  _dataToShow() {
-    return this._dataManager.serve(this._stateManager.queryObject()).data;
+  async _dataToShow() {
+    let res = await this._dataManager.serve(this._stateManager.queryObject());
+    return res.data;
   }
 
   /**
@@ -246,16 +248,18 @@ class DataTable {
    */
   _setPageNumber(n) {
     if (isNaN(n)) {
-      alert("Invalid page number!");
+      alert('Invalid page number!');
       return;
     }
     let max = this._totalPages();
     if (n < 1 || n > max) {
-      alert("Page number out of range!");
+      alert('Page number out of range!');
       return;
     }
     this._stateManager.currentPageNumber = n;
-    this._updateView();
+    this._updateView().catch(err => {
+      console.error(err.message);
+    });
   }
 
   /**
@@ -265,7 +269,9 @@ class DataTable {
   _updateRowsPerPage(n) {
     this._stateManager.rowsPerPage = n;
     this._stateManager.currentPageNumber = 1;
-    this._updateView();
+    this._updateView().catch(err => {
+      console.error(err.message);
+    });
   }
 
   /**
@@ -278,7 +284,9 @@ class DataTable {
     this._stateManager.sort = {};
     this._stateManager.sort[colName] = n;
     this._stateManager.currentPageNumber = 1;
-    this._updateView();
+    this._updateView().catch(err => {
+      console.error(err.message);
+    });
   }
 
   /**
@@ -287,7 +295,9 @@ class DataTable {
    */
   _filterData() {
     this._stateManager.currentPageNumber = 1;
-    this._updateView();
+    this._updateView().catch(err => {
+      console.error(err.message);
+    });
   }
 
   /**
@@ -333,11 +343,10 @@ class DataTable {
    * The most called function
    * @private
    */
-  _updateView() {
-    let data = this._dataToShow();
+  async _updateView() {
+    let data = await this._dataToShow();
     let totalPages = this._totalPages();
-    // below is the steps to update the table
-    updateView(this);
+    updateView(this, data, totalPages);
   }
 
   /**
@@ -345,9 +354,18 @@ class DataTable {
    * @private
    */
   async _createFilterSection() {
-    let data = this._dataManager.serve({facets: Object.keys(this._stateManager.filterStatus)});
-    // to be continued
-    createFilterSection(this);
+    let facets = await this._dataManager.serve({facets: Object.keys(this._stateManager.filterStatus)});
+    let tmp = {};
+    for (let facet of facets) {
+      tmp[facet.name] = facet.facets;
+    }
+    this._stateManager.filterStatus = tmp;
+    try {
+      createFilterSection(this);
+    } catch (err) {
+      throw err;
+    }
+    return true;
   }
 
 }

@@ -1,12 +1,10 @@
-'use strict';
-
-class StateManager {
+export default class StateManager {
   constructor() {
     this.rowsPerPage = 10;
     this.currentPageNumber = 1;
     this.sort = {};
-    this.filter = {}; // only the selected ones
-    this.filterStatus = {}; // contains all
+    this.filter = {}; // only name and value of the selected ones
+    this.filterStatus = {}; // contains all info (name, value, type, selected) of all faceting
   }
 
   extractFilter() {
@@ -21,6 +19,10 @@ class StateManager {
     return tmp;
   }
 
+  getStart() {
+    return (this.currentPageNumber - 1) * this.rowsPerPage;
+  }
+
   queryObject() {
     return {
       start: (this.currentPageNumber - 1) * this.rowsPerPage,
@@ -29,6 +31,4 @@ class StateManager {
       sort: this.sort,
     };
   }
-
-
 }

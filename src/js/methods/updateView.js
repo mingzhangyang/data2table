@@ -9,7 +9,8 @@ export default function updateTableView(datatable, dataToShow, totalPages) {
         if (!formatterPool((datatable._columnSetting.colModel[colName].formatter))) {
           throw new Error('formatter not recognized');
         } else {
-          datatable._columnSetting.colModel[colName].formatter = formatterPool((datatable._columnSetting.colModel[colName].formatter));
+          datatable._columnSetting.colModel[colName].formatter = formatterPool(
+            (datatable._columnSetting.colModel[colName].formatter));
         }
       } else if (typeof datatable._columnSetting.colModel[colName].formatter === 'function') {
         // do nothing

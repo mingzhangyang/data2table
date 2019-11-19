@@ -1,16 +1,16 @@
 const pool = {
-  highlight: function (s) {
+  highlight: function(s) {
     return `<mark>${s}</mark>`;
   },
-  addLink: function (obj) {
+  addLink: function(obj) {
     return `<a href="${obj.link}">${obj.text}</a>`;
   },
-  bold: function (word) {
+  bold: function(word) {
     return `<strong>${word}</strong>`;
   },
-  colorText: function (obj) {
+  colorText: function(obj) {
     return `<span style="color: ${obj.color}">${obj.text}</span>`;
-  }
+  },
 };
 
 export default function formatterPool(type) {

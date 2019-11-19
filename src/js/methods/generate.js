@@ -222,7 +222,8 @@ export default function generateTable(datatable) {
   table.classList.add('table-section');
 
   // add caption to the table
-  table.appendChild(document.createElement('caption')).appendChild(document.createTextNode(datatable._configuration.caption));
+  table.appendChild(document.createElement('caption')).
+    appendChild(document.createTextNode(datatable._configuration.caption));
 
   // create table header
   // Since the header is supposed not to update, create it once
@@ -384,10 +385,10 @@ export default function generateTable(datatable) {
 
   // add the df to div
   div.appendChild(container);
-  datatable._updateView().catch(err => {console.error(err.message)});
+  datatable._updateView().catch(err => {console.error(err.message);});
   if (datatable._configuration.layout.filter) {
     datatable._createFilterSection().catch(err => {
-        console.error(err);
+      console.error(err);
     });
   }
 }

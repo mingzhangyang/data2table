@@ -24,5 +24,8 @@
   "bugs": {
     "url": "https://github.com/mingzhangyang/data2table/issues"
   },
-  "homepage": "https://github.com/mingzhangyang/data2table#readme"
+  "homepage": "https://github.com/mingzhangyang/data2table#readme",
+  "devDependencies": {
+    "gulp": "^4.0.2"
+  }
 }

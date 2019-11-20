@@ -284,7 +284,17 @@ export default class DataTable {
    */
   _filterData() {
     this._stateManager.currentPageNumber = 1;
-    this._updateView().catch(err => {
+    this._stateManager.extractFilter();
+    this._updateView()
+    .then(() => {
+      let wrapper = document.getElementById(this._targetId + '-filter-viz-download-buttons-wrapper');
+      if (Object.keys(this._stateManager.filter).length) {
+        wrapper.classList.add('filter-active');
+      } else {
+        wrapper.classList.remove('filter-active');
+      }
+    })
+    .catch(err => {
       console.error(err.message);
     });
   }

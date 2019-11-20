@@ -7,6 +7,7 @@ export default class StateManager {
     this.filterStatus = {}; // contains all info (name, value, type, selected) of all faceting
   }
 
+  // analyzing the filterStatus object to update the filter
   extractFilter() {
     let tmp = {};
     let colNames = Object.keys(this.filterStatus);
@@ -16,7 +17,7 @@ export default class StateManager {
         tmp[colName] = arr.map(d => d.facetValue);
       }
     }
-    return tmp;
+    this.filter = tmp;
   }
 
   getStart() {
@@ -27,7 +28,7 @@ export default class StateManager {
     return {
       start: (this.currentPageNumber - 1) * this.rowsPerPage,
       limit: this.rowsPerPage,
-      filter: this.extractFilter(),
+      filter: this.filter,
       sort: this.sort,
     };
   }

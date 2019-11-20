@@ -34,14 +34,14 @@ export default function updateTableView(datatable, dataToShow, totalPages) {
     tBody.removeChild(tBody.lastChild);
   }
 
-  // _stateManager.currentPageNumber should be use below
-  let baseIndex = datatable._stateManager.getStart() + 1;
+  // re-generate all the rows up to date
   let df = document.createDocumentFragment();
   for (let i = 0; i < dataToShow.length; i++) {
     let row = dataToShow[i];
     let tr = df.appendChild(document.createElement('tr'));
     switch (datatable._configuration.firstColumnType) {
       case 'number':
+        let baseIndex = datatable._stateManager.getStart() + 1;
         let td = tr.appendChild(document.createElement('td'));
         td.innerText = baseIndex + i;
         td.classList.add('table-row-index-column');

@@ -14,6 +14,14 @@ An easy way to display data on web
 3. or try CDN
 
    `not working yet`
+   
+### For developement
+
+1. npm install --global gulp-cli
+
+2. npm install
+
+3. 
 
 ### Usage
 

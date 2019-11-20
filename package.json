@@ -2,11 +2,17 @@
   "name": "data2table",
   "version": "1.0.0",
   "description": "An easy way to display data as table on web",
-  "main": "\u001b[dex.js\u001b[C no",
+  "main": "",
   "directories": {
-    "test": "test"
+    "test": "test",
+    "dist": "dist",
+    "src": {
+      "css": "css",
+      "js": "js"
+    }
   },
   "scripts": {
+    "build": "gulp build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -25,7 +31,30 @@
     "url": "https://github.com/mingzhangyang/data2table/issues"
   },
   "homepage": "https://github.com/mingzhangyang/data2table#readme",
+  "dependencies": {
+    "@babel/polyfill": "^7.7.0"
+  },
   "devDependencies": {
-    "gulp": "^4.0.2"
-  }
+    "@babel/core": "^7.7.2",
+    "@babel/preset-env": "^7.7.1",
+    "babel-plugin-syntax-async-functions": "^6.13.0",
+    "del": "^4.1.1",
+    "eslint": "^5.16.0",
+    "gulp": "^4.0.2",
+    "gulp-autoprefixer": "^6.1.0",
+    "gulp-babel": "^8.0.0",
+    "gulp-clean-css": "^4.2.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-postcss": "^8.0.0",
+    "gulp-rename": "^1.4.0",
+    "gulp-uglify": "^3.0.2",
+    "gulp-uglify-es": "^1.0.4",
+    "rollup": "^1.26.5"
+  },
+  "browserslist": [
+    "last 2 version",
+    "> 1%",
+    "maintained node versions",
+    "not dead"
+  ]
 }

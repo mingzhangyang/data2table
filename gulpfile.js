@@ -1,25 +1,27 @@
 const rollup = require('rollup');
-const { parallel, src, dest } = require('gulp');
+const { parallel, series, src, dest } = require('gulp');
 const uglify = require('gulp-uglify');
 const uglifyES = require('gulp-uglify-es').default;
 const autoprefixer = require('gulp-autoprefixer');
 const cleanCSS = require('gulp-clean-css');
 const babel = require('gulp-babel');
 const rename = require('gulp-rename');
-// const del = require('del');
+const concat = require('gulp-concat');
+const del = require('del');
 
 const path = require('path');
-const source = "./src";
-const target = "./dist";
 
-const jsFiles = [
-  path.join(source, 'js', 'index.js'),
-  path.join(source, 'js', 'help.js')
-];
+// It is recommended to use absolute path to avoid copying directory to dist
+const target = path.join(__dirname, 'dist');
+const jsFiles = path.join(__dirname, 'src', 'datatable.bundle.js');
+const polyfill = path.join(__dirname, "node_modules", "@babel/polyfill/dist/polyfill.min.js");
+const cssFiles = path.join(__dirname, 'src', 'css', '*.css');
 
-const polyfill = "./node_modules/@babel/polyfill/dist/polyfill.min.js";
-
-const cssFiles = path.join(source, 'css', '*.css');
+function cleanDist() {
+  return del([
+    'dist/**/*',
+  ]);
+}
 
 
 function cssTask() {
@@ -28,6 +30,7 @@ function cssTask() {
   .pipe(cleanCSS({
     compatibility: 'ie8'
   }))
+  .pipe(concat('datatable.core.css'))
   .pipe(dest(target));
 }
 
@@ -57,10 +60,14 @@ function jsTaskNoModule() {
 }
 
 function defaultTask(cb) {
-  // place code for your default task here
-  // eslint-disable-next-line no-console
   console.log(jsFiles);
   cb();
+}
+
+function cleanTmp() {
+  return del([
+    './src/datatable.bundle.js',
+  ]);
 }
 
 function bundle() {
@@ -68,10 +75,9 @@ function bundle() {
     input: './src/js/datatable.js',
   }).then(bundle => {
     return bundle.write({
-      file: './dist/datatable.module.js',
+      file: './src/datatable.bundle.js',
       format: 'iife',
       name: 'DataTable',
-      sourcemap: true
     });
   });
 }
@@ -79,13 +85,26 @@ function bundle() {
 
 module.exports = {
   default: defaultTask,
-  build: parallel(
-    cssTask,
-    copyPolyfill,
-    jsTaskNoModule,
-    jsTaskWithModule
+  build: series(
+    cleanDist,
+    parallel(
+      cssTask,
+      copyPolyfill,
+      series(
+        bundle,
+        parallel(
+          jsTaskNoModule,
+          jsTaskWithModule
+        ),
+        cleanTmp,
+      ),
+    ),
   ),
-  bundle: bundle
+  clean: cleanDist,
+  css: cssTask,
+  "js-no-module": series(bundle, jsTaskNoModule),
+  "js-module": series(bundle, jsTaskWithModule),
+  cleanTmp: cleanTmp,
 };
 
 

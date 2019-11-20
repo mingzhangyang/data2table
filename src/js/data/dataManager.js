@@ -1,5 +1,3 @@
-'use strict';
-
 import fetchData from './fetchData.js';
 import getValueFacets from './faceting.js';
 import {assertQueryObject} from '../utils/cmp.js';

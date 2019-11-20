@@ -1,4 +1,4 @@
-function getValueFacetsForOneProp(arr, prop) {
+export default function getValueFacetsForOneProp(arr, prop) {
     let m = new Map();
     for (let obj of arr) {
         let v = obj[prop];
@@ -41,5 +41,3 @@ export const getValueFacets = function(data, facets) {
     }
     return res;
 };
-
-export default getValueFacets;

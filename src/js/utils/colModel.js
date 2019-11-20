@@ -1,8 +1,3 @@
-/**
- * Created by yangm11 on 11/14/2019.
- */
-'use strict';
-
 const createColModel = (arr) => {
   // Create column model object
   let res = {};

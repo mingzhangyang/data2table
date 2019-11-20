@@ -1,8 +1,3 @@
-/**
- * Created by yangm11 on 8/31/2018.
- */
-'use strict';
-
 export function splitLineB(s, sep) {
   sep = sep || ',';
   let elem = '';

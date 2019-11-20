@@ -1,4 +1,4 @@
-function fetchData(queryObject) {
+export default function fetchData(queryObject) {
   let start = queryObject.start;
   let limit = queryObject.limit;
   let filter = queryObject.filter;
@@ -54,7 +54,4 @@ function fetchData(queryObject) {
     totalCount: tmp.length
   };
 };
-
-
-export default fetchData;
  

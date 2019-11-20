@@ -15,13 +15,13 @@ An easy way to display data on web
 
    `not working yet`
    
-### For developement
+### For development
 
-1. npm install --global gulp-cli
+1. `npm install --global gulp-cli`
 
-2. npm install
+2. `npm install`
 
-3. 
+3. `gulp build`
 
 ### Usage
 

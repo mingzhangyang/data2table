@@ -12,12 +12,14 @@
 - totalRows/totalPages
   - initialized at start
   - when to update:
-  - what should be taken care afterhand:
+  - what should be taken care after-hand:
 - currentPage
   - initialized at start
   - when to update:
-  - what should be taken care afterhand:
+  - what should be taken care after-hand:
 - rowsPerPage
   - initialized at start
   - when to update:
-  - what should be taken care afterhand:
+  - what should be taken care after-hand:
+  
+  ### The above design has been implemented

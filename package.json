@@ -1,15 +1,10 @@
 {
-  "name": "data2table",
+  "name": "@mingzhang_yang/data2table",
   "version": "1.0.0",
   "description": "An easy way to display data as table on web",
-  "main": "",
+  "main": "./src/js/datatable.js",
   "directories": {
-    "test": "test",
-    "dist": "dist",
-    "src": {
-      "css": "css",
-      "js": "js"
-    }
+    "test": "test"
   },
   "scripts": {
     "build": "gulp build",

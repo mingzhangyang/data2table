@@ -67,6 +67,7 @@ export default function createFilterSection(datatable) {
         this.counterpart.selected = this.checked;
         datatable._filterData();
       });
+
       let label = span.appendChild(document.createElement('label'));
       label.setAttribute('for', uid);
       label.appendChild(document.createTextNode(`${obj.facetValue} (${obj.count})`));

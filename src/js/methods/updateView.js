@@ -31,7 +31,11 @@ export default function updateTableView(datatable, dataToShow, totalPages) {
   // delete all the rows in tBody
   let tBody = table.getElementsByTagName('tbody')[0];
   while (tBody.lastChild) {
-    tBody.removeChild(tBody.lastChild);
+    let tr = tBody.lastChild;
+    if (tr && tr.firstChild["attachedData"]) {
+      tr.firstChild.attachedData = null;
+    }
+    tBody.removeChild(tr);
   }
 
   // re-generate all the rows up to date
@@ -42,11 +46,14 @@ export default function updateTableView(datatable, dataToShow, totalPages) {
     switch (datatable._configuration.firstColumnType) {
       case 'number':
         let baseIndex = datatable._stateManager.getStart() + 1;
-        let td = tr.appendChild(document.createElement('td'));
-        td.innerText = baseIndex + i;
-        td.classList.add('table-row-index-column');
+        let td_i = tr.appendChild(document.createElement('td'));
+        td_i.innerText = baseIndex + i;
+        td_i.classList.add('table-row-index-column');
         break;
       case 'checkbox':
+        let td_c = tr.appendChild(document.createElement('td'));
+        td_c.classList.add('table-row-index-column');
+        td_c.attachedData = row;
         break;
       case 'image':
         break;

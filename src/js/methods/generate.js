@@ -9,8 +9,8 @@ export default function generateTable(datatable) {
   target.parentNode.insertBefore(div, target);
   target.parentNode.removeChild(target);
   div.id = datatable._targetId;
-  div.classList.add(datatable._uid);
-  div.classList.add(datatable._configuration.scheme);
+  div.classList.add(datatable._uid, datatable._configuration.scheme);
+
   // set ARIA attribute
   div.setAttribute('role', 'table');
 
@@ -61,7 +61,7 @@ export default function generateTable(datatable) {
     example.appendChild(document.createElement('span')).appendChild(document.createTextNode('"length": > 120'));
     example.appendChild(document.createElement('span')).appendChild(document.createTextNode(';'));
     example.appendChild(document.createElement('span')).
-      appendChild(document.createTextNode('"height": 80 AND "widatatableh": 100'));
+      appendChild(document.createTextNode('"height": 80 AND "width": 100'));
     example.setAttribute('role', 'row');
   }
 
@@ -91,7 +91,6 @@ export default function generateTable(datatable) {
   }
 
   if (datatable._configuration.download) {
-    let datatable = datatable;
     let dBtn = btns.appendChild(document.createElement('div'));
     dBtn.classList.add('table-top-button', 'download-control-button');
     let sp = document.createElement('span');
@@ -119,8 +118,6 @@ export default function generateTable(datatable) {
 
       label.addEventListener('click', () => {
         console.log('download type selected');
-        // console.log(type);
-        // need to be done
         let a = document.createElement('a');
         a.setAttribute('download', datatable._configuration.fileName + '.' + type.toLowerCase());
 
@@ -129,7 +126,7 @@ export default function generateTable(datatable) {
           let url = `${datatable._configuration.urlForDownloading}&type=${type.toLowerCase()}`;
           let fields = datatable._configuration.columnsToDownload
             ? datatable._configuration.columnsToDownload
-            : datatable.shownColumns;
+            : datatable._columnSetting.shownColumns;
           for (let field of fields) {
             url += `&field=${field}`;
           }
@@ -232,12 +229,16 @@ export default function generateTable(datatable) {
 
   switch (datatable._configuration.firstColumnType) {
     case 'number':
-      let firstCol = head.appendChild(document.createElement('th'));
-      firstCol.innerHTML = '#';
-      firstCol.classList.add('table-row-index-column');
-      firstCol.style.widatatableh = ((datatable._dataManager.cache.totalCount + '').length) * 6 + 24 + 'px';
+      let firstCol_i = head.appendChild(document.createElement('th'));
+      firstCol_i.innerHTML = '#';
+      firstCol_i.classList.add('table-row-index-column');
+      firstCol_i.style.width = ((datatable._dataManager.cache.totalCount + '').length) * 6 + 24 + 'px';
       break;
     case 'checkbox':
+      let firstCol_c = head.appendChild(document.createElement('input'));
+      firstCol_c.setAttribute('type', 'checkbox');
+      firstCol_c.classList.add('table-row-index-column');
+      firstCol_c.style.width = '24px';
       break;
     case 'image':
       break;
@@ -328,7 +329,7 @@ export default function generateTable(datatable) {
 
   num.selectedIndex = arr.indexOf(datatable._stateManager.rowsPerPage);
   num.addEventListener('change', function() {
-    this.setAttribute('aria-label', `showing ${datatable.value} rows per page`);
+    this.setAttribute('aria-label', `showing ${this.value} rows per page`);
     datatable._updateRowsPerPage(+this.value);
   });
 

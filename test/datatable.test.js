@@ -8,7 +8,8 @@ window.onload = () => {
     dataIsComplete: true,
     downloadFileName: 'data2table.test',
     dataToDownload: sample,
-    stickyHeader: true
+    stickyHeader: true,
+    pagination: false,
   });
   // dt.setCaption("DataTable Demo");
   dt.addFilter('Gene_symbol', 'value');

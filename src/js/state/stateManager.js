@@ -18,6 +18,7 @@ export default class StateManager {
       }
     }
     this.filter = tmp;
+    return tmp;
   }
 
   getStart() {
@@ -28,7 +29,7 @@ export default class StateManager {
     return {
       start: (this.currentPageNumber - 1) * this.rowsPerPage,
       limit: this.rowsPerPage,
-      filter: this.filter,
+      filter: this.extractFilter(),
       sort: this.sort,
     };
   }

@@ -5,7 +5,7 @@ An easy way to display data on web. Demo: https://mingzhangyang.github.io/myBenc
 
 1. using npm ? Try the command below.
 
-   `npm i @mingzhang_yang/data2table`
+   `npm i data2table`
 
 2. Or visit GitHub to download the source code
 

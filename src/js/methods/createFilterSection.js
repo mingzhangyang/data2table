@@ -23,11 +23,11 @@ export default function createFilterSection(datatable) {
     fBtn.appendChild(document.createTextNode('Filters'));
     fBtn.setAttribute('role', 'button');
     fBtn.setAttribute('aria-label', 'filter button');
-    fBtn.addEventListener('click', function() {
+    fBtn.addEventListener('click', function () {
       document.getElementById(datatable._targetId).classList.toggle('filter-section-active');
     });
     fBtn.classList.add('filter-ready-signal');
-    setTimeout(function() {
+    setTimeout(function () {
       fBtn.classList.remove('filter-ready-signal');
     }, 2000);
   }
@@ -63,7 +63,7 @@ export default function createFilterSection(datatable) {
       inp.id = uid;
 
       inp.counterpart = obj;
-      inp.addEventListener('change', function() {
+      inp.addEventListener('change', function () {
         this.counterpart.selected = this.checked;
         datatable._filterData();
       });
@@ -87,7 +87,7 @@ export default function createFilterSection(datatable) {
     if (datatable._stateManager.filterStatus[filterName].length > 10) {
       let ctrl = td.appendChild(document.createElement('span'));
       ctrl.classList.add('unfold-fold-ctrl');
-      ctrl.addEventListener('click', function(evt) {
+      ctrl.addEventListener('click', function (evt) {
         evt.target.parentNode.classList.toggle('unfold-fold-fold');
       });
     }

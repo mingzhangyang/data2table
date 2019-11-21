@@ -19,7 +19,7 @@ export function splitLineB(s, sep) {
         continue;
       }
     }
-    elem  += s[i];
+    elem += s[i];
   }
   array.push(elem);
   return array;
@@ -35,7 +35,7 @@ export function csvString2JSON(str, delimiter, firstLineAsColName) {
     num = 1;
   } else {
     for (let i = 0; i < arr[0].length; i++) {
-      colNames.push(`Col #${i+1}`);
+      colNames.push(`Col #${i + 1}`);
     }
   }
   let res = [];
@@ -52,7 +52,7 @@ export function csvString2JSON(str, delimiter, firstLineAsColName) {
 export function jsonArrayToJsonObj(arr) {
   let colNames = [];
   for (let i = 0; i < arr[0].length; i++) {
-    colNames.push(`Col #${i+1}`);
+    colNames.push(`Col #${i + 1}`);
   }
   let res = [];
   for (let k = 0; k < arr.length; k++) {
@@ -74,6 +74,7 @@ export function flatten(obj) {
     throw new TypeError('an object expected');
   }
   let res = {};
+
   function worker(obj, path) {
     let keys = Object.keys(obj);
     for (let key of keys) {
@@ -85,6 +86,7 @@ export function flatten(obj) {
       }
     }
   }
+
   worker(obj, '');
   return res;
 }
@@ -105,8 +107,8 @@ export function analyzePaths(arr) {
   for (let i = 0; i < maxDepth; i++) {
     tmp[i] = a.map(d => {
       let obj = {
-        path: d.slice(0, i+1).join('/'),
-        depth: i+1
+        path: d.slice(0, i + 1).join('/'),
+        depth: i + 1
       };
       if (d.length > i) {
         obj.prop = d[i];
@@ -118,9 +120,9 @@ export function analyzePaths(arr) {
   // calculate rowSpan and mark the field to be removed
   for (let k = tmp.length - 2; k > -1; k--) {
     for (let h = 0; h < arr.length; h++) {
-      if (tmp[k][h].path === tmp[k+1][h].path) {
-        tmp[k][h].rowSpan = tmp[k+1][h].rowSpan ? tmp[k+1][h].rowSpan + 1 : 1 + 1;
-        tmp[k+1][h].toBeDeleted = true;
+      if (tmp[k][h].path === tmp[k + 1][h].path) {
+        tmp[k][h].rowSpan = tmp[k + 1][h].rowSpan ? tmp[k + 1][h].rowSpan + 1 : 1 + 1;
+        tmp[k + 1][h].toBeDeleted = true;
       }
     }
   }
@@ -132,11 +134,11 @@ export function analyzePaths(arr) {
     let t = [tmp[i][0]];
     t[0].colSpan = 1;
     for (let j = 1; j < arr.length; j++) {
-      if (t[t.length-1].path === tmp[i][j].path) {
-        t[t.length-1].colSpan += 1;
+      if (t[t.length - 1].path === tmp[i][j].path) {
+        t[t.length - 1].colSpan += 1;
       } else {
         t.push(tmp[i][j]);
-        t[t.length-1].colSpan = 1;
+        t[t.length - 1].colSpan = 1;
       }
     }
     res[i] = t.filter(d => !d.toBeDeleted);
@@ -161,6 +163,7 @@ export function propStat(obj) {
     children: [],
     maxDepth: 0
   };
+
   // below is the worker for recursion
   function worker(obj, parentStatObj) {
     let keys = Object.keys(obj);
@@ -185,6 +188,7 @@ export function propStat(obj) {
       }
     }
   }
+
   worker(obj, root);
 
   // recursive function to count colSpan
@@ -200,6 +204,7 @@ export function propStat(obj) {
     }
     return obj.colSpan;
   }
+
   count(root);
   return root;
 }

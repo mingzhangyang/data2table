@@ -162,7 +162,7 @@ export default class DataTable {
    * @param colName
    * @param type, currently supporting value faceting only
    */
-  addFilter(colName, type="value") {
+  addFilter(colName, type = "value") {
     if (!this._columnSetting.shownColumns.includes(colName)) {
       throw `the column name ${colName} is invalid`;
     }
@@ -285,17 +285,17 @@ export default class DataTable {
   _filterData() {
     this._stateManager.currentPageNumber = 1;
     this._updateView()
-    .then(() => {
-      let wrapper = document.getElementById(this._targetId + '-filter-viz-download-buttons-wrapper');
-      if (Object.keys(this._stateManager.filter).length) {
-        wrapper.classList.add('filter-active');
-      } else {
-        wrapper.classList.remove('filter-active');
-      }
-    })
-    .catch(err => {
-      console.error(err.message);
-    });
+      .then(() => {
+        let wrapper = document.getElementById(this._targetId + '-filter-viz-download-buttons-wrapper');
+        if (Object.keys(this._stateManager.filter).length) {
+          wrapper.classList.add('filter-active');
+        } else {
+          wrapper.classList.remove('filter-active');
+        }
+      })
+      .catch(err => {
+        console.error(err.message);
+      });
   }
 
   /**

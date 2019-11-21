@@ -31,7 +31,7 @@ export default function generateTable(datatable) {
     sb.id = datatable._targetId + '-search-box';
     sb.classList.add('search-box');
     sb.setAttribute('aria-label', 'search box');
-    sb.addEventListener('focus', function() {
+    sb.addEventListener('focus', function () {
       this.parentElement.classList.remove('search-hints-active');
     });
 
@@ -46,7 +46,7 @@ export default function generateTable(datatable) {
     sp.classList.add('question-mark');
     sp.setAttribute('role', 'button');
     sp.setAttribute('aria-label', 'hints for search syntax');
-    sp.addEventListener('click', function() {
+    sp.addEventListener('click', function () {
       this.parentElement.classList.add('search-hints-active');
     });
 
@@ -60,8 +60,7 @@ export default function generateTable(datatable) {
     example.appendChild(document.createTextNode('e.g. '));
     example.appendChild(document.createElement('span')).appendChild(document.createTextNode('"length": > 120'));
     example.appendChild(document.createElement('span')).appendChild(document.createTextNode(';'));
-    example.appendChild(document.createElement('span')).
-      appendChild(document.createTextNode('"height": 80 AND "width": 100'));
+    example.appendChild(document.createElement('span')).appendChild(document.createTextNode('"height": 80 AND "width": 100'));
     example.setAttribute('role', 'row');
   }
 
@@ -75,7 +74,7 @@ export default function generateTable(datatable) {
     fBtn.appendChild(document.createTextNode('Filters'));
     fBtn.setAttribute('role', 'button');
     fBtn.setAttribute('aria-label', 'filter button');
-    fBtn.addEventListener('click', function() {
+    fBtn.addEventListener('click', function () {
       document.getElementById(datatable._targetId).classList.toggle('filter-section-active');
     });
   }
@@ -85,7 +84,7 @@ export default function generateTable(datatable) {
     vBtn.classList.add('table-top-button');
     vBtn.classList.add('viz-section-control-button');
     vBtn.appendChild(document.createTextNode('Visualize'));
-    vBtn.addEventListener('click', function() {
+    vBtn.addEventListener('click', function () {
       document.getElementById(datatable._targetId).classList.toggle('viz-section-active');
     });
   }
@@ -219,8 +218,7 @@ export default function generateTable(datatable) {
   table.classList.add('table-section');
 
   // add caption to the table
-  table.appendChild(document.createElement('caption')).
-    appendChild(document.createTextNode(datatable._configuration.caption));
+  table.appendChild(document.createElement('caption')).appendChild(document.createTextNode(datatable._configuration.caption));
 
   // create table header
   // Since the header is supposed not to update, create it once
@@ -278,7 +276,7 @@ export default function generateTable(datatable) {
       up.setAttribute('role', 'button');
       up.setAttribute('aria-label', 'sort in ascending order');
 
-      up.addEventListener('click', function() {
+      up.addEventListener('click', function () {
         let ctrls = head.getElementsByClassName('table-sorting-control');
         for (let i = 0, n = ctrls.length; i < n; i++) {
           ctrls[i].classList.remove('table-sorting-control-active');
@@ -293,7 +291,7 @@ export default function generateTable(datatable) {
       down.setAttribute('role', 'button');
       down.setAttribute('aria-label', 'sort in descending order');
 
-      down.addEventListener('click', function() {
+      down.addEventListener('click', function () {
         let ctrls = head.getElementsByClassName('table-sorting-control');
         for (let i = 0, n = ctrls.length; i < n; i++) {
           ctrls[i].classList.remove('table-sorting-control-active');
@@ -328,7 +326,7 @@ export default function generateTable(datatable) {
   }
 
   num.selectedIndex = arr.indexOf(datatable._stateManager.rowsPerPage);
-  num.addEventListener('change', function() {
+  num.addEventListener('change', function () {
     this.setAttribute('aria-label', `showing ${this.value} rows per page`);
     datatable._updateRowsPerPage(+this.value);
   });
@@ -342,7 +340,7 @@ export default function generateTable(datatable) {
   minusOneBtn.setAttribute('role', 'button');
   minusOneBtn.setAttribute('aria-label', 'last page');
 
-  minusOneBtn.addEventListener('click', function() {
+  minusOneBtn.addEventListener('click', function () {
     datatable._setPageNumber(datatable._stateManager.currentPageNumber - 1);
   });
 
@@ -358,7 +356,7 @@ export default function generateTable(datatable) {
   cPage.setAttribute('for', inp1.id);
   inp1.setAttribute('aria-label', 'current page is 1');
 
-  inp1.addEventListener('change', function() {
+  inp1.addEventListener('change', function () {
     let n = +this.value;
     if (isNaN(n)) {
       alert('Invalid page number!');
@@ -386,13 +384,15 @@ export default function generateTable(datatable) {
   plusOneBtn.setAttribute('role', 'button');
   plusOneBtn.setAttribute('aria-label', 'next page');
 
-  plusOneBtn.addEventListener('click', function() {
+  plusOneBtn.addEventListener('click', function () {
     datatable._setPageNumber(datatable._stateManager.currentPageNumber + 1);
   });
 
   // add the df to div
   div.appendChild(container);
-  datatable._updateView().catch(err => {console.error(err.message);});
+  datatable._updateView().catch(err => {
+    console.error(err.message);
+  });
   if (datatable._configuration.layout.filter) {
     datatable._createFilterSection().catch(err => {
       console.error(err);

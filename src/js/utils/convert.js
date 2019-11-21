@@ -1,6 +1,6 @@
 // convert JSON to CSV, TSV, etc.
 // don't support nested object
-function jsonToXSV(arr, delimiter=",") {
+function jsonToXSV(arr, delimiter = ",") {
   if (!Array.isArray(arr)) {
     throw new TypeError('an array of objects expected');
   }
@@ -56,7 +56,7 @@ function stringify(d) {
  * @param delimiter, <String>, default: _._
  * @returns {*} <String>, 'key_._value' or ['key_._v1', 'key_._v2', ...]
  */
-function serialize(obj, delimiter="=") {
+function serialize(obj, delimiter = "=") {
   if (typeof obj !== "object" || obj === null) {
     throw new TypeError("an object expected");
   }

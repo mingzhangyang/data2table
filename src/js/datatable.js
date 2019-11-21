@@ -47,6 +47,7 @@ export default class DataTable {
       columnsToDownload: opts.columnsToDownload,
       dataToDownload: opts.dataToDownload,
       stickyHeader: opts.stickyHeader,
+      pagination: opts.pagination === undefined || opts.pagination,
     };
 
     this._uid = 'my-1535567872393-product';

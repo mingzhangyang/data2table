@@ -30,19 +30,19 @@ export default function updateTableView(datatable, dataToShow, totalPages) {
 
   // delete all the rows in tBody
   let tBody = table.getElementsByTagName('tbody')[0];
-  while (tBody.lastChild) {
-    let tr = tBody.lastChild;
-    if (tr && tr.firstChild["attachedData"]) {
-      tr.firstChild.attachedData = null;
-    }
-    tBody.removeChild(tr);
+  let last_tr = tBody.lastChild;
+  while (last_tr) {
+    last_tr._data = null;
+    tBody.removeChild(last_tr);
+    last_tr = tBody.lastChild;
   }
 
   // re-generate all the rows up to date
   let df = document.createDocumentFragment();
   for (let i = 0; i < dataToShow.length; i++) {
-    let row = dataToShow[i];
+    let rowData = dataToShow[i];
     let tr = df.appendChild(document.createElement('tr'));
+    tr._data = rowData;
     switch (datatable._configuration.firstColumnType) {
       case 'number':
         let baseIndex = datatable._stateManager.getStart() + 1;
@@ -52,8 +52,7 @@ export default function updateTableView(datatable, dataToShow, totalPages) {
         break;
       case 'checkbox':
         let td_c = tr.appendChild(document.createElement('td'));
-        td_c.classList.add('table-row-index-column');
-        td_c.attachedData = row;
+        td_c.classList.add('table-row-index-column', 'table-row-checkbox-column');
         break;
       case 'image':
         break;
@@ -64,7 +63,7 @@ export default function updateTableView(datatable, dataToShow, totalPages) {
     for (let name of datatable._columnSetting.shownColumns) {
       let td = tr.appendChild(document.createElement('td'));
       if (datatable._columnSetting.colModel[name].formatter) {
-        let v = datatable._columnSetting.colModel[name].formatter(row[name]);
+        let v = datatable._columnSetting.colModel[name].formatter(rowData[name]);
         switch (typeof v) {
           case 'string':
             td.innerHTML = v;
@@ -76,7 +75,7 @@ export default function updateTableView(datatable, dataToShow, totalPages) {
             td.innerText = 'invalid customized formatter';
         }
       } else {
-        td.innerText = stringify(row[name]);
+        td.innerText = stringify(rowData[name]);
       }
       if (datatable._columnSetting.colModel[name].align) {
         td.style.textAlign = datatable._columnSetting.colModel[name].align;

@@ -116,7 +116,7 @@ export default function generateTable(datatable) {
       label.htmlFor = 'data-table-download-type-option ' + type;
 
       label.addEventListener('click', () => {
-        console.log('download type selected');
+        // console.log('download type selected');
         let a = document.createElement('a');
         a.setAttribute('download', datatable._configuration.fileName + '.' + type.toLowerCase());
 
@@ -145,7 +145,7 @@ export default function generateTable(datatable) {
           if (keys.length) {
             url += `&sort=${keys[0]}_._${qo.sort[keys[0]]}`;
           }
-          console.log(url);
+          // console.log(url);
           a.setAttribute('href', url);
         } else if (datatable._dataManager.dataIsComplete && datatable._configuration.dataToDownload) {
           let str;
@@ -311,7 +311,6 @@ export default function generateTable(datatable) {
   table.appendChild(document.createElement('tbody'));
 
   if (datatable._configuration.pagination) {
-    console.log(datatable._configuration.pagination);
     // create page controller panel
     let pager = container.appendChild(document.createElement('div'));
     pager.id = datatable._targetId + '-pager-section';

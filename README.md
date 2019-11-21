@@ -1,19 +1,17 @@
 # data2table
-An easy way to display data on web
+An easy way to display data on web. Demo: https://mingzhangyang.github.io/myBench/html/dataTable.html
 
 ### Get
 
 1. using npm ? Try the command below.
 
-   `npm install my-data2table`       (not working yet)
+   `npm i @mingzhang_yang/data2table`
 
-2. Or your can download the source files manually
+2. Or visit GitHub to download the source code
 
-   `Download the files directly into your project directory`
+   `git clone git@github.com:mingzhangyang/data2table.git`
 
-3. or try CDN
 
-   `not working yet`
    
 ### For development
 
@@ -25,11 +23,11 @@ An easy way to display data on web
 
 ### Usage
 
-1) import `data2table.core.js` and `data2table.core.css` into your HTML file
+1) import `data2table.bundle.js` and `data2table.bundle.css` into your HTML file
 
    ```
-   <link rel="stylesheet" href="path/to/dataTable.core.css">
-   <script src="path/to/dataTable.core.js"></script>
+   <link rel="stylesheet" href="path/to/dataTable.bundle.css">
+   <script src="path/to/dataTable.bundle.js"></script>
    ```
 
 2) Put `<table id="your-name-it></table>`into the place where you want to show 

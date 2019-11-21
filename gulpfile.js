@@ -30,7 +30,7 @@ function cssTask() {
   .pipe(cleanCSS({
     compatibility: 'ie8'
   }))
-  .pipe(concat('datatable.core.css'))
+  .pipe(concat('datatable.bundle.css'))
   .pipe(dest(target));
 }
 

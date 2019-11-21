@@ -2,7 +2,9 @@
     table-layout: fixed;
     margin-bottom: 12px;
     width: 100%;
+    position: relative;
 }
+
 .my-1535567872393-product .table-row-index-column {
     text-align: center;
     vertical-align: center;
@@ -15,23 +17,24 @@
     border: 1px solid var(--border-color);
     border-collapse: collapse;
     background-clip: padding-box;
-}
-.my-1535567872393-product th {
-    height: 20px;
-    position: relative;
-    color: var(--font-color);
-    background-color: var(--background-color-white);
-}
-
-.my-1535567872393-product th {
-    text-align: center;
-}
-.my-1535567872393-product th,
-.my-1535567872393-product td {
     word-wrap: break-word;
     padding: 6px 4px;
     font-size: 14px;
     font-family: "Source Sans Pro", "Helvetica Neue", "Helvetica", "Roboto", "Arial", sans-serif;
+}
+
+.my-1535567872393-product th {
+    position: relative;
+    height: 20px;
+    color: var(--font-color);
+    background-color: var(--background-color-white);
+    text-align: center;
+}
+
+.my-1535567872393-product .table-header-row.sticky-header th {
+    position: sticky;
+    top: -1px;
+    box-shadow: 0 2px 2px -1px var(--background-color-white);
 }
 
 .my-1535567872393-product .table-row-filter-column-name {

@@ -1,7 +1,7 @@
 /*table tooltips setting*/
-.my-1535567872393-product .table-header-row th {
-    position: relative;
-}
+/*.my-1535567872393-product .table-header-row th {*/
+/*    position: relative;*/
+/*}*/
 .my-1535567872393-product .table-header-row th .tooltiptext {
     visibility: hidden;
     opacity: .7;

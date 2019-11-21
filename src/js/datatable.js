@@ -46,6 +46,7 @@ export default class DataTable {
       urlForDownloading: opts.urlForDownloading,
       columnsToDownload: opts.columnsToDownload,
       dataToDownload: opts.dataToDownload,
+      stickyHeader: opts.stickyHeader,
     };
 
     this._uid = 'my-1535567872393-product';

@@ -224,6 +224,10 @@ export default function generateTable(datatable) {
   // Since the header is supposed not to update, create it once
   let head = table.appendChild(document.createElement('thead')).appendChild(document.createElement('tr'));
   head.classList.add('table-header-row');
+  // set sticky header
+  if (datatable._configuration.stickyHeader) {
+    head.classList.add("sticky-header");
+  }
 
   switch (datatable._configuration.firstColumnType) {
     case 'number':
@@ -247,6 +251,7 @@ export default function generateTable(datatable) {
 
   for (let name of datatable._columnSetting.shownColumns) {
     let th = head.appendChild(document.createElement('th'));
+    // set the content of th
     let sp = th.appendChild(document.createElement('span'));
     sp.classList.add('table-row-regular-column-name');
     sp.appendChild(document.createTextNode(datatable._columnSetting.colModel[name].label));

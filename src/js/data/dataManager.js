@@ -90,7 +90,6 @@ export default class DataManager {
     if (Array.isArray(queryObject.facets)) {
       return getValueFacets(this.data, queryObject.facets);
     }
-
     // this is an internal method, all the arguments are supposed to be valid
     let start = queryObject.start ? queryObject.start : 0; // the index of the first row of requested data
     let limit = queryObject.limit ? queryObject.limit : 10; // the number of rows requested

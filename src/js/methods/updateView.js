@@ -87,12 +87,14 @@ export default function updateTableView(datatable, dataToShow, totalPages) {
 
   // update current page number and total page number
   // Below is necessary and indispensable!
-  let cPage = document.getElementById(datatable._targetId + '-table-page-number-current');
-  cPage.value = datatable._stateManager.currentPageNumber;
-  cPage.setAttribute('aria-label', 'current page is ' + cPage.value);
-  let tPages = document.getElementById(datatable._targetId + '-table-page-number-total');
-  tPages.value = totalPages;
-  tPages.setAttribute('aria-label', `all ${totalPages} pages`);
+  if (datatable._configuration.pagination) {
+    let cPage = document.getElementById(datatable._targetId + '-table-page-number-current');
+    cPage.value = datatable._stateManager.currentPageNumber;
+    cPage.setAttribute('aria-label', 'current page is ' + cPage.value);
+    let tPages = document.getElementById(datatable._targetId + '-table-page-number-total');
+    tPages.value = totalPages;
+    tPages.setAttribute('aria-label', `all ${totalPages} pages`);
+  }
 }
 
 

@@ -7,7 +7,9 @@ window.onload = () => {
     caption: '',
     dataIsComplete: true,
     downloadFileName: 'data2table.test',
-    dataToDownload: sample
+    dataToDownload: sample,
+    stickyHeader: true,
+    pagination: false,
   });
   // dt.setCaption("DataTable Demo");
   dt.addFilter('Gene_symbol', 'value');

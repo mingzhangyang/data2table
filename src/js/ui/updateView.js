@@ -28,21 +28,19 @@ export default function updateTableView(datatable, dataToShow, totalPages) {
     throw new Error('failed to locate the table');
   }
 
-  // delete all the rows in tBody
+  // delete tBody
   let tBody = table.getElementsByTagName('tbody')[0];
-  let last_tr = tBody.lastChild;
-  while (last_tr) {
-    last_tr._data = null;
-    tBody.removeChild(last_tr);
-    last_tr = tBody.lastChild;
-  }
+  tBody._data = null;
+  tBody.parentNode.removeChild(tBody);
 
-  // re-generate all the rows up to date
+  // re-generate the tbody up to date
   let df = document.createDocumentFragment();
+  tBody = df.appendChild(document.createElement("tbody"));
+
   for (let i = 0; i < dataToShow.length; i++) {
     let rowData = dataToShow[i];
-    let tr = df.appendChild(document.createElement('tr'));
-    tr._data = rowData;
+    let tr = tBody.appendChild(document.createElement('tr'));
+
     switch (datatable._configuration.firstColumnType) {
       case 'number':
         let baseIndex = datatable._stateManager.getStart() + 1;
@@ -82,7 +80,9 @@ export default function updateTableView(datatable, dataToShow, totalPages) {
       }
     }
   }
-  tBody.appendChild(df);
+
+  // attach the new tbody to table
+  table.appendChild(df);
 
   // update current page number and total page number
   // Below is necessary and indispensable!

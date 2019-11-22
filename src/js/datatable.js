@@ -49,7 +49,7 @@ export default class DataTable {
     this._uid = 'my-1535567872393-product';
   }
 
-  /*********************** Below are public ui for user to execute ***************************/
+  /*********************** Below are public methods for user to execute ***************************/
 
   /**
    * setRowsPerPage is used to set and update _rowsPerPage and _totalPages
@@ -141,7 +141,7 @@ export default class DataTable {
 
   /**
    * set the shown columns and hidden columns
-   * @param arr
+   * @param arr: array of strings (column names)
    */
   setShownColumns(arr) {
     let tmp = [];
@@ -173,6 +173,11 @@ export default class DataTable {
     if (typeof str === 'string' && str.length > 0) {
       this._configuration.caption = str;
     }
+  }
+
+  // set scheme of the table, currently only "default" is implemented
+  setScheme(str) {
+    this._configuration.scheme = str;
   }
 
   /**
@@ -211,11 +216,15 @@ export default class DataTable {
     }
   }
 
+  /**
+   * Users should execute this function to generate the table
+   */
   generate() {
     generateTable(this);
   }
 
-  /************************* Below are ui for internal use *****************************/
+  /************************* Below are methods for internal use *****************************/
+  /************************* and should not be invoked by user *****************************/
 
   /**
    * set this as a function to always get up-to-date value

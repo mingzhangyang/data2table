@@ -31,11 +31,12 @@ export default function updateTableView(datatable, dataToShow, totalPages) {
   // delete tBody
   let tBody = table.getElementsByTagName('tbody')[0];
   tBody._data = null;
-  tBody.parentNode.removeChild(tBody);
+  table.removeChild(tBody);
 
   // re-generate the tbody up to date
   let df = document.createDocumentFragment();
   tBody = df.appendChild(document.createElement("tbody"));
+  tBody._data = dataToShow;
 
   for (let i = 0; i < dataToShow.length; i++) {
     let rowData = dataToShow[i];

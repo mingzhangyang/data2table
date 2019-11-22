@@ -8,8 +8,6 @@ window.onload = () => {
     dataIsComplete: true,
     downloadFileName: 'data2table.test',
     dataToDownload: sample,
-    stickyHeader: true,
-    pagination: false,
   });
   dt.setFirstColumnType('number');
   dt.addFilter('Gene_symbol', 'value');
@@ -32,8 +30,6 @@ window.onload = () => {
     align: 'center',
   });
   dt.generate();
-  // console.log(dt);
-  // dt._dataManager.serve(dt._stateManager.queryObject).then(console.log).catch(err => err);
 };
 
 

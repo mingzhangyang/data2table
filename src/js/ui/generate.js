@@ -68,18 +68,7 @@ export default function generateTable(datatable) {
   btns.id = datatable._targetId + '-filter-viz-download-buttons-wrapper';
   btns.classList.add('filter-viz-download-buttons-wrapper');
 
-  if (datatable._configuration.filter) {
-    let fBtn = btns.appendChild(document.createElement('div'));
-    fBtn.classList.add('table-top-button', 'filter-section-control-button');
-    fBtn.appendChild(document.createTextNode('Filters'));
-    fBtn.setAttribute('role', 'button');
-    fBtn.setAttribute('aria-label', 'filter button');
-    fBtn.addEventListener('click', function () {
-      document.getElementById(datatable._targetId).classList.toggle('filter-section-active');
-    });
-  }
-
-  if (datatable._configuration.chart) {
+  if (datatable._configuration.layout.chart) {
     let vBtn = btns.appendChild(document.createElement('div'));
     vBtn.classList.add('table-top-button');
     vBtn.classList.add('viz-section-control-button');
@@ -89,7 +78,7 @@ export default function generateTable(datatable) {
     });
   }
 
-  if (datatable._configuration.download) {
+  if (datatable._configuration.layout.download) {
     let dBtn = btns.appendChild(document.createElement('div'));
     dBtn.classList.add('table-top-button', 'download-control-button');
     let sp = document.createElement('span');
@@ -180,7 +169,6 @@ export default function generateTable(datatable) {
 
     dBtn.appendChild(list);
   }
-
 
   // create filter panel
   let filterSection = container.appendChild(document.createElement('div'));

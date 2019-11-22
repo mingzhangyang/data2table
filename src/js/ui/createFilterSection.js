@@ -17,6 +17,7 @@ export default function createFilterSection(datatable) {
 
   let btns = document.getElementById(datatable._targetId + '-filter-viz-download-buttons-wrapper');
 
+  // create filter button
   if (btns.getElementsByClassName('filter-section-control-button').length === 0) {
     let fBtn = btns.insertBefore(document.createElement('div'), btns.firstElementChild);
     fBtn.classList.add('table-top-button', 'filter-section-control-button');

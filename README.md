@@ -1,5 +1,11 @@
 # data2table
-An easy way to display data on web. Demo: https://mingzhangyang.github.io/myBench/html/dataTable.html
+An easy way to display data on web. 
+
+Demo page 1: https://mingzhangyang.github.io/data2table/test/datatable.test.1.html
+
+Demo page 2: https://mingzhangyang.github.io/data2table/test/datatable.test.2.html
+
+Demo page 3: https://mingzhangyang.github.io/data2table/test/datatable.test.3.html
 
 ### Get
 

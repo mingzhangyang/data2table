@@ -1,15 +1,11 @@
-/**
- * Created by yangm11 on 11/14/2019.
- */
-
 import createColModel from './utils/colModel.js';
 import DataManager from './data/dataManager.js';
 import StateManager from './state/stateManager.js';
 import formatterPool from './utils/formatterPool.js';
-import notifyStatus from './methods/notify.js';
-import updateView from './methods/updateView.js';
-import createFilterSection from './methods/createFilterSection.js';
-import generateTable from './methods/generate.js';
+import notifyStatus from './ui/notify.js';
+import updateView from './ui/updateView.js';
+import createFilterSection from './ui/createFilterSection.js';
+import generateTable from './ui/generate.js';
 
 export default class DataTable {
   /******************************************************************************
@@ -53,7 +49,7 @@ export default class DataTable {
     this._uid = 'my-1535567872393-product';
   }
 
-  /*********************** Below are public methods for user to execute ***************************/
+  /*********************** Below are public ui for user to execute ***************************/
 
   /**
    * setRowsPerPage is used to set and update _rowsPerPage and _totalPages
@@ -136,8 +132,8 @@ export default class DataTable {
         this._configuration.layout.selectColumns = value;
         break;
       default:
-        console.log('Property not recognized!');
-        console.log('Expect: download | search | filter | chart | column_selector');
+        console.error('Property not recognized!');
+        console.error('Expect: download | search | filter | chart | column_selector');
         return;
     }
     console.log('Configuration updated.');
@@ -219,7 +215,7 @@ export default class DataTable {
     generateTable(this);
   }
 
-  /************************* Below are methods for internal use *****************************/
+  /************************* Below are ui for internal use *****************************/
 
   /**
    * set this as a function to always get up-to-date value

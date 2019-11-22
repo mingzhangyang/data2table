@@ -11,7 +11,7 @@ window.onload = () => {
     stickyHeader: true,
     pagination: false,
   });
-  // dt.setCaption("DataTable Demo");
+  dt.setFirstColumnType('number');
   dt.addFilter('Gene_symbol', 'value');
   dt.configureColumn('Aff_id', {
     label: 'uid',

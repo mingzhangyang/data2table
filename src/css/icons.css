@@ -1,0 +1,30 @@
+.data-table-config-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #369;
+    position: relative;
+    opacity: .8;
+}
+
+div.config-icon-child {
+    width: 4px;
+    height: 28px;
+    background-color: #369;
+    border-radius: 1px;
+    position: absolute;
+    top: -4px;
+    left: 8px;
+}
+
+div.config-icon-child:nth-child(2) {
+    transform: rotate(45deg);
+}
+
+div.config-icon-child:nth-child(3) {
+    transform: rotate(90deg);
+}
+
+div.config-icon-child:nth-child(4) {
+    transform: rotate(135deg);
+}

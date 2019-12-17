@@ -68,6 +68,9 @@ export default function generateTable(datatable) {
   btns.id = datatable._targetId + '-filter-viz-download-buttons-wrapper';
   btns.classList.add('filter-viz-download-buttons-wrapper');
 
+  let configIcon = btns.appendChild(document.createElement("div"));
+  configIcon.classList.add("data-table-config-icon");
+
   if (datatable._configuration.layout.chart) {
     let vBtn = btns.appendChild(document.createElement('div'));
     vBtn.classList.add('table-top-button');

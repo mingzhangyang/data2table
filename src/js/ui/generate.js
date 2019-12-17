@@ -70,6 +70,12 @@ export default function generateTable(datatable) {
 
   let configIcon = btns.appendChild(document.createElement("div"));
   configIcon.classList.add("data-table-config-icon");
+  configIcon.setAttribute('role', 'button');
+  configIcon.setAttribute('aria-label', 'configuration button');
+  for (let i = 0; i < 4; i++) {
+    let c = configIcon.appendChild(document.createElement("div"));
+    c.classList.add("config-icon-child");
+  }
 
   if (datatable._configuration.layout.chart) {
     let vBtn = btns.appendChild(document.createElement('div'));

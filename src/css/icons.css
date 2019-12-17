@@ -2,19 +2,29 @@
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    background-color: #369;
+    background-color: var(--config-icon-color);
     position: relative;
     opacity: .8;
+    display: inline-block;
+    top: 4px;
+    transform: scale(.8);
+    z-index: 10;
+    cursor: pointer;
+}
+
+.data-table-config-icon:hover {
+    opacity: 1;
 }
 
 div.config-icon-child {
     width: 4px;
     height: 28px;
-    background-color: #369;
+    background-color: var(--config-icon-color);
     border-radius: 1px;
     position: absolute;
     top: -4px;
     left: 8px;
+    z-index: 8;
 }
 
 div.config-icon-child:nth-child(2) {

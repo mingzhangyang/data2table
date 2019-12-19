@@ -38,6 +38,7 @@ export default class DataTable {
       },
       firstColumnType: undefined, // 'number', 'checkbox', 'custom'
       scheme: 'default',
+      schemes: ["default", "light", "dark"],
       fileName: opts.fileName ? opts.fileName : 'data',
       urlForDownloading: opts.urlForDownloading,
       columnsToDownload: opts.columnsToDownload,

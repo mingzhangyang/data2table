@@ -1,0 +1,98 @@
+.data-table-config-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(209, 210, 211, .8);
+    z-index: 100;
+}
+
+.data-table-config-panel-content {
+    display: block;
+    position: relative;
+    width: 60%;
+    min-width: 720px;
+    height: 560px;
+    background-color: var(--background-color-white);
+    opacity: 1;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin: 90px auto;
+    box-shadow: 10px 10px 8px #aaa;
+}
+
+.data-table-config-panel-header {
+    display: block;
+    width: 80%;
+    height: 40px;
+    border-bottom: 1px solid #888;
+    margin: 20px auto;
+}
+
+.data-table-config-panel-header span {
+    display: inline-block;
+    position: relative;
+    bottom: 1px;
+    height: 40px;
+    font-size: 18px;
+    line-height: 40px;
+    text-align: center;
+    margin-left: 12px;
+    background-color: var(--background-color-white);
+    padding: 0 12px;
+    border: 1px solid #888;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+}
+
+.data-table-config-panel-header span::after {
+    content: "";
+    display: block;
+    width: 200%;
+    height: 12px;
+    position: absolute;
+    background-color: var(--background-color-white);
+    bottom: -20px;
+    left: -50%;
+    margin-left: -12px;
+}
+
+.data-table-config-panel-header span.selected {
+    border-bottom: 1px solid var(--background-color-white);
+    box-shadow: 0 0 8px var(--highlighted-color);
+}
+
+.data-table-config-panel-header span.selected::after {
+    bottom: -13px;
+}
+
+.data-table-config-panel-body {
+    width: 80%;
+    height: 420px;
+    border: 1px solid #f66;
+    margin: auto;
+}
+
+.data-table-config-panel-confirm-button-wrapper {
+    width: 180px;
+    height: 36px;
+    position: absolute;
+    right: 10%;
+    bottom: 20px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.data-table-config-panel-confirm-button {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #888;
+    cursor: pointer;
+}
+
+.data-table-config-panel-confirm-button:hover {
+    background-color: var(--hover-color);
+}
+

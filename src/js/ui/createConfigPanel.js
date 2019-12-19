@@ -11,6 +11,11 @@ export default function createConfigPanel(datatable) {
   configIcon.appendChild(document.createElement('div')).classList.add('data-table-config-icon-outer-circle');
   configIcon.appendChild(document.createElement('div')).classList.add('data-table-config-icon-inner-circle');
 
+  configIcon.addEventListener('click', () => {
+    document.getElementById(datatable._targetId).getElementsByClassName('data-table-config-panel')[0].classList.add(
+      'active');
+  });
+
   let configPanel = df.appendChild(document.createElement('div'));
   configPanel.classList.add('data-table-config-panel');
 
@@ -26,15 +31,15 @@ export default function createConfigPanel(datatable) {
   cols.appendChild(document.createTextNode('Columns'));
   cols.classList.add('selected');
   cols.getData = () => {
-    return  {
-      name: "columns",
+    return {
+      name: 'columns',
       all: datatable._columnSetting.allColumns,
       selected: datatable._columnSetting.shownColumns,
     };
   };
   cols.addEventListener('click', switchState);
   setTimeout(() => {
-    cols.click();
+    header.nextElementSibling.update(cols.getData());
   }, 1000);
 
   let scheme = header.appendChild(document.createElement('span'));
@@ -43,41 +48,47 @@ export default function createConfigPanel(datatable) {
   scheme.appendChild(document.createTextNode('Style'));
   scheme.getData = () => {
     return {
-      name: "scheme",
+      name: 'scheme',
       all: datatable._configuration.schemes,
       selected: [datatable._configuration.scheme],
     };
   };
   scheme.addEventListener('click', switchState);
 
-  let body = content.appendChild(document.createElement("div"));
-  body.classList.add("data-table-config-panel-body");
+  let body = content.appendChild(document.createElement('div'));
+  body.classList.add('data-table-config-panel-body');
   body.update = update;
   body.pullData = pullData;
 
-  let btns = content.appendChild(document.createElement("div"));
-  btns.classList.add("data-table-config-panel-confirm-button-wrapper");
+  let btns = content.appendChild(document.createElement('div'));
+  btns.classList.add('data-table-config-panel-confirm-button-wrapper');
 
-  let cancel = btns.appendChild(document.createElement("span"));
-  cancel.setAttribute("role", "button");
-  cancel.setAttribute("arial-label", "cancel");
-  cancel.classList.add("data-table-config-panel-confirm-button");
-  cancel.appendChild(document.createTextNode("Cancel"));
+  let cancel = btns.appendChild(document.createElement('span'));
+  cancel.setAttribute('role', 'button');
+  cancel.setAttribute('arial-label', 'cancel');
+  cancel.classList.add('data-table-config-panel-confirm-button');
+  cancel.appendChild(document.createTextNode('Cancel'));
+  cancel.addEventListener('click', () => {
+    document.getElementById(datatable._targetId).getElementsByClassName('data-table-config-panel')[0].classList.remove(
+      'active');
+  });
 
-  let save = btns.appendChild(document.createElement("span"));
-  save.setAttribute("role", "button");
-  save.setAttribute("arial-label", "save");
-  save.classList.add("data-table-config-panel-confirm-button");
-  save.appendChild(document.createTextNode("Save"));
-  save.addEventListener("click", () => {
-    console.log("@@@", body.pullData());
+  let save = btns.appendChild(document.createElement('span'));
+  save.setAttribute('role', 'button');
+  save.setAttribute('arial-label', 'save');
+  save.classList.add('data-table-config-panel-confirm-button');
+  save.appendChild(document.createTextNode('Save'));
+  save.addEventListener('click', () => {
+    console.log('@@@', body.pullData());
+    document.getElementById(datatable._targetId).getElementsByClassName('data-table-config-panel')[0].classList.remove(
+      'active');
   });
 
   return df;
 }
 
 function switchState() {
-  if (this.classList.contains("selected")) {
+  if (this.classList.contains('selected')) {
     return;
   }
   this.classList.add('selected');
@@ -98,19 +109,19 @@ function update(data) {
     body.removeChild(body.lastElementChild);
   }
   for (let d of data.all) {
-    let sp = body.appendChild(document.createElement("span"));
-    sp.classList.add("data-table-config-selection-unit");
-    let inp = sp.appendChild(document.createElement("input"));
-    inp.setAttribute("name", data.name);
+    let sp = body.appendChild(document.createElement('span'));
+    sp.classList.add('data-table-config-selection-unit');
+    let inp = sp.appendChild(document.createElement('input'));
+    inp.setAttribute('name', data.name);
     switch (data.name) {
-      case "scheme":
-        inp.setAttribute("type", "radio");
+      case 'scheme':
+        inp.setAttribute('type', 'radio');
         break;
-      case "columns":
-        inp.setAttribute("type", "checkbox");
+      case 'columns':
+        inp.setAttribute('type', 'checkbox');
         break;
       default:
-        console.log("what?");
+        console.log('what?');
     }
     inp.setAttribute('value', d);
     inp.checked = data.selected.includes(d);
@@ -126,6 +137,7 @@ function pullData() {
     if (c.firstChild.checked) {
       res.push(c.firstChild.value);
     }
+    c = c.nextSibling;
   }
   return res;
 }

@@ -6,6 +6,11 @@
     height: 100vh;
     background: rgba(209, 210, 211, .8);
     z-index: 100;
+    display: none;
+}
+
+.data-table-config-panel.active {
+    display: block;
 }
 
 .data-table-config-panel-content {

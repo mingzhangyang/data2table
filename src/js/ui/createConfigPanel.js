@@ -27,11 +27,15 @@ export default function createConfigPanel(datatable) {
   cols.classList.add('selected');
   cols.getData = () => {
     return  {
+      name: "columns",
       all: datatable._columnSetting.allColumns,
       selected: datatable._columnSetting.shownColumns,
     };
   };
   cols.addEventListener('click', switchState);
+  setTimeout(() => {
+    cols.click();
+  }, 1000);
 
   let scheme = header.appendChild(document.createElement('span'));
   scheme.setAttribute('role', 'button');
@@ -39,14 +43,17 @@ export default function createConfigPanel(datatable) {
   scheme.appendChild(document.createTextNode('Style'));
   scheme.getData = () => {
     return {
+      name: "scheme",
       all: datatable._configuration.schemes,
-      selected: datatable._configuration.scheme,
+      selected: [datatable._configuration.scheme],
     };
   };
   scheme.addEventListener('click', switchState);
 
   let body = content.appendChild(document.createElement("div"));
   body.classList.add("data-table-config-panel-body");
+  body.update = update;
+  body.pullData = pullData;
 
   let btns = content.appendChild(document.createElement("div"));
   btns.classList.add("data-table-config-panel-confirm-button-wrapper");
@@ -62,6 +69,9 @@ export default function createConfigPanel(datatable) {
   save.setAttribute("arial-label", "save");
   save.classList.add("data-table-config-panel-confirm-button");
   save.appendChild(document.createTextNode("Save"));
+  save.addEventListener("click", () => {
+    console.log("@@@", body.pullData());
+  });
 
   return df;
 }
@@ -78,5 +88,44 @@ function switchState() {
     }
     ch = ch.nextElementSibling;
   }
-  this.getData();
+  let data = this.getData();
+  this.parentElement.nextElementSibling.update(data);
+}
+
+function update(data) {
+  let body = this;
+  while (body.lastElementChild) {
+    body.removeChild(body.lastElementChild);
+  }
+  for (let d of data.all) {
+    let sp = body.appendChild(document.createElement("span"));
+    sp.classList.add("data-table-config-selection-unit");
+    let inp = sp.appendChild(document.createElement("input"));
+    inp.setAttribute("name", data.name);
+    switch (data.name) {
+      case "scheme":
+        inp.setAttribute("type", "radio");
+        break;
+      case "columns":
+        inp.setAttribute("type", "checkbox");
+        break;
+      default:
+        console.log("what?");
+    }
+    inp.setAttribute('value', d);
+    inp.checked = data.selected.includes(d);
+    sp.appendChild(document.createTextNode(d));
+  }
+}
+
+function pullData() {
+  let body = this;
+  let res = [];
+  let c = body.firstChild;
+  while (c) {
+    if (c.firstChild.checked) {
+      res.push(c.firstChild.value);
+    }
+  }
+  return res;
 }

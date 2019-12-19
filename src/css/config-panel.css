@@ -13,7 +13,8 @@
     position: relative;
     width: 60%;
     min-width: 720px;
-    height: 560px;
+    min-height: 360px;
+    max-height: 560px;
     background-color: var(--background-color-white);
     opacity: 1;
     border: 1px solid #ccc;
@@ -69,9 +70,8 @@
 
 .data-table-config-panel-body {
     width: 80%;
-    height: 420px;
-    border: 1px solid #f66;
-    margin: auto;
+    max-height: 420px;
+    margin: 30px auto;
 }
 
 .data-table-config-panel-confirm-button-wrapper {
@@ -94,5 +94,17 @@
 
 .data-table-config-panel-confirm-button:hover {
     background-color: var(--hover-color);
+}
+
+.data-table-config-selection-unit {
+    margin-right: 30px;
+    display: inline-block;
+    height: 30px;
+    line-height: 30px;
+}
+
+.data-table-config-selection-unit input[type=checkbox] {
+    margin-right: 16px;
+    transform: scale(1.2);
 }
 

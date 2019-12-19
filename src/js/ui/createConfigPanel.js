@@ -108,6 +108,7 @@ function update(data) {
   while (body.lastElementChild) {
     body.removeChild(body.lastElementChild);
   }
+  body.data = data;
   for (let d of data.all) {
     let sp = body.appendChild(document.createElement('span'));
     sp.classList.add('data-table-config-selection-unit');
@@ -131,11 +132,14 @@ function update(data) {
 
 function pullData() {
   let body = this;
-  let res = [];
+  let res = {
+    name: body.data.name,
+    selected: [],
+  };
   let c = body.firstChild;
   while (c) {
     if (c.firstChild.checked) {
-      res.push(c.firstChild.value);
+      res.selected.push(c.firstChild.value);
     }
     c = c.nextSibling;
   }

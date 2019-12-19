@@ -5,8 +5,7 @@ import createSearchPanel from './createSearchPanel.js';
 import createPaginationPanel from './createPaginationPanel.js';
 import createTableFrame from './createTableFrame.js';
 
-// generate all table related panels,
-// can be used to refresh the whole object
+// generate all table related panels
 export default function generateTable(datatable) {
   // replace the table with a div element
   let target = document.getElementById(datatable._targetId);
@@ -15,8 +14,6 @@ export default function generateTable(datatable) {
   target.parentNode.removeChild(target);
   div.id = datatable._targetId;
   div.classList.add(datatable._uid, datatable._configuration.scheme);
-
-  // set ARIA attribute
   div.setAttribute('role', 'table');
 
   // create the contents of the new object
@@ -35,16 +32,6 @@ export default function generateTable(datatable) {
   btns.classList.add('filter-viz-download-buttons-wrapper');
 
   btns.appendChild(createConfigPanel(datatable));
-
-  if (datatable._configuration.layout.chart) {
-    let vBtn = btns.appendChild(document.createElement('div'));
-    vBtn.classList.add('table-top-button');
-    vBtn.classList.add('viz-section-control-button');
-    vBtn.appendChild(document.createTextNode('Visualize'));
-    vBtn.addEventListener('click', function() {
-      document.getElementById(datatable._targetId).classList.toggle('viz-section-active');
-    });
-  }
 
   if (datatable._configuration.layout.download) {
     btns.appendChild(createDownloadForm(datatable));

@@ -2,7 +2,7 @@ import createColModel from './utils/colModel.js';
 import DataManager from './data/dataManager.js';
 import StateManager from './state/stateManager.js';
 import formatterPool from './utils/formatterPool.js';
-import notifyStatus from './ui/notify.js';
+import notifyStatus from './utils/notify.js';
 import updateView from './ui/updateView.js';
 import createFilterSection from './ui/createFilterSection.js';
 import generateTable from './ui/generate.js';

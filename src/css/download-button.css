@@ -3,7 +3,7 @@
     margin-right: 0;
     position: absolute;
     top: 0;
-    right: 0;
+    right: 40px;
 }
 .my-1535567872393-product div.download-control-button form {
     border-left: 1px solid var(--download-button);

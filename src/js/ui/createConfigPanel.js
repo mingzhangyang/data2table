@@ -120,24 +120,32 @@ function update(data) {
     body.removeChild(body.lastElementChild);
   }
   body.data = data;
-  for (let d of data.all) {
+  for (let i = 0; i < data.all.length; i++) {
+    let d = data.all[0];
     let sp = body.appendChild(document.createElement('span'));
     sp.classList.add('data-table-config-selection-unit');
     let inp = sp.appendChild(document.createElement('input'));
     inp.setAttribute('name', data.name);
+    let id = "config-panel-label";
     switch (data.name) {
       case 'scheme':
         inp.setAttribute('type', 'radio');
+        id += 'scheme-item-' + i;
         break;
       case 'columns':
         inp.setAttribute('type', 'checkbox');
+        id += 'column-item-' + i;
         break;
       default:
         console.log('what?');
     }
     inp.setAttribute('value', d);
     inp.checked = data.selected.includes(d);
-    sp.appendChild(document.createTextNode(d));
+    inp.setAttribute("id", id);
+    let label = document.createElement("label");
+    label.setAttribute("for", id);
+    label.appendChild(document.createTextNode(d));
+    sp.appendChild(label);
   }
 }
 

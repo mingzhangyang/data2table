@@ -9,6 +9,8 @@
     right: 8px;
     transform: scale(.9);
     cursor: pointer;
+    z-index: 199;
+    box-sizing: content-box;
 }
 
 .data-table-config-icon:hover {

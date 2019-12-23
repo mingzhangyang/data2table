@@ -121,7 +121,7 @@ function update(data) {
   }
   body.data = data;
   for (let i = 0; i < data.all.length; i++) {
-    let d = data.all[0];
+    let d = data.all[i];
     let sp = body.appendChild(document.createElement('span'));
     sp.classList.add('data-table-config-selection-unit');
     let inp = sp.appendChild(document.createElement('input'));

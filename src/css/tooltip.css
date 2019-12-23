@@ -1,13 +1,9 @@
-/*table tooltips setting*/
-/*.my-1535567872393-product .table-header-row th {*/
-/*    position: relative;*/
-/*}*/
 .my-1535567872393-product .table-header-row th .tooltiptext {
     visibility: hidden;
     opacity: .7;
     width: 240px;
-    background-color: var(--background-color-dark);
-    color: var(--background-color-white);
+    background-color: rgb(7, 8, 9);
+    color: rgb(247, 248, 249);
     text-align: center;
     border-radius: 6px;
     padding: 8px;

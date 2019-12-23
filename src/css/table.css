@@ -23,21 +23,31 @@
     font-family: "Source Sans Pro", "Helvetica Neue", "Helvetica", "Roboto", "Arial", sans-serif;
 }
 
-.my-1535567872393-product th {
+.my-1535567872393-product thead th {
     position: relative;
     height: 20px;
-    color: var(--font-color);
-    background-color: var(--background-color-white);
+    color: var(--theader-font-color);
+    background-color: var(--theader-background-color);
     text-align: center;
+}
+
+.my-1535567872393-product tbody td {
+    background-color: var(--tbody-background-color);
+    color: var(--tbody-font-color);
+}
+
+.my-1535567872393-product tbody tr:hover td {
+    background-color: var(--hover-color);
 }
 
 .my-1535567872393-product .table-header-row.sticky-header th {
     position: sticky;
     top: -1px;
-    box-shadow: 0 2px 2px -1px var(--background-color-white);
+    box-shadow: 0 2px 2px -1px rgb(247, 248, 249);
 }
 
 .my-1535567872393-product .table-row-filter-column-name {
     width: 80%;
     display: block;
 }
+

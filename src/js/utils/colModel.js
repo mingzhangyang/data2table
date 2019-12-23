@@ -19,7 +19,7 @@ const createColModel = (arr) => {
       hidden: false, // redundant, use shownColumns to manage shown/hidden
       width: '',
       align: '',
-      formatter: undefined, // must a function
+      formatter: undefined, // must be a name in formatter pools or a function
     };
     res.allColumns.push(name);
   }

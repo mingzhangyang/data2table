@@ -79,9 +79,20 @@ export default function createConfigPanel(datatable) {
   save.classList.add('data-table-config-panel-confirm-button');
   save.appendChild(document.createTextNode('Save'));
   save.addEventListener('click', () => {
-    console.log('@@@', body.pullData());
     document.getElementById(datatable._targetId).getElementsByClassName('data-table-config-panel')[0].classList.remove(
       'active');
+    let d = body.pullData();
+    switch (d.name) {
+      case "columns":
+        datatable._columnSetting.shownColumns = body.pullData().selected;
+        break;
+      case "scheme":
+        datatable._configuration.scheme = d.selected[0];
+        break;
+      default:
+        console.log("What?");
+    }
+    datatable.generate();
   });
 
   return df;

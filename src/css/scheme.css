@@ -1,15 +1,53 @@
 .my-1535567872393-product.default {
     --border-color: #ccc;
     --hover-color: #f2f2f2;
-    --font-color: #2f5777;
+    --theader-font-color: #2f5777;
+    --tbody-font-color: #000;
     --icon-color: #369;
+    --theader-background-color: rgb(249,250,251);
+    --tbody-background-color: #FFFFFF;
     --sorting-icon-color: #000;
     --search-box-border-color: #2196F3;
     --hover-blue-color: #0b7dda;
     --em-color: linen;
     --download-button: #323a45;
-    --background-color-white: rgb(249,250,251);
-    --background-color-dark: rgb(7,8,9);
+    --error-color: #f66;
+    --alert-color: #3e94cf;
+    --highlighted-color: rgb(23, 190, 207);
+    --config-icon-color: #999;
+}
+
+.my-1535567872393-product.light {
+    --border-color: transparent;
+    --hover-color: #f2f2f2;
+    --font-color: #2f5777;
+    --icon-color: #369;
+    --theader-background-color: rgb(249,250,251);
+    --tbody-background-color: #FFFFFF;
+    --sorting-icon-color: #000;
+    --search-box-border-color: #2196F3;
+    --hover-blue-color: #0b7dda;
+    --em-color: linen;
+    --download-button: #323a45;
+    --error-color: #f66;
+    --alert-color: #3e94cf;
+    --highlighted-color: rgb(23, 190, 207);
+    --config-icon-color: #999;
+}
+
+.my-1535567872393-product.dark {
+    --border-color: #FFFFFF;
+    --hover-color: rgba(2, 2, 2, .4);
+    --theader-font-color: yellow;
+    --tbody-font-color: #fff;
+    --icon-color: #369;
+    --theader-background-color: #222;
+    --tbody-background-color: rgba(2, 2, 2, .8);
+    --sorting-icon-color: #000;
+    --search-box-border-color: #2196F3;
+    --hover-blue-color: #0b7dda;
+    --em-color: linen;
+    --download-button: #323a45;
     --error-color: #f66;
     --alert-color: #3e94cf;
     --highlighted-color: rgb(23, 190, 207);

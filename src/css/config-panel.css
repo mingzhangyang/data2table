@@ -4,7 +4,6 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    /*background: rgba(209, 210, 211, .8);*/
     background: rgba(23,43,77,0.5);
     z-index: 100;
     display: none;
@@ -21,7 +20,8 @@
     min-width: 720px;
     min-height: 360px;
     max-height: 560px;
-    background-color: var(--background-color-white);
+    background-color: var(--tbody-background-color);
+    color: var(--tbody-font-color);
     opacity: 1;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -47,7 +47,8 @@
     line-height: 40px;
     text-align: center;
     margin-left: 12px;
-    background-color: var(--background-color-white);
+    background-color: var(--tbody-background-color);
+    color: var(--tbody-font-color);
     padding: 0 12px;
     border: 1px solid #888;
     border-radius: 8px 8px 0 0;
@@ -60,14 +61,14 @@
     width: 200%;
     height: 12px;
     position: absolute;
-    background-color: var(--background-color-white);
+    background-color: var(--tbody-background-color);
     bottom: -20px;
     left: -50%;
     margin-left: -12px;
 }
 
 .data-table-config-panel-header span.selected {
-    border-bottom: 1px solid var(--background-color-white);
+    border-bottom: 1px solid var(--tbody-background-color);
     box-shadow: 0 0 8px var(--highlighted-color);
 }
 

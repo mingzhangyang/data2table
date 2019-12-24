@@ -58,3 +58,39 @@ div.data-table-config-icon-outer-circle {
     background-color: var(--config-icon-color);
     border-radius: 50%;
 }
+
+
+/*style for sorting icons*/
+.my-1535567872393-product .table-sorting-control-container {
+    width: 20px;
+    height: 80%;
+    display: inline-flex;
+    position: absolute;
+    right: 0;
+    top: 10%;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    opacity: .5;
+}
+
+.my-1535567872393-product .table-sorting-control {
+    display: block;
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    cursor: pointer;
+    opacity: .3;
+}
+
+.my-1535567872393-product .table-sorting-up-control {
+    border-bottom: 8px solid var(--sorting-icon-color);
+}
+.my-1535567872393-product .table-sorting-down-control {
+    border-top: 8px solid var(--sorting-icon-color);
+}
+
+.my-1535567872393-product .table-sorting-control-active {
+    opacity: 1;
+}

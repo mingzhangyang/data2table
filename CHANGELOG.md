@@ -13,6 +13,8 @@
 ### November 2019
 
 - project structure overhaul
+  - data manager + state manager + ui
+  - split into ES6 modules
 - ready for publishing
 
 ### v2.1.0 (November 2019)

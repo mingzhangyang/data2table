@@ -24,7 +24,7 @@
     --icon-color: #369;
     --theader-background-color: rgb(249,250,251);
     --tbody-background-color: #FFFFFF;
-    --sorting-icon-color: #000;
+    --sorting-icon-color: #369;
     --search-box-border-color: #2196F3;
     --hover-blue-color: #0b7dda;
     --em-color: linen;
@@ -43,7 +43,7 @@
     --icon-color: #369;
     --theader-background-color: #222;
     --tbody-background-color: rgba(2, 2, 2, .8);
-    --sorting-icon-color: #000;
+    --sorting-icon-color: white;
     --search-box-border-color: #2196F3;
     --hover-blue-color: #0b7dda;
     --em-color: linen;

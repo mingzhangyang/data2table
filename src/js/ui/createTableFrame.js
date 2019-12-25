@@ -95,7 +95,7 @@ export default function createTableFrame(datatable) {
     }
   }
 
-  // create tBody as placeholder for _updateView to populate
+  // create tBody as placeholder for _updateTableBodyView to populate
   table.appendChild(document.createElement('tbody'));
 
   return table;

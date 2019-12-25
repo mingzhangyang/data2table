@@ -85,14 +85,18 @@ export default function createConfigPanel(datatable) {
     switch (d.name) {
       case "columns":
         datatable._columnSetting.shownColumns = body.pullData().selected;
+        datatable._updateWholeTableView();
         break;
       case "scheme":
+        let oldScheme = datatable._configuration.scheme;
         datatable._configuration.scheme = d.selected[0];
+        let div = document.getElementById(datatable._targetId);
+        div.classList.remove(oldScheme);
+        div.classList.add(datatable._configuration.scheme);
         break;
       default:
         console.log("What?");
     }
-    datatable.generate();
   });
 
   return df;

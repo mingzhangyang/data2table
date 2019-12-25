@@ -62,7 +62,7 @@ export default function generateTable(datatable) {
 
   // add the df to div
   div.appendChild(container);
-  datatable._updateView().catch(err => {
+  datatable._updateTableBodyView().catch(err => {
     console.error(err);
   });
 

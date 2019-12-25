@@ -6,6 +6,7 @@ import notifyStatus from './utils/notify.js';
 import updateView from './ui/updateView.js';
 import createFilterSection from './ui/createFilterSection.js';
 import generateTable from './ui/generate.js';
+import createTableFrame from "./ui/createTableFrame.js";
 
 export default class DataTable {
   /******************************************************************************
@@ -254,7 +255,7 @@ export default class DataTable {
       return;
     }
     this._stateManager.currentPageNumber = n;
-    this._updateView().catch(err => {
+    this._updateTableBodyView().catch(err => {
       console.error(err.message);
     });
   }
@@ -266,7 +267,7 @@ export default class DataTable {
   _updateRowsPerPage(n) {
     this._stateManager.rowsPerPage = n;
     this._stateManager.currentPageNumber = 1;
-    this._updateView().catch(err => {
+    this._updateTableBodyView().catch(err => {
       console.error(err.message);
     });
   }
@@ -281,7 +282,7 @@ export default class DataTable {
     this._stateManager.sort = {};
     this._stateManager.sort[colName] = n;
     this._stateManager.currentPageNumber = 1;
-    this._updateView().catch(err => {
+    this._updateTableBodyView().catch(err => {
       console.error(err.message);
     });
   }
@@ -292,7 +293,7 @@ export default class DataTable {
    */
   _filterData() {
     this._stateManager.currentPageNumber = 1;
-    this._updateView()
+    this._updateTableBodyView()
       .then(() => {
         let wrapper = document.getElementById(this._targetId + '-filter-viz-download-buttons-wrapper');
         if (Object.keys(this._stateManager.filter).length) {
@@ -349,7 +350,7 @@ export default class DataTable {
    * The most called function
    * @private
    */
-  async _updateView() {
+  async _updateTableBodyView() {
     let data = null;
     try {
       this._notifyStatus({
@@ -380,6 +381,23 @@ export default class DataTable {
       });
       throw err;
     }
+  }
+
+  /**
+   * This should be invoked internally only to update the thead and tbody view.
+   * Use case: changing columns to show
+   * @private
+   */
+  _updateWholeTableView() {
+    let oldId = this._targetId + '-table-section';
+    let oldTable = document.getElementById(oldId);
+    oldTable.id = oldId + "-to-be-removed";
+    let table = createTableFrame(this);
+    document.getElementById(this._targetId).insertBefore(table, oldTable);
+    oldTable.parentNode.removeChild(oldTable);
+    this._updateTableBodyView().catch(err => {
+      console.error(err);
+    });
   }
 
   /**

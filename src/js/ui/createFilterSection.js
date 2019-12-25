@@ -1,4 +1,4 @@
-// create or update the Filter section
+// create the Filter section
 export default function createFilterSection(datatable) {
   let filterSection = document.getElementById(datatable._targetId + '-filter-section');
   if (!filterSection) {

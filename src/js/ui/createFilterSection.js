@@ -62,7 +62,7 @@ export default function createFilterSection(datatable) {
       inp.type = 'checkbox';
       let uid = `${datatable._targetId}-filter-value-${filterName}-value-${i}`;
       inp.id = uid;
-      inp.checked = !!obj.selected;
+      //inp.checked = !!obj.selected; // this is redundant
 
       inp.counterpart = obj;
       inp.addEventListener('change', function () {

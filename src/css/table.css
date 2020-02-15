@@ -1,5 +1,7 @@
 .my-1535567872393-product .table-frame {
     overflow-x: scroll;
+    padding-top: 90px;
+    margin-top: -90px;
 }
 
 .my-1535567872393-product table {

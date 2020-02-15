@@ -1,8 +1,5 @@
-export default function createTableFrame(datatable) {
-  let frame = document.createElement("div");
-  frame.classList.add("table-frame");
-
-  let table = frame.appendChild(document.createElement('table'));
+export default function createTableSection(datatable) {
+  let table = document.createElement('table');
   table.id = datatable._targetId + '-table-section';
   table.classList.add('table-section');
 
@@ -101,5 +98,5 @@ export default function createTableFrame(datatable) {
   // create tBody as placeholder for _updateTableBodyView to populate
   table.appendChild(document.createElement('tbody'));
 
-  return frame;
+  return table;
 }

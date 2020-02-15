@@ -3,7 +3,7 @@ import createConfigPanel from './createConfigPanel.js';
 import createNotificationBar from './createNotificationBar.js';
 import createSearchPanel from './createSearchPanel.js';
 import createPaginationPanel from './createPaginationPanel.js';
-import createTableFrame from './createTableFrame.js';
+import createTableSection from './createTableSection.js';
 
 // generate all table related panels
 export default function generateTable(datatable) {
@@ -51,7 +51,10 @@ export default function generateTable(datatable) {
   container.appendChild(createNotificationBar(datatable));
 
   // create table panel
-  container.appendChild(createTableFrame(datatable));
+  let frame = document.createElement("div");
+  frame.classList.add("table-frame");
+  frame.appendChild(createTableSection(datatable));
+  container.appendChild(frame);
 
   // create pagination panel
   if (datatable._configuration.pagination) {

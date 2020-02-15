@@ -1,3 +1,7 @@
+.my-1535567872393-product .table-frame {
+    overflow-x: scroll;
+}
+
 .my-1535567872393-product table {
     table-layout: fixed;
     margin-bottom: 12px;

@@ -6,7 +6,7 @@ import notifyStatus from './utils/notify.js';
 import updateView from './ui/updateView.js';
 import createFilterSection from './ui/createFilterSection.js';
 import generateTable from './ui/generate.js';
-import createTableFrame from "./ui/createTableFrame.js";
+import createTableSection from "./ui/createTableSection.js";
 
 export default class DataTable {
   /******************************************************************************
@@ -392,7 +392,7 @@ export default class DataTable {
     let oldId = this._targetId + '-table-section';
     let oldTable = document.getElementById(oldId);
     oldTable.id = oldId + "-to-be-removed";
-    let table = createTableFrame(this);
+    let table = createTableSection(this);
     document.getElementById(this._targetId).insertBefore(table, oldTable);
     oldTable.parentNode.removeChild(oldTable);
     this._updateTableBodyView().catch(err => {

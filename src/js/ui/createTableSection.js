@@ -1,4 +1,4 @@
-export default function createTableFrame(datatable) {
+export default function createTableSection(datatable) {
   let table = document.createElement('table');
   table.id = datatable._targetId + '-table-section';
   table.classList.add('table-section');

@@ -393,7 +393,7 @@ export default class DataTable {
     let oldTable = document.getElementById(oldId);
     oldTable.id = oldId + "-to-be-removed";
     let table = createTableSection(this);
-    document.getElementById(this._targetId).insertBefore(table, oldTable);
+    oldTable.parentNode.insertBefore(table, oldTable);
     oldTable.parentNode.removeChild(oldTable);
     this._updateTableBodyView().catch(err => {
       console.error(err);

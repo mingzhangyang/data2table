@@ -23,6 +23,10 @@
 
 ### v2.2.0 (December 2019)
 
-- confguration icon added
+- configuration icon added
 - selecting columns or styles implemented
+
+### v2.3.0 (February 2020)
+
+- put table into a div frame for handling scrolling table
 

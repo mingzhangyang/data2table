@@ -1,7 +1,12 @@
 .my-1535567872393-product .table-frame {
-    overflow-x: scroll;
     padding-top: 90px;
     margin-top: -90px;
+}
+
+@media only screen and (max-width: 600px) {
+    .my-1535567872393-product .table-frame {
+        overflow-x: scroll;
+    }
 }
 
 .my-1535567872393-product table {

@@ -50,7 +50,7 @@ export default class DataTable {
       pagination: opts.pagination === undefined || opts.pagination,
     };
 
-    this._selectedRows = new CustomSet("_uid");
+    this._selectedRows = null;
 
     this._uid = 'my-1535567872393-product';
   }

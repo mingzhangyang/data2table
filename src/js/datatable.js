@@ -7,6 +7,7 @@ import updateView from './ui/updateView.js';
 import createFilterSection from './ui/createFilterSection.js';
 import generateTable from './ui/generate.js';
 import createTableSection from "./ui/createTableSection.js";
+import CustomSet from './utils/set.js';
 
 export default class DataTable {
   /******************************************************************************
@@ -38,6 +39,7 @@ export default class DataTable {
         column_selector: false,
       },
       firstColumnType: undefined, // 'number', 'checkbox', 'custom'
+      uidName: "", // if firstColumnType is checkbox, this uidName is required
       scheme: 'default',
       schemes: ["default", "light", "dark"],
       fileName: opts.fileName ? opts.fileName : 'data',
@@ -47,6 +49,8 @@ export default class DataTable {
       stickyHeader: opts.stickyHeader,
       pagination: opts.pagination === undefined || opts.pagination,
     };
+
+    this._selectedRows = new CustomSet("_uid");
 
     this._uid = 'my-1535567872393-product';
   }
@@ -182,7 +186,12 @@ export default class DataTable {
         this._configuration.firstColumnType = 'number';
         break;
       case 'checkbox':
+        if (typeof elementDescriptor !== "object" || !elementDescriptor.uidName) {
+          throw "a uid name is required when first column is checkbox";
+        }
         this._configuration.firstColumnType = 'checkbox';
+        this._configuration.uidName = elementDescriptor.uidName;
+        this._selectedRows = new CustomSet(this._configuration.uidName);
         break;
       case 'image':
         this._configuration.firstColumnType = 'image';
@@ -279,6 +288,9 @@ export default class DataTable {
    */
   _filterData() {
     this._stateManager.currentPageNumber = 1;
+    if (this._configuration.firstColumnType === "checkbox") {
+      this._selectedRows = new CustomSet(this._configuration.uidName);
+    }
     this._updateTableBodyView()
       .then(() => {
         let wrapper = document.getElementById(this._targetId + '-filter-viz-download-buttons-wrapper');
@@ -295,6 +307,31 @@ export default class DataTable {
 
   _notifyStatus(status) {
     notifyStatus(this._targetId, status);
+  }
+
+  _updateCheckboxInHeader(dataToShow) {
+    let ctrl = document.getElementById(`${this._targetId}-table-header-checkbox`);
+
+    let m = 0;
+    for (let d of dataToShow) {
+      if (this._selectedRows.has(d)) {
+        m++;
+      }
+    }
+
+    switch (m) {
+      case dataToShow.length:
+        ctrl.classList.remove('partial');
+        ctrl.checked = true;
+        break;
+      case 0:
+        ctrl.classList.remove('partial');
+        ctrl.checked = false;
+        break;
+      default:
+        ctrl.classList.add('partial');
+        ctrl.checked = false;
+    }
   }
 
   /**
@@ -335,7 +372,7 @@ export default class DataTable {
   }
 
   /**
-   * This should be invoked internally only to update the thead and tbody view.
+   * This should be invoked internally to update both the thead and tbody view.
    * Use case: changing columns to show
    * @private
    */

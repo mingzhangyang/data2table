@@ -25,10 +25,47 @@ export default function createTableSection(datatable) {
       firstCol_i.style.width = ((datatable._dataManager.cache.totalCount + '').length) * 6 + 24 + 'px';
       break;
     case 'checkbox':
-      let firstCol_c = head.appendChild(document.createElement('input'));
-      firstCol_c.setAttribute('type', 'checkbox');
-      firstCol_c.classList.add('table-row-index-column');
-      firstCol_c.style.width = '24px';
+      let firstCol = head.appendChild(document.createElement('th'));
+      firstCol.classList.add('table-row-index-column');
+      firstCol.style.width = '30px';
+      let checkbox = firstCol.appendChild(document.createElement('input'));
+      checkbox.type = 'checkbox';
+      checkbox.id = `${datatable._targetId}-table-header-checkbox`;
+      checkbox.addEventListener('change', function(evt) {
+        let boxes = table.querySelectorAll('td input.table-row-checkbox');
+        if (checkbox.classList.contains('partial')) {
+          checkbox.checked = false;
+          for (let box of boxes) {
+            if (box.checked) {
+              box.checked = false;
+              let tr = box.parentElement.parentElement;
+              tr.classList.remove("table-row-selected");
+              datatable._selectedRows.delete(tr._attachedData);
+            }
+          }
+          checkbox.classList.remove('partial');
+        } else { // checkbox.classList doesn't contain 'partial'
+          if (checkbox.checked) {
+            for (let box of boxes) {
+              box.checked = true;
+              let tr = box.parentElement.parentElement;
+              tr.classList.add("table-row-selected");
+              datatable._selectedRows.add(tr._attachedData);
+            }
+          } else {
+            for (let box of boxes) {
+              box.checked = false;
+              let tr = box.parentElement.parentElement;
+              tr.classList.remove("table-row-selected");
+              datatable._selectedRows.delete(tr._attachedData);
+            }
+          }
+        }
+        // datatable._updateSelectedCount();
+      });
+      let label = firstCol.appendChild(document.createElement('label'));
+      label.setAttribute('for', checkbox.id);
+
       break;
     case 'image':
       break;

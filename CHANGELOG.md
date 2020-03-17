@@ -30,3 +30,9 @@
 
 - put table into a div frame for handling scrolling table
 
+### v2.4.0 (March 2020)
+
+- first column as checkbox implemented
+- ColumnSetting now implemented as a class
+- redundant codes removed
+

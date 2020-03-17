@@ -31,6 +31,7 @@ window.onload = () => {
     width: '120px',
     align: 'center',
   });
+  // console.log(dt._columnSetting);
   dt.generate();
 };
 

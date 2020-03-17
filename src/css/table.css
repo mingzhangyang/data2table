@@ -62,3 +62,25 @@
     display: block;
 }
 
+.my-1535567872393-product td.table-row-index-column {
+    opacity: .26;
+}
+
+.my-1535567872393-product tr.table-row-selected td.table-row-index-column {
+    opacity: .96;
+}
+
+/*.my-1535567872393-product th input[type="checkbox"] {*/
+/*    display: block;*/
+/*    position: relative;*/
+/*}*/
+
+
+.my-1535567872393-product th input[type="checkbox"].partial::before{
+    content: "";
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 25%;
+    background-color: rgba(192, 42, 156, .78);
+}

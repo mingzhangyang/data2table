@@ -41,6 +41,7 @@ export default function updateTableView(datatable, dataToShow, totalPages) {
   for (let i = 0; i < dataToShow.length; i++) {
     let rowData = dataToShow[i];
     let tr = tBody.appendChild(document.createElement('tr'));
+    tr._attachedData = rowData;
 
     switch (datatable._configuration.firstColumnType) {
       case 'number':
@@ -51,7 +52,32 @@ export default function updateTableView(datatable, dataToShow, totalPages) {
         break;
       case 'checkbox':
         let td_c = tr.appendChild(document.createElement('td'));
-        td_c.classList.add('table-row-index-column', 'table-row-checkbox-column');
+        td_c.classList.add('table-row-index-column');
+        let checkbox = td_c.appendChild(document.createElement('input'));
+        checkbox.type = 'checkbox';
+        checkbox.checked = datatable._selectedRows.has(rowData);
+        checkbox.id = `${datatable._targetId}-table-row-checkbox-${i}`;
+        checkbox.classList.add('table-row-checkbox');
+
+        if (checkbox.checked) {
+          tr.classList.add('table-row-selected');
+        }
+
+        checkbox.addEventListener("change", function() {
+          tr.classList.toggle("table-row-selected");
+
+          if (checkbox.checked) {
+            datatable._selectedRows.add(rowData);
+          } else {
+            datatable._selectedRows.delete(rowData);
+          }
+
+          datatable._updateCheckboxInHeader(dataToShow);
+          // datatable._updateSelectedCount();
+        });
+
+        let label = td_c.appendChild(document.createElement('label'));
+        label.setAttribute('for', checkbox.id);
         break;
       case 'image':
         break;
@@ -82,6 +108,9 @@ export default function updateTableView(datatable, dataToShow, totalPages) {
     }
   }
 
+  if (datatable._configuration.firstColumnType === "checkbox") {
+    datatable._updateCheckboxInHeader(dataToShow);
+  }
   // attach the new tbody to table
   table.appendChild(df);
 

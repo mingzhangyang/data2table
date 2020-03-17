@@ -1,4 +1,4 @@
-import createColModel from './utils/colModel.js';
+import ColumnSetting from './utils/columnSetting.js';
 import DataManager from './data/dataManager.js';
 import StateManager from './state/stateManager.js';
 import formatterPool from './utils/formatterPool.js';
@@ -7,6 +7,7 @@ import updateView from './ui/updateView.js';
 import createFilterSection from './ui/createFilterSection.js';
 import generateTable from './ui/generate.js';
 import createTableSection from "./ui/createTableSection.js";
+import CustomSet from './utils/set.js';
 
 export default class DataTable {
   /******************************************************************************
@@ -25,7 +26,7 @@ export default class DataTable {
     this._dataManager = new DataManager(arr, opts);
     this._stateManager = new StateManager();
 
-    this._columnSetting = createColModel(this._dataManager.data);
+    this._columnSetting = new ColumnSetting(this._dataManager.data);
 
     this._configuration = {
       caption: '',
@@ -38,6 +39,7 @@ export default class DataTable {
         column_selector: false,
       },
       firstColumnType: undefined, // 'number', 'checkbox', 'custom'
+      uidName: "", // if firstColumnType is checkbox, this uidName is required
       scheme: 'default',
       schemes: ["default", "light", "dark"],
       fileName: opts.fileName ? opts.fileName : 'data',
@@ -47,6 +49,8 @@ export default class DataTable {
       stickyHeader: opts.stickyHeader,
       pagination: opts.pagination === undefined || opts.pagination,
     };
+
+    this._selectedRows = new CustomSet("_uid");
 
     this._uid = 'my-1535567872393-product';
   }
@@ -99,13 +103,7 @@ export default class DataTable {
    * @param obj: object, an object describing the column
    */
   configureColumn(name, obj) {
-    if (!this._columnSetting.colModel[name]) {
-      throw new Error('Column name not recognized.');
-    }
-    if (typeof obj !== 'object') {
-      throw new Error('An object describing the column expected.');
-    }
-    Object.assign(this._columnSetting.colModel[name], obj);
+    this._columnSetting.configureColumn(name, obj);
   }
 
   /**
@@ -146,15 +144,7 @@ export default class DataTable {
    * @param arr: array of strings (column names)
    */
   setShownColumns(arr) {
-    let tmp = [];
-    for (let col of arr) {
-      if (!this._columnSetting.allColumns.includes(col)) {
-        throw 'invalid column name found when set shown columns';
-      }
-      tmp.push(col);
-    }
-    this._columnSetting.shownColumns = tmp;
-    this._columnSetting.hiddenColumns = this._columnSetting.allColumns.filter(c => !tmp.includes(c));
+    this._columnSetting.setShownColumns(arr);
   }
 
   /**
@@ -196,7 +186,12 @@ export default class DataTable {
         this._configuration.firstColumnType = 'number';
         break;
       case 'checkbox':
+        if (typeof elementDescriptor !== "object" || !elementDescriptor.uidName) {
+          throw "a uid name is required when first column is checkbox";
+        }
         this._configuration.firstColumnType = 'checkbox';
+        this._configuration.uidName = elementDescriptor.uidName;
+        this._selectedRows = new CustomSet(this._configuration.uidName);
         break;
       case 'image':
         this._configuration.firstColumnType = 'image';
@@ -293,6 +288,9 @@ export default class DataTable {
    */
   _filterData() {
     this._stateManager.currentPageNumber = 1;
+    if (this._configuration.firstColumnType === "checkbox") {
+      this._selectedRows = new CustomSet(this._configuration.uidName);
+    }
     this._updateTableBodyView()
       .then(() => {
         let wrapper = document.getElementById(this._targetId + '-filter-viz-download-buttons-wrapper');
@@ -307,43 +305,33 @@ export default class DataTable {
       });
   }
 
-  /**
-   * Add a column to the table to show
-   * @param colName: string, can put as many as possible
-   */
-  _addColumn(...colName) {
-    for (let name of colName) {
-      if (!this._columnSetting.allColumns.includes(name)) {
-        console.error(`invalid column name ${name} to add`);
-        continue;
-      }
-      if (this._columnSetting.shownColumns.includes(name)) {
-        console.error(`column name ${name} already in the shown list`);
-        continue;
-      }
-      this._columnSetting.shownColumns.push(name);
-      this._columnSetting.hiddenColumns.splice(this._columnSetting.hiddenColumns.indexOf(name), 1);
-    }
-  }
-
-  /**
-   * remove a present column in the table
-   * @param colName
-   */
-  _removeColumn(...colName) {
-    for (let name of colName) {
-      let i = this._columnSetting.shownColumns.indexOf(name);
-      if (i === -1) {
-        console.error(`invalid column name ${name} to remove`);
-        continue;
-      }
-      this._columnSetting.shownColumns.splice(i, 1);
-      this._columnSetting.hiddenColumns.push(name);
-    }
-  }
-
   _notifyStatus(status) {
     notifyStatus(this._targetId, status);
+  }
+
+  _updateCheckboxInHeader(dataToShow) {
+    let ctrl = document.getElementById(`${this._targetId}-table-header-checkbox`);
+
+    let m = 0;
+    for (let d of dataToShow) {
+      if (this._selectedRows.has(d)) {
+        m++;
+      }
+    }
+
+    switch (m) {
+      case dataToShow.length:
+        ctrl.classList.remove('partial');
+        ctrl.checked = true;
+        break;
+      case 0:
+        ctrl.classList.remove('partial');
+        ctrl.checked = false;
+        break;
+      default:
+        ctrl.classList.add('partial');
+        ctrl.checked = false;
+    }
   }
 
   /**
@@ -384,7 +372,7 @@ export default class DataTable {
   }
 
   /**
-   * This should be invoked internally only to update the thead and tbody view.
+   * This should be invoked internally to update both the thead and tbody view.
    * Use case: changing columns to show
    * @private
    */

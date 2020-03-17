@@ -11,10 +11,10 @@ window.onload = () => {
     stickyHeader: true,
     pagination: false,
   });
-  dt.setFirstColumnType('number');
+  dt.setFirstColumnType('checkbox', {uidName: "Aff_id"});
   dt.addFilter('Gene_symbol', 'value');
   dt.configureColumn('Aff_id', {
-    label: 'uid',
+    label: 'ID',
     tips: 'unique identifier',
     sortable: true,
     width: '100px',
@@ -31,6 +31,7 @@ window.onload = () => {
     width: '120px',
     align: 'center',
   });
+  // console.log(dt._columnSetting);
   dt.generate();
 };
 

@@ -26,7 +26,7 @@ export default function createTableSection(datatable) {
       break;
     case 'checkbox':
       let firstCol = head.appendChild(document.createElement('th'));
-      firstCol.classList.add('table-row-index-column');
+      firstCol.classList.add('table-row-index-column', 'table-row-checkbox-column');
       firstCol.style.width = '30px';
       let checkbox = firstCol.appendChild(document.createElement('input'));
       checkbox.type = 'checkbox';

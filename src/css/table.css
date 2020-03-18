@@ -2,14 +2,13 @@
     padding-top: 90px;
     margin-top: -90px;
     margin-bottom: 16px;
-    overflow-x: scroll;
 }
 
-/*@media only screen and (max-width: 600px) {*/
-/*    .my-1535567872393-product .table-frame {*/
-/*        overflow-x: scroll;*/
-/*    }*/
-/*}*/
+@media only screen and (max-width: 600px) {
+    .my-1535567872393-product .table-frame {
+        overflow-x: scroll;
+    }
+}
 
 .my-1535567872393-product table {
     table-layout: fixed;

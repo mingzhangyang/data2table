@@ -1,6 +1,6 @@
 {
   "name": "data2table",
-  "version": "2.4.1",
+  "version": "2.4.2",
   "description": "An easy way to display data as table on web",
   "main": "./src/js/datatable.js",
   "directories": {

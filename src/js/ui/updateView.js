@@ -52,7 +52,7 @@ export default function updateTableView(datatable, dataToShow, totalPages) {
         break;
       case 'checkbox':
         let td_c = tr.appendChild(document.createElement('td'));
-        td_c.classList.add('table-row-index-column');
+        td_c.classList.add('table-row-index-column', 'table-row-checkbox-column');
         let checkbox = td_c.appendChild(document.createElement('input'));
         checkbox.type = 'checkbox';
         checkbox.checked = datatable._selectedRows.has(rowData);

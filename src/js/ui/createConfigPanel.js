@@ -84,7 +84,7 @@ export default function createConfigPanel(datatable) {
     let d = body.pullData();
     switch (d.name) {
       case "columns":
-        datatable._columnSetting.shownColumns = body.pullData().selected;
+        datatable._columnSetting.setShownColumns(d.selected);
         datatable._updateWholeTableView();
         break;
       case "scheme":

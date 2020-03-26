@@ -55,7 +55,7 @@ class ColumnSetting {
   setOrderedAllColumns(arr) {
     for (let col of arr) {
       if (!this.allColumns.includes(col)) {
-        throw 'invalid column name found when set shown columns';
+        throw 'invalid column name found when set ordered allColumns';
       }
     }
     this.allColumns = arr;

@@ -25,6 +25,11 @@
 .my-1535567872393-product .filter-viz-download-buttons-wrapper.filter-active .filter-section-control-button {
     background-color: var(--alert-color);
     border-color: var(--alert-color);
+    color: white;
+}
+
+.my-1535567872393-product .filter-viz-download-buttons-wrapper.filter-active .filter-section-control-button::after {
+    border-color: white;
 }
 
 .my-1535567872393-product .filter-section-control-button.filter-ready-signal {

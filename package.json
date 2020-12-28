@@ -30,8 +30,8 @@
     "@babel/polyfill": "^7.8.7"
   },
   "devDependencies": {
-    "@babel/core": "^7.8.7",
-    "@babel/preset-env": "^7.8.7",
+    "@babel/core": "^7.12.10",
+    "@babel/preset-env": "^7.12.11",
     "babel-plugin-syntax-async-functions": "^6.13.0",
     "del": "^4.1.1",
     "gulp": "^4.0.2",
